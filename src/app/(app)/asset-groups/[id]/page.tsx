@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { bulkUpdateGroupStatus } from "../actions";
+import { AddAssetsForm } from "./add-assets-form";
+import { RemoveMemberButton } from "./remove-member-button";
 
 const STATUS_STYLES: Record<string, string> = {
   ACTIVE: "bg-green-100 text-green-800",
@@ -71,6 +73,8 @@ export default async function AssetGroupDetailPage({
         </button>
       </form>
 
+      <AddAssetsForm assetGroupId={group.id} />
+
       <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
         <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
           <tr>
@@ -79,6 +83,7 @@ export default async function AssetGroupDetailPage({
             <th className="px-4 py-2">Department</th>
             <th className="px-4 py-2">Location</th>
             <th className="px-4 py-2">Status</th>
+            <th className="px-4 py-2" />
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-200">
@@ -97,8 +102,18 @@ export default async function AssetGroupDetailPage({
                   {member.asset.status.replace("_", " ")}
                 </span>
               </td>
+              <td className="px-4 py-2 text-right">
+                <RemoveMemberButton assetGroupId={group.id} assetId={member.assetId} />
+              </td>
             </tr>
           ))}
+          {group.members.length === 0 && (
+            <tr>
+              <td colSpan={6} className="px-4 py-6 text-center text-neutral-500">
+                No assets in this group yet.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
