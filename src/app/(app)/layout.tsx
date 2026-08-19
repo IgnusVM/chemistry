@@ -7,7 +7,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+      <header className="border-b border-neutral-200 bg-white print:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <nav className="flex items-center gap-5 text-sm font-medium text-neutral-700">
             <Link href="/" className="text-neutral-900 font-semibold">
@@ -15,6 +15,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Link>
             <Link href="/assets" className="hover:text-neutral-900">
               Assets
+            </Link>
+            <Link href="/asset-groups" className="hover:text-neutral-900">
+              Asset Groups
             </Link>
             <Link href="/locations" className="hover:text-neutral-900">
               Locations
@@ -46,7 +49,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 print:max-w-none print:px-0 print:py-0">
+        {children}
+      </main>
     </div>
   );
 }

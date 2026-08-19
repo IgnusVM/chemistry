@@ -49,12 +49,20 @@ export default async function AssetsPage({
           <h1 className="text-lg font-semibold text-neutral-900">Assets</h1>
           <p className="text-sm text-neutral-500">{assets.length} shown</p>
         </div>
-        <Link
-          href="/assets/new"
-          className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-        >
-          + New asset
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/assets/bulk-new"
+            className="rounded-md border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+          >
+            + Bulk create
+          </Link>
+          <Link
+            href="/assets/new"
+            className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+          >
+            + New asset
+          </Link>
+        </div>
       </div>
 
       <form className="flex flex-wrap gap-2 rounded-md border border-neutral-200 bg-white p-3">
@@ -93,45 +101,59 @@ export default async function AssetsPage({
         </button>
       </form>
 
-      <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
-        <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
-          <tr>
-            <th className="px-4 py-2">Tag</th>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Type</th>
-            <th className="px-4 py-2">Department</th>
-            <th className="px-4 py-2">Location</th>
-            <th className="px-4 py-2">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-neutral-200">
-          {assets.map((asset) => (
-            <tr key={asset.id} className="hover:bg-neutral-50">
-              <td className="px-4 py-2">
-                <Link href={`/assets/${asset.assetTag}`} className="font-medium text-neutral-900 hover:underline">
-                  {asset.assetTag}
-                </Link>
-              </td>
-              <td className="px-4 py-2">{asset.name}</td>
-              <td className="px-4 py-2 text-neutral-500">{asset.assetType.name}</td>
-              <td className="px-4 py-2 text-neutral-500">{asset.owningDepartment.name}</td>
-              <td className="px-4 py-2 text-neutral-500">{asset.currentLocation?.name ?? "—"}</td>
-              <td className="px-4 py-2">
-                <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[asset.status]}`}>
-                  {asset.status.replace("_", " ")}
-                </span>
-              </td>
-            </tr>
-          ))}
-          {assets.length === 0 && (
+      <form method="get" action="/assets/qr-sheet">
+        <div className="mb-2 flex justify-end">
+          <button
+            type="submit"
+            className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+          >
+            Print QR sheet for selected
+          </button>
+        </div>
+        <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
+          <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
             <tr>
-              <td colSpan={6} className="px-4 py-6 text-center text-neutral-500">
-                No assets match these filters.
-              </td>
+              <th className="w-8 px-4 py-2" />
+              <th className="px-4 py-2">Tag</th>
+              <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Type</th>
+              <th className="px-4 py-2">Department</th>
+              <th className="px-4 py-2">Location</th>
+              <th className="px-4 py-2">Status</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {assets.map((asset) => (
+              <tr key={asset.id} className="hover:bg-neutral-50">
+                <td className="px-4 py-2">
+                  <input type="checkbox" name="tags" value={asset.assetTag} aria-label={`Select ${asset.assetTag}`} />
+                </td>
+                <td className="px-4 py-2">
+                  <Link href={`/assets/${asset.assetTag}`} className="font-medium text-neutral-900 hover:underline">
+                    {asset.assetTag}
+                  </Link>
+                </td>
+                <td className="px-4 py-2">{asset.name}</td>
+                <td className="px-4 py-2 text-neutral-500">{asset.assetType.name}</td>
+                <td className="px-4 py-2 text-neutral-500">{asset.owningDepartment.name}</td>
+                <td className="px-4 py-2 text-neutral-500">{asset.currentLocation?.name ?? "—"}</td>
+                <td className="px-4 py-2">
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[asset.status]}`}>
+                    {asset.status.replace("_", " ")}
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {assets.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-4 py-6 text-center text-neutral-500">
+                  No assets match these filters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </form>
     </div>
   );
 }
