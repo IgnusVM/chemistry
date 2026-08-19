@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decryptSession } from "@/lib/session";
 
-const PUBLIC_ROUTES = ["/login", "/auth/verify"];
+const PUBLIC_ROUTES = ["/login", "/auth/verify", "/auth/clear"];
+const REDIRECT_EXEMPT_ROUTES = ["/auth/verify", "/auth/clear"];
 
 export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
@@ -16,7 +17,7 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isPublicRoute && session?.userId && path !== "/auth/verify") {
+  if (isPublicRoute && session?.userId && !REDIRECT_EXEMPT_ROUTES.some((route) => path.startsWith(route))) {
     return NextResponse.redirect(new URL("/", req.nextUrl));
   }
 

@@ -28,8 +28,10 @@ export const getCurrentUser = cache(async () => {
 });
 
 export const requireCurrentUser = cache(async () => {
+  const session = await verifySession();
+  if (!session) redirect("/login");
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/auth/clear");
   return user;
 });
 
