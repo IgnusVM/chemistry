@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { consumeMagicLinkToken } from "@/lib/magic-link";
 import { createSession } from "@/lib/session";
+import { trustThisDevice } from "@/lib/device-trust";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
@@ -16,6 +18,12 @@ export async function GET(req: NextRequest) {
   }
 
   await createSession(userId);
+  await trustThisDevice(userId);
+  // A magic-link login is a stronger identity proof than a PIN, so it clears any PIN lockout.
+  await prisma.user.update({
+    where: { id: userId },
+    data: { pinFailedCount: 0, pinLockedUntil: null },
+  });
 
   const destination = next && next.startsWith("/") ? next : "/";
   return NextResponse.redirect(new URL(destination, req.nextUrl));

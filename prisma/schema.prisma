@@ -73,21 +73,36 @@ model Department {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  displayName String
-  playaName   String?
-  phone       String?
-  isOrgAdmin  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String    @id @default(cuid())
+  email          String    @unique
+  displayName    String
+  playaName      String?
+  phone          String?
+  isOrgAdmin     Boolean   @default(false)
+  pinHash        String?
+  pinFailedCount Int       @default(0)
+  pinLockedUntil DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   memberships     DepartmentMembership[]
   ledDepartments  Department[]            @relation("DepartmentLead")
   createdAssets   Asset[]                 @relation("AssetCreatedBy")
   locationMoves   AssetLocationHistory[]
   magicLinkTokens MagicLinkToken[]
+  trustedDevices  TrustedDevice[]
   auditLogs       AuditLog[]
+}
+
+model TrustedDevice {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String   @unique
+  label      String?
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model DepartmentMembership {

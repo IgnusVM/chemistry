@@ -40,7 +40,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             )}
           </nav>
           <div className="flex items-center gap-3 text-sm text-neutral-600">
-            <span>{user.playaName ?? user.displayName}</span>
+            <Link href="/account" className="hover:text-neutral-900">
+              {user.playaName ?? user.displayName}
+            </Link>
             <form action={logout}>
               <button type="submit" className="text-neutral-500 hover:text-neutral-900">
                 Sign out
