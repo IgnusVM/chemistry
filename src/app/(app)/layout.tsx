@@ -19,6 +19,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link href="/asset-groups" className="hover:text-neutral-900">
               Asset Groups
             </Link>
+            <Link href="/work-orders" className="hover:text-neutral-900">
+              Work Orders
+            </Link>
             <Link href="/locations" className="hover:text-neutral-900">
               Locations
             </Link>
@@ -35,6 +38,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 </Link>
                 <Link href="/admin/asset-types" className="hover:text-neutral-900">
                   Asset Types
+                </Link>
+                <Link href="/admin/failure-codes" className="hover:text-neutral-900">
+                  Failure Codes
                 </Link>
               </>
             )}

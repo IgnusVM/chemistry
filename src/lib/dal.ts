@@ -68,3 +68,15 @@ export async function requireOrgAdmin() {
   if (!user.isOrgAdmin) throw new Error("Org admin required");
   return user;
 }
+
+export async function getAccessibleDepartmentIds(minRole: DepartmentAccessLevel = "VIEWER") {
+  const user = await getCurrentUser();
+  if (!user) return [];
+  if (user.isOrgAdmin) {
+    const all = await prisma.department.findMany({ select: { id: true } });
+    return all.map((d) => d.id);
+  }
+  return user.memberships
+    .filter((m) => ROLE_RANK[m.role] >= ROLE_RANK[minRole])
+    .map((m) => m.departmentId);
+}

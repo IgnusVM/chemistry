@@ -32,3 +32,24 @@ export async function sendMagicLinkEmail(email: string, url: string) {
     html: `<p>Sign in to Chemistry:</p><p><a href="${url}">${url}</a></p><p>This link expires in 15 minutes.</p>`,
   });
 }
+
+export async function sendWorkOrderAssignedEmail(params: {
+  email: string;
+  woNumber: number;
+  title: string;
+  url: string;
+}) {
+  const smtp = getTransporter();
+  const subject = `WO-${params.woNumber} assigned to you: ${params.title}`;
+  if (!smtp) {
+    console.log(`[dev] Work order email for ${params.email}: ${subject} — ${params.url}`);
+    return;
+  }
+  await smtp.sendMail({
+    from: process.env.SMTP_FROM ?? "Chemistry <no-reply@chemistry.local>",
+    to: params.email,
+    subject,
+    text: `You've been assigned WO-${params.woNumber}: ${params.title}\n\n${params.url}`,
+    html: `<p>You've been assigned <strong>WO-${params.woNumber}: ${params.title}</strong>.</p><p><a href="${params.url}">${params.url}</a></p>`,
+  });
+}

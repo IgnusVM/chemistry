@@ -92,27 +92,60 @@ async function main() {
   const existingLamplighterType = await prisma.assetType.findFirst({
     where: { name: "Solar Lamplighter Lantern" },
   });
-  if (existingLamplighterType) {
-    await prisma.assetType.update({
-      where: { id: existingLamplighterType.id },
-      data: {
-        manufacturer: "Alchemy Lamplighters",
-        defaultDepartmentId: lamplighters.id,
-        customFieldSchema: LAMPLIGHTER_CUSTOM_FIELDS,
-      },
+  const lamplighterType = existingLamplighterType
+    ? await prisma.assetType.update({
+        where: { id: existingLamplighterType.id },
+        data: {
+          manufacturer: "Alchemy Lamplighters",
+          defaultDepartmentId: lamplighters.id,
+          customFieldSchema: LAMPLIGHTER_CUSTOM_FIELDS,
+        },
+      })
+    : await prisma.assetType.create({
+        data: {
+          name: "Solar Lamplighter Lantern",
+          manufacturer: "Alchemy Lamplighters",
+          defaultDepartmentId: lamplighters.id,
+          customFieldSchema: LAMPLIGHTER_CUSTOM_FIELDS,
+        },
+      });
+
+  const LANTERN_FAILURE_CODES = [
+    { code: "NO_LIGHT", label: "No light" },
+    { code: "DIM", label: "Dim" },
+    { code: "WAND_NO_TRIGGER", label: "Wand doesn't trigger" },
+    { code: "ALWAYS_ON", label: "Always on" },
+    { code: "WATER_INGRESS", label: "Water ingress" },
+    { code: "PHYSICAL_DAMAGE", label: "Physical damage" },
+    { code: "BATTERY_DEAD", label: "Battery dead" },
+    { code: "PANEL_DAMAGE", label: "Panel damage" },
+    { code: "MISSING", label: "Missing" },
+  ];
+  const GENERIC_FAILURE_CODES = [
+    { code: "WONT_START", label: "Won't start" },
+    { code: "LEAKING", label: "Leaking" },
+    { code: "WORN", label: "Worn" },
+    { code: "USER_ERROR", label: "User error" },
+    { code: "NO_FAULT_FOUND", label: "No fault found" },
+  ];
+  for (const fc of LANTERN_FAILURE_CODES) {
+    await prisma.failureCode.upsert({
+      where: { code: fc.code },
+      update: { label: fc.label, assetTypeId: lamplighterType.id },
+      create: { ...fc, assetTypeId: lamplighterType.id },
     });
-  } else {
-    await prisma.assetType.create({
-      data: {
-        name: "Solar Lamplighter Lantern",
-        manufacturer: "Alchemy Lamplighters",
-        defaultDepartmentId: lamplighters.id,
-        customFieldSchema: LAMPLIGHTER_CUSTOM_FIELDS,
-      },
+  }
+  for (const fc of GENERIC_FAILURE_CODES) {
+    await prisma.failureCode.upsert({
+      where: { code: fc.code },
+      update: { label: fc.label },
+      create: fc,
     });
   }
 
-  console.log(`Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, org admin ${ignus.email}, Lamplighter asset type, and ${storage.name}.`);
+  console.log(
+    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, org admin ${ignus.email}, Lamplighter asset type, ${storage.name}, and ${LANTERN_FAILURE_CODES.length + GENERIC_FAILURE_CODES.length} failure codes.`,
+  );
 }
 
 main()

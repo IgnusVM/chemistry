@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
@@ -6,6 +7,15 @@ import { changeAssetStatus, moveAsset } from "../actions";
 import type { CustomFieldDef } from "@/lib/custom-fields";
 
 const ASSET_STATUSES = ["ACTIVE", "IN_REPAIR", "STORAGE", "RETIRED", "LOST", "DESTROYED"];
+const WO_STATUS_STYLES: Record<string, string> = {
+  OPEN: "bg-blue-100 text-blue-800",
+  ASSIGNED: "bg-indigo-100 text-indigo-800",
+  IN_PROGRESS: "bg-amber-100 text-amber-800",
+  WAITING_PARTS: "bg-orange-100 text-orange-800",
+  COMPLETE: "bg-green-100 text-green-800",
+  CLOSED: "bg-neutral-200 text-neutral-500",
+  CANCELLED: "bg-neutral-200 text-neutral-400",
+};
 
 export default async function AssetDetailPage({
   params,
@@ -30,7 +40,7 @@ export default async function AssetDetailPage({
   });
   if (!asset) notFound();
 
-  const [locations, auditEntries, qrDataUrl] = await Promise.all([
+  const [locations, auditEntries, qrDataUrl, workOrders] = await Promise.all([
     prisma.location.findMany({ orderBy: { name: "asc" } }),
     prisma.auditLog.findMany({
       where: { entityType: "Asset", entityId: asset.id },
@@ -39,6 +49,11 @@ export default async function AssetDetailPage({
       take: 20,
     }),
     assetQrDataUrl(asset.assetTag),
+    prisma.workOrder.findMany({
+      where: { assetId: asset.id },
+      orderBy: { reportedAt: "desc" },
+      take: 10,
+    }),
   ]);
 
   const fieldDefs = (asset.assetType.customFieldSchema as unknown as CustomFieldDef[]) ?? [];
@@ -59,13 +74,21 @@ export default async function AssetDetailPage({
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <div>
-          <div className="text-xs uppercase tracking-wide text-neutral-400">{asset.assetType.name}</div>
-          <h1 className="text-xl font-semibold text-neutral-900">{asset.name}</h1>
-          <div className="text-sm text-neutral-500">
-            {asset.assetTag} · {asset.owningDepartment.name}
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-xs uppercase tracking-wide text-neutral-400">{asset.assetType.name}</div>
+            <h1 className="text-xl font-semibold text-neutral-900">{asset.name}</h1>
+            <div className="text-sm text-neutral-500">
+              {asset.assetTag} · {asset.owningDepartment.name}
+            </div>
+            {asset.description && <p className="mt-2 text-sm text-neutral-700">{asset.description}</p>}
           </div>
-          {asset.description && <p className="mt-2 text-sm text-neutral-700">{asset.description}</p>}
+          <Link
+            href={`/work-orders/new?asset=${asset.assetTag}`}
+            className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+          >
+            Report a problem
+          </Link>
         </div>
 
         <div className="grid grid-cols-2 gap-4 rounded-md border border-neutral-200 bg-white p-4 text-sm sm:grid-cols-4">
@@ -96,6 +119,24 @@ export default async function AssetDetailPage({
           <div className="rounded-md border border-neutral-200 bg-white p-4">
             <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
             <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-700">{asset.notes}</p>
+          </div>
+        )}
+
+        {workOrders.length > 0 && (
+          <div className="rounded-md border border-neutral-200 bg-white p-4">
+            <h2 className="text-sm font-semibold text-neutral-900">Work orders</h2>
+            <ul className="mt-2 divide-y divide-neutral-200">
+              {workOrders.map((wo) => (
+                <li key={wo.id} className="flex items-center justify-between py-2 text-sm">
+                  <Link href={`/work-orders/${wo.woNumber}`} className="hover:underline">
+                    WO-{wo.woNumber} · {wo.title}
+                  </Link>
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${WO_STATUS_STYLES[wo.status]}`}>
+                    {wo.status.replace("_", " ")}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
@@ -132,6 +173,7 @@ export default async function AssetDetailPage({
         >
           <h2 className="text-sm font-semibold text-neutral-900">Status</h2>
           <select
+            key={asset.status}
             name="status"
             defaultValue={asset.status}
             className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
