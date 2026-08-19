@@ -1,6 +1,7 @@
 import { requireCurrentUser } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { PinForm } from "./pin-form";
+import { ContactForm } from "./contact-form";
 import { RevokeDeviceButton } from "./revoke-device-button";
 import { clearPin } from "./actions";
 
@@ -20,6 +21,8 @@ export default async function AccountPage() {
           {user.playaName && ` · "${user.playaName}"`} · {user.email}
         </p>
       </div>
+
+      <ContactForm phone={user.phone} notifyByEmail={user.notifyByEmail} />
 
       <PinForm hasPin={!!user.pinHash} />
 

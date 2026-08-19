@@ -78,6 +78,7 @@ model User {
   displayName    String
   playaName      String?
   phone          String?
+  notifyByEmail  Boolean   @default(false)
   isOrgAdmin     Boolean   @default(false)
   pinHash        String?
   pinFailedCount Int       @default(0)

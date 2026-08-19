@@ -1,9 +1,47 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireCurrentUser } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { hashPin, pinSchema } from "@/lib/pin";
+
+const contactInfoSchema = z.object({
+  phone: z
+    .string()
+    .regex(/^[0-9+()\-.\s]{7,20}$/, "That doesn't look like a phone number")
+    .optional()
+    .or(z.literal("")),
+  notifyByEmail: z.boolean(),
+});
+
+export type ContactInfoFormState = { error?: string; message?: string } | undefined;
+
+export async function updateContactInfo(
+  _prevState: ContactInfoFormState,
+  formData: FormData,
+): Promise<ContactInfoFormState> {
+  const user = await requireCurrentUser();
+
+  const parsed = contactInfoSchema.safeParse({
+    phone: formData.get("phone") || "",
+    notifyByEmail: formData.get("notifyByEmail") === "on",
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      phone: parsed.data.phone || null,
+      notifyByEmail: parsed.data.notifyByEmail,
+    },
+  });
+
+  revalidatePath("/account");
+  return { message: "Saved." };
+}
 
 export type SetPinFormState = { error?: string; message?: string } | undefined;
 
