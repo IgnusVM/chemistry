@@ -1,0 +1,226 @@
+// Chemistry — asset management for Alchemy. Phase 1 schema
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DepartmentRole {
+  VIEWER
+  MEMBER
+  LEAD
+}
+
+enum AssetStatus {
+  ACTIVE
+  IN_REPAIR
+  STORAGE
+  RETIRED
+  LOST
+  DESTROYED
+}
+
+enum AssetCondition {
+  NEW
+  GOOD
+  FAIR
+  POOR
+  UNSERVICEABLE
+}
+
+enum LocationType {
+  STORAGE_FACILITY
+  CONTAINER
+  ZONE
+  CAMP
+  PLACEMENT
+  VEHICLE
+}
+
+model Division {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  departments Department[]
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  leadUserId  String?
+  divisionId  String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lead        User?                  @relation("DepartmentLead", fields: [leadUserId], references: [id])
+  division    Division?              @relation(fields: [divisionId], references: [id])
+  memberships DepartmentMembership[]
+  assetTypes  AssetType[]
+  assets      Asset[]
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  displayName String
+  playaName   String?
+  phone       String?
+  isOrgAdmin  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships     DepartmentMembership[]
+  ledDepartments  Department[]            @relation("DepartmentLead")
+  createdAssets   Asset[]                 @relation("AssetCreatedBy")
+  locationMoves   AssetLocationHistory[]
+  magicLinkTokens MagicLinkToken[]
+  auditLogs       AuditLog[]
+}
+
+model DepartmentMembership {
+  id           String         @id @default(cuid())
+  userId       String
+  departmentId String
+  role         DepartmentRole @default(MEMBER)
+  createdAt    DateTime       @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, departmentId])
+}
+
+model MagicLinkToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Location {
+  id                String       @id @default(cuid())
+  name              String
+  type              LocationType
+  parentLocationId  String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  parentLocation Location?               @relation("LocationHierarchy", fields: [parentLocationId], references: [id])
+  children       Location[]              @relation("LocationHierarchy")
+  assets         Asset[]
+  history        AssetLocationHistory[]
+}
+
+model AssetType {
+  id                  String   @id @default(cuid())
+  name                String
+  manufacturer        String?
+  model               String?
+  defaultDepartmentId String?
+  customFieldSchema   Json     @default("[]")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  defaultDepartment Department? @relation(fields: [defaultDepartmentId], references: [id])
+  assets            Asset[]
+}
+
+model Asset {
+  id                 String          @id @default(cuid())
+  assetTag           String          @unique
+  name               String
+  description        String?
+  assetTypeId        String
+  owningDepartmentId String
+  status             AssetStatus     @default(ACTIVE)
+  condition          AssetCondition  @default(GOOD)
+  acquisitionDate    DateTime?
+  acquisitionCost    Decimal?        @db.Decimal(10, 2)
+  parentAssetId      String?
+  currentLocationId  String?
+  customFields       Json            @default("{}")
+  notes              String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  createdByUserId    String?
+
+  assetType        AssetType          @relation(fields: [assetTypeId], references: [id])
+  owningDepartment Department         @relation(fields: [owningDepartmentId], references: [id])
+  parentAsset      Asset?             @relation("AssetHierarchy", fields: [parentAssetId], references: [id])
+  childAssets      Asset[]            @relation("AssetHierarchy")
+  currentLocation  Location?          @relation(fields: [currentLocationId], references: [id])
+  createdBy        User?              @relation("AssetCreatedBy", fields: [createdByUserId], references: [id])
+  groupMemberships AssetGroupMember[]
+  locationHistory  AssetLocationHistory[]
+
+  @@index([owningDepartmentId])
+  @@index([assetTypeId])
+  @@index([status])
+}
+
+model AssetGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  members AssetGroupMember[]
+}
+
+model AssetGroupMember {
+  assetGroupId String
+  assetId      String
+  addedAt      DateTime @default(now())
+
+  assetGroup AssetGroup @relation(fields: [assetGroupId], references: [id], onDelete: Cascade)
+  asset      Asset      @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@id([assetGroupId, assetId])
+}
+
+model AssetLocationHistory {
+  id            String   @id @default(cuid())
+  assetId       String
+  locationId    String
+  movedAt       DateTime @default(now())
+  movedByUserId String?
+  notes         String?
+
+  asset    Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id])
+  movedBy  User?    @relation(fields: [movedByUserId], references: [id])
+
+  @@index([assetId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  action     String
+  userId     String?
+  changes    Json?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
