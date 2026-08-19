@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
+import { getAttachmentUrl } from "@/lib/s3";
 import { updateWorkOrderStatus, assignWorkOrder, addWorkOrderNote, updateResolution } from "../actions";
+import { AttachmentUploadForm } from "./attachment-upload-form";
+import { DeleteAttachmentButton } from "./delete-attachment-button";
 
 const STATUS_STYLES: Record<string, string> = {
   OPEN: "bg-blue-100 text-blue-800",
@@ -34,15 +37,19 @@ export default async function WorkOrderDetailPage({
       assignedTo: true,
       failureCode: true,
       notes: { orderBy: { createdAt: "asc" }, include: { user: true } },
+      attachments: { orderBy: { createdAt: "desc" }, include: { uploadedBy: true } },
     },
   });
   if (!workOrder) notFound();
 
-  const departmentMembers = await prisma.departmentMembership.findMany({
-    where: { departmentId: workOrder.departmentId },
-    include: { user: true },
-    orderBy: { user: { displayName: "asc" } },
-  });
+  const [departmentMembers, attachmentUrls] = await Promise.all([
+    prisma.departmentMembership.findMany({
+      where: { departmentId: workOrder.departmentId },
+      include: { user: true },
+      orderBy: { user: { displayName: "asc" } },
+    }),
+    Promise.all(workOrder.attachments.map((a) => getAttachmentUrl(a.s3Key))),
+  ]);
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -77,6 +84,31 @@ export default async function WorkOrderDetailPage({
           <InfoTile label="Failure code" value={workOrder.failureCode?.label ?? "—"} />
           <InfoTile label="Reported by" value={workOrder.reportedBy?.displayName ?? "—"} />
           <InfoTile label="Reported" value={workOrder.reportedAt.toLocaleDateString()} />
+        </div>
+
+        <div className="rounded-md border border-neutral-200 bg-white p-4">
+          <h2 className="text-sm font-semibold text-neutral-900">Photos</h2>
+          {workOrder.attachments.length > 0 && (
+            <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {workOrder.attachments.map((attachment, i) => (
+                <div key={attachment.id} className="space-y-1">
+                  <a href={attachmentUrls[i]} target="_blank" rel="noopener noreferrer">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={attachmentUrls[i]}
+                      alt={attachment.filename}
+                      className="aspect-square w-full rounded-md border border-neutral-200 object-cover"
+                    />
+                  </a>
+                  <div className="flex items-center justify-between text-xs text-neutral-500">
+                    <span className="truncate">{attachment.uploadedBy?.displayName ?? "Unknown"}</span>
+                    <DeleteAttachmentButton attachmentId={attachment.id} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <AttachmentUploadForm workOrderId={workOrder.id} />
         </div>
 
         <form

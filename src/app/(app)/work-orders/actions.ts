@@ -7,6 +7,9 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { sendWorkOrderAssignedEmail } from "@/lib/mailer";
+import { buildAttachmentKey, uploadAttachment, deleteAttachmentObject } from "@/lib/s3";
+
+const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
 
 const WO_TYPES = ["CORRECTIVE", "PREVENTIVE", "INSPECTION", "MODIFICATION", "DECOMMISSION"] as const;
 const WO_PRIORITIES = ["LOW", "NORMAL", "HIGH", "EVENT_CRITICAL"] as const;
@@ -216,4 +219,79 @@ export async function updateResolution(formData: FormData) {
   });
 
   revalidatePath(`/work-orders/${workOrder.woNumber}`);
+}
+
+export type AttachmentFormState = { error?: string } | undefined;
+
+export async function uploadWorkOrderAttachments(
+  _prevState: AttachmentFormState,
+  formData: FormData,
+): Promise<AttachmentFormState> {
+  const user = await requireCurrentUser();
+  const workOrderId = String(formData.get("workOrderId"));
+  const workOrder = await requireWorkOrderAccess(workOrderId);
+
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length === 0) return { error: "Choose at least one photo." };
+
+  for (const file of files) {
+    if (!file.type.startsWith("image/")) {
+      return { error: `"${file.name}" isn't an image.` };
+    }
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      return { error: `"${file.name}" is over the 8MB limit.` };
+    }
+  }
+
+  for (const file of files) {
+    const key = buildAttachmentKey(workOrder.id, file.name);
+    const buffer = Buffer.from(await file.arrayBuffer());
+    try {
+      await uploadAttachment(key, buffer, file.type);
+    } catch {
+      return { error: "Upload failed — storage isn't reachable right now. Try again in a bit." };
+    }
+    await prisma.workOrderAttachment.create({
+      data: {
+        workOrderId: workOrder.id,
+        s3Key: key,
+        filename: file.name,
+        mimeType: file.type,
+        uploadedByUserId: user.id,
+      },
+    });
+  }
+
+  await recordAudit({
+    entityType: "WorkOrder",
+    entityId: workOrder.id,
+    action: "attachments added",
+    userId: user.id,
+    changes: { count: files.length },
+  });
+
+  revalidatePath(`/work-orders/${workOrder.woNumber}`);
+}
+
+export async function deleteWorkOrderAttachment(attachmentId: string) {
+  const user = await requireCurrentUser();
+  const attachment = await prisma.workOrderAttachment.findUniqueOrThrow({
+    where: { id: attachmentId },
+    include: { workOrder: true },
+  });
+  const allowed = await hasDepartmentAccess(attachment.workOrder.departmentId, "MEMBER");
+  if (!allowed) throw new Error("Not authorized for this work order's department");
+
+  await deleteAttachmentObject(attachment.s3Key);
+  await prisma.workOrderAttachment.delete({ where: { id: attachment.id } });
+
+  await recordAudit({
+    entityType: "WorkOrder",
+    entityId: attachment.workOrderId,
+    action: "attachment removed",
+    userId: user.id,
+    changes: { filename: attachment.filename },
+  });
+
+  revalidatePath(`/work-orders/${attachment.workOrder.woNumber}`);
 }
