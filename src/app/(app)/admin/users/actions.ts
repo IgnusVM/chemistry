@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireOrgAdmin } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
+import { issueInviteCode } from "@/lib/invite";
+import { appUrl } from "@/lib/app-url";
 
 const userSchema = z.object({
   email: z.email(),
@@ -111,6 +113,35 @@ export async function toggleOrgAdmin(userId: string, isOrgAdmin: boolean) {
     entityType: "User",
     entityId: userId,
     action: isOrgAdmin ? "granted org admin" : "revoked org admin",
+    userId: admin.id,
+  });
+  revalidatePath("/admin/users");
+}
+
+export async function generateInviteLink() {
+  const admin = await requireOrgAdmin();
+  const { invite, token } = await issueInviteCode(admin.id);
+
+  await recordAudit({
+    entityType: "InviteCode",
+    entityId: invite.id,
+    action: "created",
+    userId: admin.id,
+  });
+
+  revalidatePath("/admin/users");
+  return appUrl(`/join?invite=${token}`).toString();
+}
+
+export async function revokeInviteCode(inviteId: string) {
+  const admin = await requireOrgAdmin();
+  const deleted = await prisma.inviteCode.deleteMany({ where: { id: inviteId, usedAt: null } });
+  if (deleted.count === 0) return;
+
+  await recordAudit({
+    entityType: "InviteCode",
+    entityId: inviteId,
+    action: "revoked",
     userId: admin.id,
   });
   revalidatePath("/admin/users");

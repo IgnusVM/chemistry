@@ -45,6 +45,8 @@ When in doubt, search this guide from the box at the top of the **Help** tab —
     summary: "How passwordless sign-in works, and how the quick PIN saves you from re-checking email every time.",
     body: `Chemistry doesn't use passwords. You sign in with your email address, and a link is emailed to you that logs you in when you click it. That link expires after a short window and can only be used once, so a new one is generated every time you need it.
 
+**Getting an account.** Chemistry is invite-only — there's no public sign-up. An org admin generates a one-time invite link (from **Admin → Users**) and sends it to you; opening it asks for your name and email, creates your account, and immediately emails you a sign-in link. Each invite link only works once.
+
 **First sign-in on a device.** Enter your email on the sign-in page, check your inbox, and click the link. You'll land back in Chemistry, signed in — and that browser is automatically remembered as a trusted device.
 
 **Quick PIN.** A trusted device alone doesn't skip sign-in by itself — for that, set a short PIN from your **Account** page. Once you have a PIN, opening Chemistry again on that same trusted device offers a PIN prompt instead of making you wait on another email — much faster if you're checking work orders repeatedly during a shift. The PIN is tied to that specific browser/device, not your account globally, so a new device always starts with the email link. If you'd rather sign in with email even on a trusted device, the PIN screen has a **"Not you? Sign in with email"** link.
@@ -257,7 +259,7 @@ The QR code encodes the asset's tag, so as long as the sticker is legible, the a
 
 - **Divisions** — the top level of Alchemy's org structure, grouping related departments.
 - **Departments** — the actual owning teams (Lamplighters, Gate, APW, and so on), each optionally under a division, each with a lead and a member list. Assets and work orders are always owned by a department.
-- **Users** — every account, their org-admin flag, and their department memberships and roles (Viewer, Member, Lead).
+- **Users** — generate invite links for new accounts, plus every existing account's org-admin flag and department memberships/roles (Viewer, Member, Lead).
 - **Asset Types** — the templates that define a class of asset and its custom fields, fully editable after creation, with a Documents section for manuals and schematics. See [Asset types and custom fields](/help/admin-setup/asset-types-and-custom-fields).
 - **Resolution Codes** — the CMMS-based outcome codes used when closing work orders.
 - **Locations** — the shared, reusable place hierarchy assets can be moved between.

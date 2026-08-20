@@ -3,9 +3,7 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { issueMagicLinkToken, isMagicLinkRateLimited } from "@/lib/magic-link";
-import { appUrl } from "@/lib/app-url";
-import { sendMagicLinkEmail } from "@/lib/mailer";
+import { issueAndSendMagicLink } from "@/lib/magic-link";
 import { getTrustedDeviceUser, touchTrustedDevice } from "@/lib/device-trust";
 import { pinSchema, verifyPin } from "@/lib/pin";
 import { createSession } from "@/lib/session";
@@ -32,14 +30,10 @@ export async function requestMagicLink(
   const next = formData.get("next");
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (user && !(await isMagicLinkRateLimited(user.id))) {
-    const token = await issueMagicLinkToken(user.id);
-    const verifyUrl = appUrl("/auth/verify");
-    verifyUrl.searchParams.set("token", token);
-    if (typeof next === "string" && next.startsWith("/")) {
-      verifyUrl.searchParams.set("next", next);
-    }
-    await sendMagicLinkEmail(email, verifyUrl.toString());
+  if (user) {
+    await issueAndSendMagicLink(user.id, email, next).catch((err) => {
+      console.error("Failed to send magic link:", err);
+    });
   }
 
   return { message: "If that email has an account, a sign-in link is on its way." };

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decryptSession } from "@/lib/session";
 
-const PUBLIC_ROUTES = ["/login", "/auth/verify", "/auth/clear"];
+const PUBLIC_ROUTES = ["/login", "/join", "/auth/verify", "/auth/clear"];
 const REDIRECT_EXEMPT_ROUTES = ["/auth/verify", "/auth/clear"];
 
 export async function proxy(req: NextRequest) {

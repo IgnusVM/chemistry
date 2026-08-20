@@ -127,6 +127,21 @@ model User {
   workOrderNotes      WorkOrderNote[]
   workOrderAttachments WorkOrderAttachment[]
   assetTypeDocuments  AssetTypeDocument[]
+  createdInvites      InviteCode[]          @relation("InviteCreatedBy")
+  redeemedInvites     InviteCode[]          @relation("InviteUsedBy")
+}
+
+model InviteCode {
+  id              String    @id @default(cuid())
+  tokenHash       String    @unique
+  createdByUserId String
+  expiresAt       DateTime
+  usedAt          DateTime?
+  usedByUserId    String?
+  createdAt       DateTime  @default(now())
+
+  createdBy User  @relation("InviteCreatedBy", fields: [createdByUserId], references: [id])
+  usedBy    User? @relation("InviteUsedBy", fields: [usedByUserId], references: [id])
 }
 
 model TrustedDevice {

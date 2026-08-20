@@ -1,6 +1,8 @@
 import "server-only";
 import { randomBytes, createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { appUrl } from "@/lib/app-url";
+import { sendMagicLinkEmail } from "@/lib/mailer";
 
 const TOKEN_TTL_MS = 15 * 60 * 1000;
 const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
@@ -15,6 +17,17 @@ export async function isMagicLinkRateLimited(userId: string) {
     where: { userId, createdAt: { gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MS) } },
   });
   return count >= RATE_LIMIT_MAX;
+}
+
+export async function issueAndSendMagicLink(userId: string, email: string, next: FormDataEntryValue | null) {
+  if (await isMagicLinkRateLimited(userId)) return;
+  const token = await issueMagicLinkToken(userId);
+  const verifyUrl = appUrl("/auth/verify");
+  verifyUrl.searchParams.set("token", token);
+  if (typeof next === "string" && next.startsWith("/")) {
+    verifyUrl.searchParams.set("next", next);
+  }
+  await sendMagicLinkEmail(email, verifyUrl.toString());
 }
 
 export async function issueMagicLinkToken(userId: string) {
