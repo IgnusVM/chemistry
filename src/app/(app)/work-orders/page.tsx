@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
 import type { Prisma } from "@/generated/prisma/client";
-import { buttonClass } from "@/components/button";
+import { Button, buttonClass } from "@/components/button";
 
 const STATUS_STYLES: Record<string, string> = {
   OPEN: "bg-blue-100 text-blue-800",
@@ -24,10 +24,26 @@ const PRIORITY_STYLES: Record<string, string> = {
 export default async function WorkOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; department?: string; status?: string; priority?: string; mine?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    department?: string;
+    status?: string;
+    priority?: string;
+    mine?: string;
+    assignedToName?: string;
+  }>;
 }) {
   const user = await requireCurrentUser();
-  const { q, department, status, priority, mine } = await searchParams;
+  const params = await searchParams;
+  const { q, department, priority, assignedToName } = params;
+
+  // First-ever visit (no query string at all) defaults to "my in-progress work" —
+  // once the filter form has been submitted even once, every field (including
+  // cleared ones) is present as an explicit "" in the query string, so this only
+  // fires before the user has touched the filters.
+  const hasAnyFilterParam = Object.keys(params).length > 0;
+  const status = hasAnyFilterParam ? params.status : "IN_PROGRESS";
+  const mine = hasAnyFilterParam ? params.mine : "1";
 
   const accessibleDeptIds = await getAccessibleDepartmentIds("VIEWER");
 
@@ -37,6 +53,9 @@ export default async function WorkOrdersPage({
   if (status) where.status = status as Prisma.EnumWorkOrderStatusFilter["equals"];
   if (priority) where.priority = priority as Prisma.EnumWorkOrderPriorityFilter["equals"];
   if (mine === "1") where.assignedToUserId = user.id;
+  if (assignedToName) {
+    where.assignedTo = { displayName: { contains: assignedToName, mode: "insensitive" } };
+  }
   if (q) {
     where.OR = [
       { description: { contains: q, mode: "insensitive" } },
@@ -44,7 +63,7 @@ export default async function WorkOrdersPage({
     ];
   }
 
-  const [workOrders, departments] = await Promise.all([
+  const [workOrders, departments, members] = await Promise.all([
     prisma.workOrder.findMany({
       where,
       orderBy: [{ priority: "desc" }, { reportedAt: "desc" }],
@@ -52,6 +71,11 @@ export default async function WorkOrdersPage({
       take: 200,
     }),
     prisma.department.findMany({ where: { id: { in: accessibleDeptIds } }, orderBy: { name: "asc" } }),
+    prisma.user.findMany({
+      where: { memberships: { some: { departmentId: { in: accessibleDeptIds } } } },
+      orderBy: { displayName: "asc" },
+      select: { displayName: true },
+    }),
   ]);
 
   return (
@@ -97,13 +121,25 @@ export default async function WorkOrdersPage({
             </option>
           ))}
         </select>
+        <input
+          name="assignedToName"
+          list="dept-members"
+          defaultValue={assignedToName}
+          placeholder="Assigned to…"
+          className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+        />
+        <datalist id="dept-members">
+          {members.map((m) => (
+            <option key={m.displayName} value={m.displayName} />
+          ))}
+        </datalist>
         <label className="flex items-center gap-1.5 text-sm text-neutral-600">
           <input type="checkbox" name="mine" value="1" defaultChecked={mine === "1"} />
           Assigned to me
         </label>
-        <button type="submit" className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-100">
+        <Button type="submit" variant="secondary">
           Filter
-        </button>
+        </Button>
       </form>
 
       <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
