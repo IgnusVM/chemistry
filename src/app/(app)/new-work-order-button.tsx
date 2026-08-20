@@ -14,11 +14,12 @@ export function NewWorkOrderButton() {
   return (
     <Link
       href="/work-orders/new"
-      className="group relative isolate flex w-full items-center gap-4 overflow-hidden rounded-2xl bg-[length:250%_250%] bg-[0%_50%] px-6 py-5 text-white shadow-lg shadow-fuchsia-500/20 transition-all duration-300 hover:scale-[1.02] hover:bg-[100%_50%] hover:shadow-2xl hover:shadow-fuchsia-500/40 active:scale-[0.98] sm:w-auto"
+      className="group relative isolate flex w-full items-center gap-4 overflow-hidden rounded-2xl bg-[length:250%_250%] bg-[0%_50%] px-6 py-5 text-white shadow-lg shadow-fuchsia-500/20 hover:scale-[1.02] hover:bg-[25%_50%] hover:shadow-2xl hover:shadow-fuchsia-500/40 active:scale-[0.98] sm:w-auto"
       style={{
         backgroundImage:
           "linear-gradient(115deg, #f59e0b, #db2777, #9333ea, #db2777, #f59e0b)",
-        transitionProperty: "transform, box-shadow, background-position",
+        transition:
+          "transform 300ms ease, box-shadow 300ms ease, background-position 200ms ease-in-out",
       }}
     >
       {SPARKLES.map((s, i) => (
