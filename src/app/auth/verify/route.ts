@@ -3,18 +3,19 @@ import { consumeMagicLinkToken } from "@/lib/magic-link";
 import { createSession } from "@/lib/session";
 import { trustThisDevice } from "@/lib/device-trust";
 import { prisma } from "@/lib/prisma";
+import { appUrl } from "@/lib/app-url";
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
   const next = req.nextUrl.searchParams.get("next");
 
   if (!token) {
-    return NextResponse.redirect(new URL("/login?error=missing-token", req.nextUrl));
+    return NextResponse.redirect(appUrl("/login?error=missing-token"));
   }
 
   const userId = await consumeMagicLinkToken(token);
   if (!userId) {
-    return NextResponse.redirect(new URL("/login?error=invalid-token", req.nextUrl));
+    return NextResponse.redirect(appUrl("/login?error=invalid-token"));
   }
 
   await createSession(userId);
@@ -26,5 +27,5 @@ export async function GET(req: NextRequest) {
   });
 
   const destination = next && next.startsWith("/") ? next : "/";
-  return NextResponse.redirect(new URL(destination, req.nextUrl));
+  return NextResponse.redirect(appUrl(destination));
 }

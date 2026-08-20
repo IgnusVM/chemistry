@@ -4,6 +4,7 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { issueMagicLinkToken, isMagicLinkRateLimited } from "@/lib/magic-link";
+import { appUrl } from "@/lib/app-url";
 import { sendMagicLinkEmail } from "@/lib/mailer";
 import { getTrustedDeviceUser, touchTrustedDevice } from "@/lib/device-trust";
 import { pinSchema, verifyPin } from "@/lib/pin";
@@ -33,8 +34,7 @@ export async function requestMagicLink(
   const user = await prisma.user.findUnique({ where: { email } });
   if (user && !(await isMagicLinkRateLimited(user.id))) {
     const token = await issueMagicLinkToken(user.id);
-    const base = process.env.APP_BASE_URL ?? "http://localhost:3000";
-    const verifyUrl = new URL("/auth/verify", base);
+    const verifyUrl = appUrl("/auth/verify");
     verifyUrl.searchParams.set("token", token);
     if (typeof next === "string" && next.startsWith("/")) {
       verifyUrl.searchParams.set("next", next);
