@@ -23,7 +23,7 @@ export function JoinForm({ token }: { token: string }) {
           required
           autoFocus
           className="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
-          placeholder="Jaysen"
+          placeholder="Your name"
         />
       </div>
       <div>
