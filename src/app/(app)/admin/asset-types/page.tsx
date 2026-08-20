@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireOrgAdmin } from "@/lib/dal";
 import { AssetTypeForm } from "./asset-type-form";
@@ -28,7 +29,11 @@ export default async function AssetTypesAdminPage() {
         {assetTypes.map((type) => {
           const fields = (type.customFieldSchema as unknown as CustomFieldDef[]) ?? [];
           return (
-            <div key={type.id} className="rounded-md border border-neutral-200 bg-white p-4">
+            <Link
+              key={type.id}
+              href={`/admin/asset-types/${type.id}`}
+              className="block rounded-md border border-neutral-200 bg-white p-4 hover:border-neutral-300 hover:bg-neutral-50"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium text-neutral-900">{type.name}</div>
@@ -51,7 +56,7 @@ export default async function AssetTypesAdminPage() {
                   ))}
                 </div>
               )}
-            </div>
+            </Link>
           );
         })}
       </div>

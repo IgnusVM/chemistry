@@ -126,6 +126,7 @@ model User {
   assignedWorkOrders  WorkOrder[]           @relation("WorkOrderAssignedTo")
   workOrderNotes      WorkOrderNote[]
   workOrderAttachments WorkOrderAttachment[]
+  assetTypeDocuments  AssetTypeDocument[]
 }
 
 model TrustedDevice {
@@ -189,6 +190,22 @@ model AssetType {
 
   defaultDepartment Department? @relation(fields: [defaultDepartmentId], references: [id])
   assets            Asset[]
+  documents         AssetTypeDocument[]
+}
+
+model AssetTypeDocument {
+  id               String   @id @default(cuid())
+  assetTypeId      String
+  s3Key            String
+  filename         String
+  mimeType         String
+  uploadedByUserId String?
+  createdAt        DateTime @default(now())
+
+  assetType  AssetType @relation(fields: [assetTypeId], references: [id], onDelete: Cascade)
+  uploadedBy User?     @relation(fields: [uploadedByUserId], references: [id])
+
+  @@index([assetTypeId])
 }
 
 model Asset {

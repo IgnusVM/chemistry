@@ -23,6 +23,11 @@ export function buildAttachmentKey(workOrderId: string, filename: string) {
   return `${prefix}/work-orders/${workOrderId}/${unique}-${sanitizeFilename(filename)}`;
 }
 
+export function buildAssetTypeDocumentKey(assetTypeId: string, filename: string) {
+  const unique = randomBytes(8).toString("hex");
+  return `${prefix}/asset-types/${assetTypeId}/${unique}-${sanitizeFilename(filename)}`;
+}
+
 export async function uploadAttachment(key: string, body: Buffer, contentType: string) {
   await client.send(
     new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: contentType }),
