@@ -5,7 +5,7 @@ const FLASK_PATH = "M20 5h8v10.5l8.4 17.6A4.2 4.2 0 0 1 32.6 39H15.4a4.2 4.2 0 0
 export function ChemistryLogo() {
   return (
     <div className="flex items-center gap-6">
-      <svg viewBox="0 0 48 48" className="h-40 w-40 shrink-0 drop-shadow-sm sm:h-44 sm:w-44" fill="none">
+      <svg viewBox="0 0 48 48" className="h-52 w-52 shrink-0 drop-shadow-sm sm:h-56 sm:w-56" fill="none">
         <defs>
           <linearGradient id="chem-mark" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#f59e0b" />
@@ -20,10 +20,10 @@ export function ChemistryLogo() {
         <g clipPath="url(#chem-flask-clip)" className="text-violet-950">
           <MalevolentGodLogo
             showFlourish={false}
-            x={10}
-            y={14}
-            width={28}
-            height={26}
+            x={15}
+            y={16.5}
+            width={18}
+            height={17}
             preserveAspectRatio="xMidYMid meet"
           />
         </g>
