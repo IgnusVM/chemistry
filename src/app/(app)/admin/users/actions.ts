@@ -96,6 +96,16 @@ export async function removeMembership(userId: string, departmentId: string) {
 
 export async function toggleOrgAdmin(userId: string, isOrgAdmin: boolean) {
   const admin = await requireOrgAdmin();
+
+  if (!isOrgAdmin) {
+    const otherAdminCount = await prisma.user.count({
+      where: { isOrgAdmin: true, id: { not: userId } },
+    });
+    if (otherAdminCount === 0) {
+      throw new Error("Can't remove the last org admin — grant someone else admin first.");
+    }
+  }
+
   await prisma.user.update({ where: { id: userId }, data: { isOrgAdmin } });
   await recordAudit({
     entityType: "User",

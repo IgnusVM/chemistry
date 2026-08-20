@@ -3,9 +3,18 @@ import { randomBytes, createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 
 const TOKEN_TTL_MS = 15 * 60 * 1000;
+const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
+const RATE_LIMIT_MAX = 3;
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
+}
+
+export async function isMagicLinkRateLimited(userId: string) {
+  const count = await prisma.magicLinkToken.count({
+    where: { userId, createdAt: { gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MS) } },
+  });
+  return count >= RATE_LIMIT_MAX;
 }
 
 export async function issueMagicLinkToken(userId: string) {
