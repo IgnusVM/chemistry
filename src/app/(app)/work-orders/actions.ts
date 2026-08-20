@@ -130,6 +130,44 @@ export async function updateWorkOrderStatus(formData: FormData) {
   revalidatePath(`/work-orders/${workOrder.code}`);
 }
 
+const assetSchema = z.object({
+  workOrderId: z.string().min(1),
+  assetTag: z.string().optional(),
+});
+
+export type UpdateAssetState = { error?: string } | undefined;
+
+export async function updateWorkOrderAsset(
+  _prevState: UpdateAssetState,
+  formData: FormData,
+): Promise<UpdateAssetState> {
+  const user = await requireCurrentUser();
+  const parsed = assetSchema.parse({
+    workOrderId: formData.get("workOrderId"),
+    assetTag: formData.get("assetTag") || undefined,
+  });
+  const workOrder = await requireWorkOrderAccess(parsed.workOrderId);
+
+  let assetId: string | null = null;
+  if (parsed.assetTag) {
+    const asset = await prisma.asset.findUnique({ where: { assetTag: parsed.assetTag } });
+    if (!asset) return { error: `No asset with tag "${parsed.assetTag}".` };
+    assetId = asset.id;
+  }
+
+  await prisma.workOrder.update({ where: { id: workOrder.id }, data: { assetId } });
+
+  await recordAudit({
+    entityType: "WorkOrder",
+    entityId: workOrder.id,
+    action: assetId ? "asset linked" : "asset unlinked",
+    userId: user.id,
+    changes: { assetTag: parsed.assetTag ?? null },
+  });
+
+  revalidatePath(`/work-orders/${workOrder.code}`);
+}
+
 const assignSchema = z.object({
   workOrderId: z.string().min(1),
   assignedToUserId: z.string().optional(),

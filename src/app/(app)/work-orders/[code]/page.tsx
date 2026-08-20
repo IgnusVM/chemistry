@@ -6,6 +6,7 @@ import { getAttachmentUrl } from "@/lib/s3";
 import { updateWorkOrderStatus, assignWorkOrder, addWorkOrderNote, updateResolution } from "../actions";
 import { AttachmentUploadForm } from "./attachment-upload-form";
 import { DeleteAttachmentButton } from "./delete-attachment-button";
+import { AssetEditForm } from "./asset-edit-form";
 import { Button } from "@/components/button";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -41,7 +42,7 @@ export default async function WorkOrderDetailPage({
   });
   if (!workOrder) notFound();
 
-  const [departmentMembers, resolutionCodes, attachmentUrls] = await Promise.all([
+  const [departmentMembers, resolutionCodes, attachmentUrls, assets] = await Promise.all([
     prisma.departmentMembership.findMany({
       where: { departmentId: workOrder.departmentId },
       include: { user: true },
@@ -49,6 +50,12 @@ export default async function WorkOrderDetailPage({
     }),
     prisma.resolutionCode.findMany({ orderBy: { label: "asc" } }),
     Promise.all(workOrder.attachments.map((a) => getAttachmentUrl(a.s3Key))),
+    prisma.asset.findMany({
+      where: { owningDepartmentId: workOrder.departmentId },
+      select: { assetTag: true },
+      orderBy: { assetTag: "asc" },
+      take: 500,
+    }),
   ]);
 
   return (
@@ -191,6 +198,12 @@ export default async function WorkOrderDetailPage({
       </div>
 
       <div className="space-y-6">
+        <AssetEditForm
+          workOrderId={workOrder.id}
+          currentAssetTag={workOrder.asset?.assetTag ?? null}
+          assetTags={assets.map((a) => a.assetTag)}
+        />
+
         <form
           action={updateWorkOrderStatus}
           className="space-y-2 rounded-md border border-neutral-200 bg-white p-4"
