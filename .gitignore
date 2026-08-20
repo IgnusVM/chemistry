@@ -48,3 +48,4 @@ next-env.d.ts
 /.agents/skills/prisma-*
 /.windsurf/skills/prisma-*
 /skills-lock.json
+dev-server.log
