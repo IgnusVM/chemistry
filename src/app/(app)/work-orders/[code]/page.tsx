@@ -140,18 +140,28 @@ export default async function WorkOrderDetailPage({
         <div className="rounded-md border border-neutral-200 bg-white p-4">
           <h2 className="text-sm font-semibold text-neutral-900">Parts used</h2>
           {workOrder.partsUsed.length > 0 ? (
-            <ul className="mt-2 divide-y divide-neutral-200">
-              {workOrder.partsUsed.map((use) => (
-                <li key={use.id} className="flex items-center justify-between py-2 text-sm">
-                  <div>
-                    <span className="font-medium text-neutral-900">{use.part.partNumber}</span>
-                    <span className="ml-2 text-neutral-500">{use.part.description}</span>
-                    <span className="ml-2 text-neutral-500">qty {use.quantity}</span>
-                  </div>
-                  <DeleteWorkOrderPartButton workOrderPartId={use.id} />
-                </li>
-              ))}
-            </ul>
+            <table className="mt-2 w-full text-sm">
+              <thead className="text-left text-xs uppercase text-neutral-500">
+                <tr>
+                  <th className="py-1 pr-2">Part #</th>
+                  <th className="py-1 pr-2">Description</th>
+                  <th className="py-1 pr-2">Qty</th>
+                  <th className="py-1" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {workOrder.partsUsed.map((use) => (
+                  <tr key={use.id}>
+                    <td className="py-2 pr-2 font-medium text-neutral-900">{use.part.partNumber}</td>
+                    <td className="py-2 pr-2 text-neutral-600">{use.part.description}</td>
+                    <td className="py-2 pr-2 text-neutral-500">{use.quantity}</td>
+                    <td className="py-2 text-right">
+                      <DeleteWorkOrderPartButton workOrderPartId={use.id} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : (
             <p className="mt-1 text-sm text-neutral-500">No parts logged yet.</p>
           )}
