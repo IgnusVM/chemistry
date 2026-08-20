@@ -20,7 +20,7 @@ export default async function AdminPage() {
     { href: "/admin/departments", label: "Departments", description: "Owning organizations within Alchemy.", count: departmentCount },
     { href: "/admin/users", label: "Users", description: "Accounts and department roles.", count: userCount },
     { href: "/admin/asset-types", label: "Asset Types", description: "Templates and their custom fields.", count: assetTypeCount },
-    { href: "/admin/resolution-codes", label: "Resolution Codes", description: "GEMS-style outcome codes for work orders.", count: resolutionCodeCount },
+    { href: "/admin/resolution-codes", label: "Resolution Codes", description: "CMMS-style outcome codes for work orders.", count: resolutionCodeCount },
     { href: "/locations", label: "Locations", description: "Storage facilities, camps, and placements.", count: locationCount },
   ];
 

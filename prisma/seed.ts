@@ -112,7 +112,7 @@ async function main() {
     });
   }
 
-  // GEMS resolution codes — what happened, not what was wrong.
+  // CMMS resolution codes — what happened, not what was wrong.
   const RESOLUTION_CODES = [
     { code: "COULD_NOT_DUPLICATE", label: "Could Not Duplicate" },
     { code: "COULD_NOT_LOCATE", label: "Could Not Locate" },

@@ -11,7 +11,7 @@ export default async function ResolutionCodesAdminPage() {
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">Resolution Codes</h1>
         <p className="text-sm text-neutral-500">
-          GEMS-style outcome codes — what happened, not what was wrong. Keep the list short.
+          CMMS-style outcome codes — what happened, not what was wrong. Keep the list short.
         </p>
       </div>
 

@@ -183,11 +183,11 @@ The **reported by** field on a ticket links to that person's [account profile](/
   },
   {
     slug: "resolution-codes-explained",
-    title: "Resolution codes explained (GEMS)",
+    title: "Resolution codes explained (CMMS)",
     category: "work-orders",
     order: 2,
     summary: "What each of the seven resolution codes means and when to use it.",
-    body: `When you close a work order, you pick a **resolution code** describing what actually happened. These are based on the GEMS troubleshooting vocabulary and are deliberately a short, controlled list rather than free text, so patterns become visible over time (if half your "Could Not Duplicate" tickets are on the same asset, that asset probably has an intermittent fault worth digging into properly).
+    body: `When you close a work order, you pick a **resolution code** describing what actually happened. These are based on standard CMMS troubleshooting vocabulary and are deliberately a short, controlled list rather than free text, so patterns become visible over time (if half your "Could Not Duplicate" tickets are on the same asset, that asset probably has an intermittent fault worth digging into properly).
 
 - **Could Not Duplicate** — you looked into the reported issue and couldn't reproduce it. The asset checked out fine when you had it.
 - **Could Not Locate** — you went to find the asset to work on it and couldn't — wrong location on record, walked off, buried under something. Different failure mode from "couldn't reproduce the problem"; this is "couldn't even get to it."
@@ -259,7 +259,7 @@ The QR code encodes the asset's tag, so as long as the sticker is legible, the a
 - **Departments** — the actual owning teams (Lamplighters, Gate, APW, and so on), each optionally under a division, each with a lead and a member list. Assets and work orders are always owned by a department.
 - **Users** — every account, their org-admin flag, and their department memberships and roles (Viewer, Member, Lead).
 - **Asset Types** — the templates that define a class of asset and its custom fields, fully editable after creation, with a Documents section for manuals and schematics. See [Asset types and custom fields](/help/admin-setup/asset-types-and-custom-fields).
-- **Resolution Codes** — the GEMS-based outcome codes used when closing work orders.
+- **Resolution Codes** — the CMMS-based outcome codes used when closing work orders.
 - **Locations** — the shared, reusable place hierarchy assets can be moved between.
 
 Everything under Admin is deliberately one level down from the main nav, since most day-to-day work only touches **Assets** and **Work Orders**. If you're not an org admin, you won't see this tab at all — ask an existing admin (visible from **Admin → Users**) if you need something here changed.`,
