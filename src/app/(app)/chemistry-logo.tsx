@@ -12,6 +12,14 @@ export function ChemistryLogo() {
             <stop offset="50%" stopColor="#a855f7" />
             <stop offset="100%" stopColor="#0d9488" />
           </linearGradient>
+          <linearGradient id="chem-bubble-rainbow" x1="24.5" y1="22" x2="27.5" y2="35" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#ef4444" />
+            <stop offset="20%" stopColor="#f97316" />
+            <stop offset="40%" stopColor="#eab308" />
+            <stop offset="60%" stopColor="#22c55e" />
+            <stop offset="80%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#8b5cf6" />
+          </linearGradient>
           <clipPath id="chem-flask-clip">
             <path d={FLASK_PATH} />
           </clipPath>
@@ -21,7 +29,7 @@ export function ChemistryLogo() {
           <MalevolentGodLogo
             showFlourish={false}
             x={15}
-            y={16.5}
+            y={21}
             width={18}
             height={17}
             preserveAspectRatio="xMidYMid meet"
@@ -36,9 +44,9 @@ export function ChemistryLogo() {
         />
         <path d="M17 7.5h14" stroke="url(#chem-mark)" strokeWidth="2.5" strokeLinecap="round" />
         <path d="M14.5 29.5h19" stroke="url(#chem-mark)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-        <circle cx="22" cy="34" r="1.6" fill="url(#chem-mark)" />
-        <circle cx="27.5" cy="33" r="1.1" fill="url(#chem-mark)" />
-        <circle cx="24.5" cy="24" r="1.3" fill="url(#chem-mark)" />
+        <circle cx="22" cy="34" r="1.6" fill="url(#chem-bubble-rainbow)" opacity="0.55" />
+        <circle cx="27.5" cy="33" r="1.1" fill="url(#chem-bubble-rainbow)" opacity="0.55" />
+        <circle cx="24.5" cy="24" r="1.3" fill="url(#chem-bubble-rainbow)" opacity="0.55" />
         <path
           d="M39 4.5l1.1 2.9 2.9 1.1-2.9 1.1L39 12.5l-1.1-2.9-2.9-1.1 2.9-1.1L39 4.5z"
           fill="url(#chem-mark)"
