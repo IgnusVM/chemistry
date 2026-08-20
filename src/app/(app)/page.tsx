@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FlaskConical } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 export default async function DashboardPage() {
@@ -17,9 +18,14 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Dashboard</h1>
-        <p className="text-sm text-neutral-500">Fleet overview across all departments.</p>
+      <div className="flex items-center gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-neutral-900">
+          <FlaskConical className="h-6 w-6 text-white" strokeWidth={2} />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Dashboard</h1>
+          <p className="text-sm text-neutral-500">A live look at the fleet across every Ops department.</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
