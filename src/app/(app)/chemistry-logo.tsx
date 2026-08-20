@@ -2,6 +2,19 @@ import { MalevolentGodLogo } from "@/components/malevolent-god-logo";
 
 const FLASK_PATH = "M20 5h8v10.5l8.4 17.6A4.2 4.2 0 0 1 32.6 39H15.4a4.2 4.2 0 0 1-3.8-5.9L20 15.5V5z";
 
+// Scattered along the belly's edges, away from the elephant emblem's bounding box (x 15-33, y 21-38).
+const BUBBLES = [
+  { x: 13.2, y: 36.5, r: 0.55 },
+  { x: 34.6, y: 35.5, r: 0.45 },
+  { x: 12.6, y: 23.5, r: 0.4 },
+  { x: 35.2, y: 25.5, r: 0.5 },
+  { x: 17, y: 17.5, r: 0.35 },
+  { x: 31.2, y: 17, r: 0.4 },
+  { x: 14.5, y: 30.5, r: 0.35 },
+  { x: 33.5, y: 31, r: 0.4 },
+  { x: 24, y: 37.8, r: 0.45 },
+];
+
 export function ChemistryLogo() {
   return (
     <div className="flex items-center gap-6">
@@ -12,7 +25,7 @@ export function ChemistryLogo() {
             <stop offset="50%" stopColor="#a855f7" />
             <stop offset="100%" stopColor="#0d9488" />
           </linearGradient>
-          <linearGradient id="chem-bubble-rainbow" x1="24.5" y1="22" x2="27.5" y2="35" gradientUnits="userSpaceOnUse">
+          <linearGradient id="chem-bubble-rainbow" x1="12" y1="16" x2="36" y2="39" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#ef4444" />
             <stop offset="20%" stopColor="#f97316" />
             <stop offset="40%" stopColor="#eab308" />
@@ -25,7 +38,13 @@ export function ChemistryLogo() {
           </clipPath>
         </defs>
 
-        <g clipPath="url(#chem-flask-clip)" className="text-violet-950">
+        <g
+          clipPath="url(#chem-flask-clip)"
+          style={{ color: "#0a0414" }}
+          stroke="currentColor"
+          strokeWidth="18"
+          strokeLinejoin="round"
+        >
           <MalevolentGodLogo
             showFlourish={false}
             x={15}
@@ -44,9 +63,9 @@ export function ChemistryLogo() {
         />
         <path d="M17 7.5h14" stroke="url(#chem-mark)" strokeWidth="2.5" strokeLinecap="round" />
         <path d="M14.5 29.5h19" stroke="url(#chem-mark)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-        <circle cx="22" cy="34" r="1.6" fill="url(#chem-bubble-rainbow)" opacity="0.55" />
-        <circle cx="27.5" cy="33" r="1.1" fill="url(#chem-bubble-rainbow)" opacity="0.55" />
-        <circle cx="24.5" cy="24" r="1.3" fill="url(#chem-bubble-rainbow)" opacity="0.55" />
+        {BUBBLES.map((b, i) => (
+          <circle key={i} cx={b.x} cy={b.y} r={b.r} fill="url(#chem-bubble-rainbow)" opacity="0.55" />
+        ))}
         <path
           d="M39 4.5l1.1 2.9 2.9 1.1-2.9 1.1L39 12.5l-1.1-2.9-2.9-1.1 2.9-1.1L39 4.5z"
           fill="url(#chem-mark)"
