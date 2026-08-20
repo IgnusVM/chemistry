@@ -2,16 +2,19 @@ import { MalevolentGodLogo } from "@/components/malevolent-god-logo";
 
 const FLASK_PATH = "M20 5h8v10.5l8.4 17.6A4.2 4.2 0 0 1 32.6 39H15.4a4.2 4.2 0 0 1-3.8-5.9L20 15.5V5z";
 
-// Scattered along the belly's edges, away from the elephant emblem's bounding box (x 15-33, y 21-38).
+// Scattered along the belly's inner edges (kept ~1 unit inside the glass outline at
+// each height — the belly tapers from ~19-29 wide near the neck to ~15-33 at the
+// bottom, so a fixed x/y grid clips outside the glass unless computed per-row) and
+// away from the elephant emblem's bounding box (x 15-33, y 21-38).
 const BUBBLES = [
-  { x: 13.2, y: 36.5, r: 0.55 },
-  { x: 34.6, y: 35.5, r: 0.45 },
-  { x: 12.6, y: 23.5, r: 0.4 },
-  { x: 35.2, y: 25.5, r: 0.5 },
-  { x: 17, y: 17.5, r: 0.35 },
-  { x: 31.2, y: 17, r: 0.4 },
-  { x: 14.5, y: 30.5, r: 0.35 },
-  { x: 33.5, y: 31, r: 0.4 },
+  { x: 14.5, y: 36.5, r: 0.55 },
+  { x: 34, y: 35.5, r: 0.45 },
+  { x: 17.2, y: 23.5, r: 0.4 },
+  { x: 32, y: 25.5, r: 0.5 },
+  { x: 20.3, y: 17.8, r: 0.35 },
+  { x: 27.8, y: 17.3, r: 0.4 },
+  { x: 13.8, y: 30.5, r: 0.35 },
+  { x: 34.2, y: 31, r: 0.4 },
   { x: 24, y: 37.8, r: 0.45 },
 ];
 
@@ -63,9 +66,11 @@ export function ChemistryLogo() {
         />
         <path d="M17 7.5h14" stroke="url(#chem-mark)" strokeWidth="2.5" strokeLinecap="round" />
         <path d="M14.5 29.5h19" stroke="url(#chem-mark)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-        {BUBBLES.map((b, i) => (
-          <circle key={i} cx={b.x} cy={b.y} r={b.r} fill="url(#chem-bubble-rainbow)" opacity="0.55" />
-        ))}
+        <g clipPath="url(#chem-flask-clip)">
+          {BUBBLES.map((b, i) => (
+            <circle key={i} cx={b.x} cy={b.y} r={b.r} fill="url(#chem-bubble-rainbow)" opacity="0.55" />
+          ))}
+        </g>
         <path
           d="M39 4.5l1.1 2.9 2.9 1.1-2.9 1.1L39 12.5l-1.1-2.9-2.9-1.1 2.9-1.1L39 4.5z"
           fill="url(#chem-mark)"
