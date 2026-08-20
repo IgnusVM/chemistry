@@ -26,23 +26,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               Locations
             </Link>
             {user.isOrgAdmin && (
-              <>
-                <Link href="/admin/divisions" className="hover:text-neutral-900">
-                  Divisions
-                </Link>
-                <Link href="/admin/departments" className="hover:text-neutral-900">
-                  Departments
-                </Link>
-                <Link href="/admin/users" className="hover:text-neutral-900">
-                  Users
-                </Link>
-                <Link href="/admin/asset-types" className="hover:text-neutral-900">
-                  Asset Types
-                </Link>
-                <Link href="/admin/failure-codes" className="hover:text-neutral-900">
-                  Failure Codes
-                </Link>
-              </>
+              <Link href="/admin" className="hover:text-neutral-900">
+                Admin
+              </Link>
             )}
           </nav>
           <div className="flex items-center gap-3 text-sm text-neutral-600">
