@@ -13,6 +13,7 @@ type AssetTypeOption = {
   id: string;
   name: string;
   defaultDepartmentId: string | null;
+  defaultAcquisitionCost: string | null;
   fields: CustomFieldDef[];
 };
 
@@ -200,6 +201,18 @@ export function BulkAssetForm({
           </select>
         </Field>
       </div>
+
+      <Field label="Value ($) — same for every asset in this batch">
+        <input
+          name="acquisitionCost"
+          type="number"
+          min={0}
+          step="0.01"
+          key={selectedType?.defaultAcquisitionCost ?? "none"}
+          defaultValue={selectedType?.defaultAcquisitionCost ?? ""}
+          className={inputClass}
+        />
+      </Field>
 
       <LocationField name="currentLocationId" locations={locations} label="Location" />
 

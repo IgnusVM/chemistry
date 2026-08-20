@@ -16,6 +16,7 @@ export function EditAssetTypeForm({
     manufacturer: string | null;
     model: string | null;
     defaultDepartmentId: string | null;
+    defaultAcquisitionCost: string | null;
     customFieldSchema: CustomFieldDef[];
   };
   departments: { id: string; name: string }[];
@@ -77,7 +78,22 @@ export function EditAssetTypeForm({
             ))}
           </select>
         </div>
+        <div>
+          <label className="block text-xs font-medium text-neutral-600">Default value ($)</label>
+          <input
+            name="defaultAcquisitionCost"
+            type="number"
+            min={0}
+            step="0.01"
+            defaultValue={assetType.defaultAcquisitionCost ?? ""}
+            placeholder="e.g. 150.00"
+            className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+          />
+        </div>
       </div>
+      <p className="text-xs text-neutral-400">
+        Pre-fills each new asset&rsquo;s value at creation — editable per-asset afterward.
+      </p>
 
       <FieldBuilder rows={rows} setRows={setRows} />
 

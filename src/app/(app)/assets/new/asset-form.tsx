@@ -13,6 +13,7 @@ type AssetTypeOption = {
   id: string;
   name: string;
   defaultDepartmentId: string | null;
+  defaultAcquisitionCost: string | null;
   fields: CustomFieldDef[];
 };
 
@@ -98,6 +99,18 @@ export function AssetForm({
           </select>
         </Field>
       </div>
+
+      <Field label="Value ($)">
+        <input
+          name="acquisitionCost"
+          type="number"
+          min={0}
+          step="0.01"
+          key={selectedType?.defaultAcquisitionCost ?? "none"}
+          defaultValue={selectedType?.defaultAcquisitionCost ?? ""}
+          className={inputClass}
+        />
+      </Field>
 
       <LocationField name="currentLocationId" locations={locations} label="Location" />
 

@@ -15,6 +15,7 @@ export default async function NewAssetPage() {
     id: t.id,
     name: t.name,
     defaultDepartmentId: t.defaultDepartmentId,
+    defaultAcquisitionCost: t.defaultAcquisitionCost?.toString() ?? null,
     fields: (t.customFieldSchema as unknown as CustomFieldDef[]) ?? [],
   }));
 

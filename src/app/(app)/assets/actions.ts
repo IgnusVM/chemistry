@@ -21,6 +21,7 @@ const baseAssetSchema = z.object({
   owningDepartmentId: z.string().min(1),
   status: z.enum(ASSET_STATUSES),
   condition: z.enum(ASSET_CONDITIONS),
+  acquisitionCost: z.coerce.number().nonnegative().optional(),
   notes: z.string().optional(),
 });
 
@@ -40,6 +41,7 @@ export async function createAsset(
     owningDepartmentId: formData.get("owningDepartmentId"),
     status: formData.get("status"),
     condition: formData.get("condition"),
+    acquisitionCost: formData.get("acquisitionCost") || undefined,
     notes: formData.get("notes") || undefined,
   });
   if (!parsed.success) {
@@ -84,6 +86,7 @@ export async function createAsset(
       owningDepartmentId: parsed.data.owningDepartmentId,
       status: parsed.data.status,
       condition: parsed.data.condition,
+      acquisitionCost: parsed.data.acquisitionCost,
       currentLocationId: location.locationId,
       customLocationText: location.customLocationText,
       notes: parsed.data.notes,
@@ -138,6 +141,37 @@ export async function changeAssetStatus(formData: FormData) {
     action: "status changed",
     userId: user.id,
     changes: { from: asset.status, to: parsed.status },
+  });
+
+  revalidatePath(`/assets/${asset.assetTag}`);
+}
+
+const valueSchema = z.object({
+  assetId: z.string().min(1),
+  acquisitionCost: z.coerce.number().nonnegative().optional(),
+});
+
+export async function updateAssetValue(formData: FormData) {
+  const user = await requireCurrentUser();
+  const parsed = valueSchema.parse({
+    assetId: formData.get("assetId"),
+    acquisitionCost: formData.get("acquisitionCost") || undefined,
+  });
+
+  const asset = await prisma.asset.findUniqueOrThrow({ where: { id: parsed.assetId } });
+  const allowed = await hasDepartmentAccess(asset.owningDepartmentId, "MEMBER");
+  if (!allowed) throw new Error("Not authorized");
+
+  await prisma.asset.update({
+    where: { id: asset.id },
+    data: { acquisitionCost: parsed.acquisitionCost ?? null },
+  });
+  await recordAudit({
+    entityType: "Asset",
+    entityId: asset.id,
+    action: "value updated",
+    userId: user.id,
+    changes: { acquisitionCost: parsed.acquisitionCost ?? null },
   });
 
   revalidatePath(`/assets/${asset.assetTag}`);

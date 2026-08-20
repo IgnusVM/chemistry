@@ -129,6 +129,8 @@ model User {
   assetTypeDocuments  AssetTypeDocument[]
   createdInvites      InviteCode[]          @relation("InviteCreatedBy")
   redeemedInvites     InviteCode[]          @relation("InviteUsedBy")
+  partOrders          PartOrder[]
+  workOrderParts      WorkOrderPart[]
 }
 
 model InviteCode {
@@ -199,6 +201,7 @@ model AssetType {
   manufacturer        String?
   model               String?
   defaultDepartmentId String?
+  defaultAcquisitionCost Decimal? @db.Decimal(10, 2)
   customFieldSchema   Json     @default("[]")
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -206,6 +209,53 @@ model AssetType {
   defaultDepartment Department? @relation(fields: [defaultDepartmentId], references: [id])
   assets            Asset[]
   documents         AssetTypeDocument[]
+  parts             Part[]
+}
+
+model Part {
+  id          String   @id @default(cuid())
+  assetTypeId String
+  partNumber  String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assetType     AssetType       @relation(fields: [assetTypeId], references: [id], onDelete: Cascade)
+  orders        PartOrder[]
+  workOrderUses WorkOrderPart[]
+
+  @@unique([assetTypeId, partNumber])
+}
+
+model PartOrder {
+  id              String   @id @default(cuid())
+  partId          String
+  price           Decimal? @db.Decimal(10, 2)
+  purchaseLink    String?
+  orderedAt       DateTime @default(now())
+  createdAt       DateTime @default(now())
+  createdByUserId String?
+
+  part      Part  @relation(fields: [partId], references: [id], onDelete: Cascade)
+  createdBy User? @relation(fields: [createdByUserId], references: [id])
+
+  @@index([partId])
+}
+
+model WorkOrderPart {
+  id              String   @id @default(cuid())
+  workOrderId     String
+  partId          String
+  quantity        Int      @default(1)
+  createdAt       DateTime @default(now())
+  createdByUserId String?
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  part      Part      @relation(fields: [partId], references: [id])
+  createdBy User?     @relation(fields: [createdByUserId], references: [id])
+
+  @@index([workOrderId])
+  @@index([partId])
 }
 
 model AssetTypeDocument {
@@ -346,6 +396,7 @@ model WorkOrder {
   resolutionCode ResolutionCode?       @relation(fields: [resolutionCodeId], references: [id])
   notes          WorkOrderNote[]
   attachments    WorkOrderAttachment[]
+  partsUsed      WorkOrderPart[]
 
   @@index([departmentId])
   @@index([status])

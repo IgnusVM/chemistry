@@ -8,6 +8,8 @@ import { EditAssetTypeForm } from "./edit-asset-type-form";
 import { DocumentUploadForm } from "./document-upload-form";
 import { DeleteDocumentButton } from "./delete-document-button";
 import { DeleteAssetTypeButton } from "./delete-asset-type-button";
+import { AddPartForm } from "./add-part-form";
+import { DeletePartButton } from "./delete-part-button";
 
 export default async function AssetTypeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requireOrgAdmin();
@@ -18,6 +20,13 @@ export default async function AssetTypeDetailPage({ params }: { params: Promise<
     include: {
       _count: { select: { assets: true } },
       documents: { orderBy: { createdAt: "desc" }, include: { uploadedBy: true } },
+      parts: {
+        orderBy: { partNumber: "asc" },
+        include: {
+          orders: { orderBy: { orderedAt: "desc" } },
+          _count: { select: { workOrderUses: true } },
+        },
+      },
     },
   });
   if (!assetType) notFound();
@@ -44,7 +53,11 @@ export default async function AssetTypeDetailPage({ params }: { params: Promise<
 
       <EditAssetTypeForm
         key={assetType.updatedAt.toISOString()}
-        assetType={{ ...assetType, customFieldSchema: fieldDefs }}
+        assetType={{
+          ...assetType,
+          defaultAcquisitionCost: assetType.defaultAcquisitionCost?.toString() ?? null,
+          customFieldSchema: fieldDefs,
+        }}
         departments={departments}
       />
 
@@ -73,6 +86,50 @@ export default async function AssetTypeDetailPage({ params }: { params: Promise<
           </ul>
         )}
         <DocumentUploadForm assetTypeId={assetType.id} />
+      </div>
+
+      <div className="rounded-md border border-neutral-200 bg-white p-4">
+        <h2 className="text-sm font-semibold text-neutral-900">Parts</h2>
+        <p className="text-sm text-neutral-500">
+          Parts known for this asset type — new ones are added automatically the first time they&rsquo;re
+          logged as used on a work order, or add one directly below.
+        </p>
+        {assetType.parts.length > 0 && (
+          <table className="mt-3 w-full text-sm">
+            <thead className="text-left text-xs uppercase text-neutral-500">
+              <tr>
+                <th className="py-1 pr-2">Part #</th>
+                <th className="py-1 pr-2">Description</th>
+                <th className="py-1 pr-2">Times ordered</th>
+                <th className="py-1 pr-2">Last price</th>
+                <th className="py-1" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {assetType.parts.map((part) => (
+                <tr key={part.id}>
+                  <td className="py-2 pr-2">
+                    <Link
+                      href={`/admin/asset-types/${assetType.id}/parts/${part.id}`}
+                      className="font-medium text-neutral-900 hover:underline"
+                    >
+                      {part.partNumber}
+                    </Link>
+                  </td>
+                  <td className="py-2 pr-2 text-neutral-600">{part.description}</td>
+                  <td className="py-2 pr-2 text-neutral-500">{part.orders.length}</td>
+                  <td className="py-2 pr-2 text-neutral-500">
+                    {part.orders[0]?.price ? `$${part.orders[0].price.toString()}` : "—"}
+                  </td>
+                  <td className="py-2 text-right">
+                    <DeletePartButton partId={part.id} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <AddPartForm assetTypeId={assetType.id} />
       </div>
     </div>
   );

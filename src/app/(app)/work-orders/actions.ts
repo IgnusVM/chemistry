@@ -344,3 +344,117 @@ export async function deleteWorkOrderAttachment(attachmentId: string) {
 
   revalidatePath(`/work-orders/${attachment.workOrder.code}`);
 }
+
+const workOrderPartSchema = z.object({
+  workOrderId: z.string().min(1),
+  partNumber: z.string().min(1),
+  description: z.string().optional(),
+  quantity: z.coerce.number().int().positive().default(1),
+  price: z.coerce.number().nonnegative().optional(),
+  purchaseLink: z.string().url().optional(),
+  orderedAt: z.coerce.date().optional(),
+});
+
+export type WorkOrderPartFormState = { error: string } | { ok: true } | undefined;
+
+export async function addWorkOrderPart(
+  _prevState: WorkOrderPartFormState,
+  formData: FormData,
+): Promise<WorkOrderPartFormState> {
+  const user = await requireCurrentUser();
+  const parsed = workOrderPartSchema.safeParse({
+    workOrderId: formData.get("workOrderId"),
+    partNumber: formData.get("partNumber"),
+    description: formData.get("description") || undefined,
+    quantity: formData.get("quantity") || undefined,
+    price: formData.get("price") || undefined,
+    purchaseLink: formData.get("purchaseLink") || undefined,
+    orderedAt: formData.get("orderedAt") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const workOrder = await requireWorkOrderAccess(parsed.data.workOrderId);
+  const asset = workOrder.assetId ? await prisma.asset.findUnique({ where: { id: workOrder.assetId } }) : null;
+  if (!asset) {
+    return { error: "Link an asset to this work order before logging parts used." };
+  }
+
+  let part = await prisma.part.findUnique({
+    where: { assetTypeId_partNumber: { assetTypeId: asset.assetTypeId, partNumber: parsed.data.partNumber } },
+  });
+  if (!part) {
+    if (!parsed.data.description) {
+      return { error: `"${parsed.data.partNumber}" is a new part — add a description to create it.` };
+    }
+    part = await prisma.part.create({
+      data: {
+        assetTypeId: asset.assetTypeId,
+        partNumber: parsed.data.partNumber,
+        description: parsed.data.description,
+      },
+    });
+    await recordAudit({
+      entityType: "Part",
+      entityId: part.id,
+      action: "created from work order",
+      userId: user.id,
+      changes: { partNumber: part.partNumber, workOrderCode: workOrder.code },
+    });
+  }
+
+  await prisma.workOrderPart.create({
+    data: {
+      workOrderId: workOrder.id,
+      partId: part.id,
+      quantity: parsed.data.quantity,
+      createdByUserId: user.id,
+    },
+  });
+
+  if (parsed.data.price !== undefined || parsed.data.purchaseLink || parsed.data.orderedAt) {
+    await prisma.partOrder.create({
+      data: {
+        partId: part.id,
+        price: parsed.data.price,
+        purchaseLink: parsed.data.purchaseLink,
+        orderedAt: parsed.data.orderedAt,
+        createdByUserId: user.id,
+      },
+    });
+  }
+
+  await recordAudit({
+    entityType: "WorkOrder",
+    entityId: workOrder.id,
+    action: "part used",
+    userId: user.id,
+    changes: { partNumber: part.partNumber, quantity: parsed.data.quantity },
+  });
+
+  revalidatePath(`/work-orders/${workOrder.code}`);
+  revalidatePath(`/admin/asset-types/${asset.assetTypeId}`);
+  return { ok: true };
+}
+
+export async function deleteWorkOrderPart(workOrderPartId: string) {
+  const user = await requireCurrentUser();
+  const use = await prisma.workOrderPart.findUniqueOrThrow({
+    where: { id: workOrderPartId },
+    include: { workOrder: true },
+  });
+  const allowed = await hasDepartmentAccess(use.workOrder.departmentId, "MEMBER");
+  if (!allowed) throw new Error("Not authorized for this work order's department");
+
+  await prisma.workOrderPart.delete({ where: { id: use.id } });
+
+  await recordAudit({
+    entityType: "WorkOrder",
+    entityId: use.workOrderId,
+    action: "part usage removed",
+    userId: user.id,
+  });
+
+  revalidatePath(`/work-orders/${use.workOrder.code}`);
+}

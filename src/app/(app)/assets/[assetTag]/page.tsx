@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { assetQrDataUrl, assetScanUrl } from "@/lib/qr";
-import { changeAssetStatus, moveAsset } from "../actions";
+import { changeAssetStatus, moveAsset, updateAssetValue } from "../actions";
 import type { CustomFieldDef } from "@/lib/custom-fields";
 import { LocationField } from "@/components/location-field";
 import { Button, buttonClass } from "@/components/button";
@@ -113,6 +113,7 @@ export default async function AssetDetailPage({
               )
             }
           />
+          <InfoTile label="Value" value={asset.acquisitionCost ? `$${asset.acquisitionCost.toString()}` : "—"} />
           <InfoTile
             label="Acquired"
             value={asset.acquisitionDate ? asset.acquisitionDate.toLocaleDateString() : "—"}
@@ -213,6 +214,30 @@ export default async function AssetDetailPage({
           </select>
           <Button type="submit" className="w-full">
             Update status
+          </Button>
+        </form>
+
+        <form
+          action={async (formData: FormData) => {
+            "use server";
+            formData.set("assetId", asset.id);
+            await updateAssetValue(formData);
+          }}
+          className="space-y-2 rounded-md border border-neutral-200 bg-white p-4"
+        >
+          <h2 className="text-sm font-semibold text-neutral-900">Value</h2>
+          <input
+            key={asset.acquisitionCost?.toString() ?? "none"}
+            name="acquisitionCost"
+            type="number"
+            min={0}
+            step="0.01"
+            defaultValue={asset.acquisitionCost?.toString() ?? ""}
+            placeholder="$0.00"
+            className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+          />
+          <Button type="submit" variant="secondary" className="w-full">
+            Save value
           </Button>
         </form>
 
