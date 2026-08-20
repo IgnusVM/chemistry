@@ -136,7 +136,16 @@ export default async function AssetsPage({
                 <td className="px-4 py-2">{asset.name}</td>
                 <td className="px-4 py-2 text-neutral-500">{asset.assetType.name}</td>
                 <td className="px-4 py-2 text-neutral-500">{asset.owningDepartment.name}</td>
-                <td className="px-4 py-2 text-neutral-500">{asset.currentLocation?.name ?? "—"}</td>
+                <td className="px-4 py-2 text-neutral-500">
+                  {asset.currentLocation?.name ??
+                    (asset.customLocationText ? (
+                      <>
+                        {asset.customLocationText} <span className="text-amber-500">*</span>
+                      </>
+                    ) : (
+                      "—"
+                    ))}
+                </td>
                 <td className="px-4 py-2">
                   <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[asset.status]}`}>
                     {asset.status.replace("_", " ")}

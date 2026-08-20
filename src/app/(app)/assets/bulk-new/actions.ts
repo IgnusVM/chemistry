@@ -7,6 +7,7 @@ import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { buildCustomFieldsSchema, type CustomFieldDef } from "@/lib/custom-fields";
 import { generateSequentialTags, parseTagList, sequentialTagRangeSchema } from "@/lib/asset-tags";
+import { parseLocationInput } from "@/lib/location-input";
 import type { Prisma } from "@/generated/prisma/client";
 
 const ASSET_STATUSES = ["ACTIVE", "IN_REPAIR", "STORAGE", "RETIRED", "LOST", "DESTROYED"] as const;
@@ -18,7 +19,6 @@ const baseSchema = z.object({
   owningDepartmentId: z.string().min(1),
   status: z.enum(ASSET_STATUSES),
   condition: z.enum(ASSET_CONDITIONS),
-  currentLocationId: z.string().optional(),
   notes: z.string().optional(),
   groupName: z.string().min(1),
   groupDescription: z.string().optional(),
@@ -38,7 +38,6 @@ export async function createAssetBatch(
     owningDepartmentId: formData.get("owningDepartmentId"),
     status: formData.get("status"),
     condition: formData.get("condition"),
-    currentLocationId: formData.get("currentLocationId") || undefined,
     notes: formData.get("notes") || undefined,
     groupName: formData.get("groupName"),
     groupDescription: formData.get("groupDescription") || undefined,
@@ -46,6 +45,9 @@ export async function createAssetBatch(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
+
+  const location = parseLocationInput(formData, "currentLocationId");
+  if ("error" in location) return { error: location.error };
 
   const allowed = await hasDepartmentAccess(parsed.data.owningDepartmentId, "MEMBER");
   if (!allowed) {
@@ -115,7 +117,8 @@ export async function createAssetBatch(
         owningDepartmentId: parsed.data.owningDepartmentId,
         status: parsed.data.status,
         condition: parsed.data.condition,
-        currentLocationId: parsed.data.currentLocationId || null,
+        currentLocationId: location.locationId,
+        customLocationText: location.customLocationText,
         notes: parsed.data.notes,
         customFields,
         createdByUserId: user.id,
@@ -127,11 +130,12 @@ export async function createAssetBatch(
       data: createdAssets.map((a) => ({ assetGroupId: group.id, assetId: a.id })),
     });
 
-    if (parsed.data.currentLocationId) {
+    if (location.locationId || location.customLocationText) {
       await tx.assetLocationHistory.createMany({
         data: createdAssets.map((a) => ({
           assetId: a.id,
-          locationId: parsed.data.currentLocationId!,
+          locationId: location.locationId,
+          customLocationText: location.customLocationText,
           movedByUserId: user.id,
           notes: "Initial location on bulk creation",
         })),

@@ -204,6 +204,7 @@ model Asset {
   acquisitionCost    Decimal?        @db.Decimal(10, 2)
   parentAssetId      String?
   currentLocationId  String?
+  customLocationText String?
   customFields       Json            @default("{}")
   notes              String?
   createdAt          DateTime        @default(now())
@@ -246,16 +247,17 @@ model AssetGroupMember {
 }
 
 model AssetLocationHistory {
-  id            String   @id @default(cuid())
-  assetId       String
-  locationId    String
-  movedAt       DateTime @default(now())
-  movedByUserId String?
-  notes         String?
+  id                 String   @id @default(cuid())
+  assetId            String
+  locationId         String?
+  customLocationText String?
+  movedAt            DateTime @default(now())
+  movedByUserId      String?
+  notes              String?
 
-  asset    Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  location Location @relation(fields: [locationId], references: [id])
-  movedBy  User?    @relation(fields: [movedByUserId], references: [id])
+  asset    Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  location Location? @relation(fields: [locationId], references: [id])
+  movedBy  User?     @relation(fields: [movedByUserId], references: [id])
 
   @@index([assetId])
 }

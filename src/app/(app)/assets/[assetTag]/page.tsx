@@ -5,6 +5,7 @@ import { requireCurrentUser } from "@/lib/dal";
 import { assetQrDataUrl, assetScanUrl } from "@/lib/qr";
 import { changeAssetStatus, moveAsset } from "../actions";
 import type { CustomFieldDef } from "@/lib/custom-fields";
+import { LocationField } from "@/components/location-field";
 
 const ASSET_STATUSES = ["ACTIVE", "IN_REPAIR", "STORAGE", "RETIRED", "LOST", "DESTROYED"];
 const WO_STATUS_STYLES: Record<string, string> = {
@@ -62,13 +63,20 @@ export default async function AssetDetailPage({
   const timeline = [
     ...asset.locationHistory.map((h) => ({
       at: h.movedAt,
-      label: `Moved to ${h.location.name}`,
+      label: h.location ? `Moved to ${h.location.name}` : "Moved to",
+      custom: h.location ? null : h.customLocationText,
       by: h.movedBy?.displayName,
       notes: h.notes,
     })),
     ...auditEntries
       .filter((a) => a.action !== "created")
-      .map((a) => ({ at: a.createdAt, label: a.action, by: a.user?.displayName, notes: null as string | null })),
+      .map((a) => ({
+        at: a.createdAt,
+        label: a.action,
+        custom: null as string | null,
+        by: a.user?.displayName,
+        notes: null as string | null,
+      })),
   ].sort((a, b) => b.at.getTime() - a.at.getTime());
 
   return (
@@ -93,7 +101,20 @@ export default async function AssetDetailPage({
 
         <div className="grid grid-cols-2 gap-4 rounded-md border border-neutral-200 bg-white p-4 text-sm sm:grid-cols-4">
           <InfoTile label="Condition" value={asset.condition} />
-          <InfoTile label="Location" value={asset.currentLocation?.name ?? "—"} />
+          <InfoTile
+            label="Location"
+            value={
+              asset.currentLocation ? (
+                asset.currentLocation.name
+              ) : asset.customLocationText ? (
+                <>
+                  {asset.customLocationText} <CustomLocationMark />
+                </>
+              ) : (
+                "—"
+              )
+            }
+          />
           <InfoTile
             label="Acquired"
             value={asset.acquisitionDate ? asset.acquisitionDate.toLocaleDateString() : "—"}
@@ -146,7 +167,15 @@ export default async function AssetDetailPage({
             {timeline.length === 0 && <li className="py-2 text-sm text-neutral-500">No history yet.</li>}
             {timeline.map((entry, i) => (
               <li key={i} className="py-2 text-sm">
-                <span className="text-neutral-900">{entry.label}</span>
+                <span className="text-neutral-900">
+                  {entry.label}
+                  {entry.custom && (
+                    <>
+                      {" "}
+                      {entry.custom} <CustomLocationMark />
+                    </>
+                  )}
+                </span>
                 {entry.by && <span className="text-neutral-500"> · {entry.by}</span>}
                 <span className="ml-2 text-xs text-neutral-400">{entry.at.toLocaleString()}</span>
                 {entry.notes && <div className="text-xs text-neutral-500">{entry.notes}</div>}
@@ -201,18 +230,7 @@ export default async function AssetDetailPage({
           className="space-y-2 rounded-md border border-neutral-200 bg-white p-4"
         >
           <h2 className="text-sm font-semibold text-neutral-900">Move</h2>
-          <select
-            name="locationId"
-            required
-            className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
-          >
-            <option value="">Select location…</option>
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
+          <LocationField key={asset.updatedAt.toISOString()} name="locationId" locations={locations} />
           <input
             name="notes"
             placeholder="Notes (optional)"
@@ -230,11 +248,19 @@ export default async function AssetDetailPage({
   );
 }
 
-function InfoTile({ label, value }: { label: string; value: string }) {
+function InfoTile({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
       <div className="text-xs text-neutral-500">{label}</div>
       <div className="font-medium text-neutral-900">{value}</div>
     </div>
+  );
+}
+
+function CustomLocationMark() {
+  return (
+    <span title="Custom location — not on the standard locations list" className="text-amber-500">
+      *
+    </span>
   );
 }

@@ -4,6 +4,7 @@ import { useActionState, useMemo, useState } from "react";
 import { createAssetBatch } from "./actions";
 import type { CustomFieldDef } from "@/lib/custom-fields";
 import type { Department, Location } from "@/generated/prisma/client";
+import { LocationField } from "@/components/location-field";
 
 const inputClass = "w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm";
 
@@ -199,16 +200,7 @@ export function BulkAssetForm({
         </Field>
       </div>
 
-      <Field label="Location">
-        <select name="currentLocationId" defaultValue="" className={inputClass}>
-          <option value="">—</option>
-          {locations.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name}
-            </option>
-          ))}
-        </select>
-      </Field>
+      <LocationField name="currentLocationId" locations={locations} label="Location" />
 
       {selectedType && selectedType.fields.length > 0 && (
         <div className="space-y-3 rounded-md bg-neutral-50 p-3">

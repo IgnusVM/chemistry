@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { buildCustomFieldsSchema, type CustomFieldDef } from "@/lib/custom-fields";
+import { parseLocationInput } from "@/lib/location-input";
 import type { Prisma } from "@/generated/prisma/client";
 
 const ASSET_STATUSES = ["ACTIVE", "IN_REPAIR", "STORAGE", "RETIRED", "LOST", "DESTROYED"] as const;
@@ -20,7 +21,6 @@ const baseAssetSchema = z.object({
   owningDepartmentId: z.string().min(1),
   status: z.enum(ASSET_STATUSES),
   condition: z.enum(ASSET_CONDITIONS),
-  currentLocationId: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -40,12 +40,14 @@ export async function createAsset(
     owningDepartmentId: formData.get("owningDepartmentId"),
     status: formData.get("status"),
     condition: formData.get("condition"),
-    currentLocationId: formData.get("currentLocationId") || undefined,
     notes: formData.get("notes") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
+
+  const location = parseLocationInput(formData, "currentLocationId");
+  if ("error" in location) return { error: location.error };
 
   const allowed = await hasDepartmentAccess(parsed.data.owningDepartmentId, "MEMBER");
   if (!allowed) {
@@ -82,18 +84,20 @@ export async function createAsset(
       owningDepartmentId: parsed.data.owningDepartmentId,
       status: parsed.data.status,
       condition: parsed.data.condition,
-      currentLocationId: parsed.data.currentLocationId || null,
+      currentLocationId: location.locationId,
+      customLocationText: location.customLocationText,
       notes: parsed.data.notes,
       customFields,
       createdByUserId: user.id,
     },
   });
 
-  if (parsed.data.currentLocationId) {
+  if (location.locationId || location.customLocationText) {
     await prisma.assetLocationHistory.create({
       data: {
         assetId: asset.id,
-        locationId: parsed.data.currentLocationId,
+        locationId: location.locationId,
+        customLocationText: location.customLocationText,
         movedByUserId: user.id,
         notes: "Initial location on creation",
       },
@@ -141,7 +145,6 @@ export async function changeAssetStatus(formData: FormData) {
 
 const moveSchema = z.object({
   assetId: z.string().min(1),
-  locationId: z.string().min(1),
   notes: z.string().optional(),
 });
 
@@ -149,20 +152,26 @@ export async function moveAsset(formData: FormData) {
   const user = await requireCurrentUser();
   const parsed = moveSchema.parse({
     assetId: formData.get("assetId"),
-    locationId: formData.get("locationId"),
     notes: formData.get("notes") || undefined,
   });
+
+  const location = parseLocationInput(formData, "locationId");
+  if ("error" in location) throw new Error(location.error);
 
   const asset = await prisma.asset.findUniqueOrThrow({ where: { id: parsed.assetId } });
   const allowed = await hasDepartmentAccess(asset.owningDepartmentId, "MEMBER");
   if (!allowed) throw new Error("Not authorized");
 
   await prisma.$transaction([
-    prisma.asset.update({ where: { id: asset.id }, data: { currentLocationId: parsed.locationId } }),
+    prisma.asset.update({
+      where: { id: asset.id },
+      data: { currentLocationId: location.locationId, customLocationText: location.customLocationText },
+    }),
     prisma.assetLocationHistory.create({
       data: {
         assetId: asset.id,
-        locationId: parsed.locationId,
+        locationId: location.locationId,
+        customLocationText: location.customLocationText,
         movedByUserId: user.id,
         notes: parsed.notes,
       },
@@ -174,7 +183,7 @@ export async function moveAsset(formData: FormData) {
     entityId: asset.id,
     action: "moved",
     userId: user.id,
-    changes: { locationId: parsed.locationId },
+    changes: { locationId: location.locationId, customLocationText: location.customLocationText },
   });
 
   revalidatePath(`/assets/${asset.assetTag}`);
