@@ -12,9 +12,11 @@ RUN npm ci
 COPY . .
 
 # DATABASE_URL is only needed here so `prisma generate`/build can resolve the
-# schema; it never connects. The real value comes from the container env at
-# runtime — see docker-compose.prod.yml.
+# schema; it never connects. SESSION_SECRET is only needed so build-time page
+# data collection can evaluate session.ts's module-load check. Real values
+# come from the container env at runtime — see docker-compose.prod.yml.
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+ENV SESSION_SECRET="build-time-placeholder-not-used-at-runtime"
 RUN npx prisma generate
 RUN npm run build
 
