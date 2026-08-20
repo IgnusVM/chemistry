@@ -27,6 +27,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 Admin
               </Link>
             )}
+            <Link href="/help" className="ml-2 border-l border-neutral-200 pl-5 hover:text-neutral-900">
+              Help
+            </Link>
           </nav>
           <div className="flex items-center gap-3 text-sm text-neutral-600">
             <Link href="/account" className="hover:text-neutral-900">

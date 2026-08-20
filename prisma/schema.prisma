@@ -350,6 +350,20 @@ model WorkOrderNote {
   @@index([workOrderId])
 }
 
+model HelpArticle {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  category  String
+  summary   String?
+  body      String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+}
+
 model WorkOrderAttachment {
   id               String   @id @default(cuid())
   workOrderId      String
