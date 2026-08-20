@@ -11,7 +11,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <nav className="flex items-center gap-5 text-sm font-medium text-neutral-700">
             <Link href="/" className="text-neutral-900 font-semibold">
-              Chemistry
+              Dashboard
             </Link>
             <Link href="/assets" className="hover:text-neutral-900">
               Assets

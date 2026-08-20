@@ -118,8 +118,9 @@ async function main() {
     { code: "COULD_NOT_LOCATE", label: "Could Not Locate" },
     { code: "GENERAL_REPAIR", label: "General Repair" },
     { code: "MISC", label: "Misc" },
-    { code: "ID10T", label: "ID10t" },
+    { code: "ID10T", label: "ID10-t" },
     { code: "MAGIC", label: "Magic" },
+    { code: "DEFERRED", label: "Deferred" },
   ];
   for (const rc of RESOLUTION_CODES) {
     await prisma.resolutionCode.upsert({
