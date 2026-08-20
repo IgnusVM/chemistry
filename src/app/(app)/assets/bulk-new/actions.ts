@@ -8,10 +8,8 @@ import { recordAudit } from "@/lib/audit";
 import { buildCustomFieldsSchema, type CustomFieldDef } from "@/lib/custom-fields";
 import { generateSequentialTags, parseTagList, sequentialTagRangeSchema } from "@/lib/asset-tags";
 import { parseLocationInput } from "@/lib/location-input";
+import { ASSET_STATUSES, ASSET_CONDITIONS } from "@/lib/constants";
 import type { Prisma } from "@/generated/prisma/client";
-
-const ASSET_STATUSES = ["ACTIVE", "IN_REPAIR", "STORAGE", "RETIRED", "LOST", "DESTROYED"] as const;
-const ASSET_CONDITIONS = ["NEW", "GOOD", "FAIR", "POOR", "UNSERVICEABLE"] as const;
 
 const baseSchema = z.object({
   nameTemplate: z.string().min(1),

@@ -10,12 +10,9 @@ import { recordAudit } from "@/lib/audit";
 import { sendWorkOrderAssignedEmail } from "@/lib/mailer";
 import { buildAttachmentKey, uploadAttachment, deleteAttachmentObject } from "@/lib/s3";
 import { generateWorkOrderCode } from "@/lib/work-order-code";
+import { WO_TYPES, WO_PRIORITIES, WO_STATUSES } from "@/lib/constants";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
-
-const WO_TYPES = ["CORRECTIVE", "PREVENTIVE", "INSPECTION", "MODIFICATION", "DECOMMISSION"] as const;
-const WO_PRIORITIES = ["LOW", "NORMAL", "HIGH", "EVENT_CRITICAL"] as const;
-const WO_STATUSES = ["OPEN", "IN_PROGRESS", "WAITING_PARTS", "COMPLETE", "CLOSED", "CANCELLED"] as const;
 
 const createSchema = z.object({
   description: z.string().min(1),
@@ -125,6 +122,33 @@ export async function updateWorkOrderStatus(formData: FormData) {
     action: "status changed",
     userId: user.id,
     changes: { from: workOrder.status, to: parsed.status },
+  });
+
+  revalidatePath(`/work-orders/${workOrder.code}`);
+}
+
+const reopenSchema = z.object({
+  workOrderId: z.string().min(1),
+});
+
+export async function reopenWorkOrder(formData: FormData) {
+  const user = await requireCurrentUser();
+  const parsed = reopenSchema.parse({
+    workOrderId: formData.get("workOrderId"),
+  });
+  const workOrder = await requireWorkOrderAccess(parsed.workOrderId);
+
+  await prisma.workOrder.update({
+    where: { id: workOrder.id },
+    data: { status: "OPEN", closedAt: null },
+  });
+
+  await recordAudit({
+    entityType: "WorkOrder",
+    entityId: workOrder.id,
+    action: "reopened",
+    userId: user.id,
+    changes: { from: workOrder.status },
   });
 
   revalidatePath(`/work-orders/${workOrder.code}`);

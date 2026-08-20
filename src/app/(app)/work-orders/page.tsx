@@ -1,75 +1,40 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
-import type { Prisma } from "@/generated/prisma/client";
 import { Button, buttonClass } from "@/components/button";
+import { Pagination } from "@/components/pagination";
+import { PAGE_SIZE, parsePage } from "@/lib/list-page";
+import { SelectionProvider } from "@/components/selection/selection-context";
+import { SelectAllHeaderCheckbox } from "@/components/selection/select-all-checkbox";
+import { RowCheckbox } from "@/components/selection/row-checkbox";
+import { SelectionToolbar } from "@/components/selection/selection-toolbar";
 import { AssignedFilterFields } from "./assigned-filter-fields";
-
-const STATUS_STYLES: Record<string, string> = {
-  OPEN: "bg-blue-100 text-blue-800",
-  IN_PROGRESS: "bg-amber-100 text-amber-800",
-  WAITING_PARTS: "bg-orange-100 text-orange-800",
-  COMPLETE: "bg-green-100 text-green-800",
-  CLOSED: "bg-neutral-200 text-neutral-500",
-  CANCELLED: "bg-neutral-200 text-neutral-400",
-};
-
-const PRIORITY_STYLES: Record<string, string> = {
-  LOW: "text-neutral-500",
-  NORMAL: "text-neutral-700",
-  HIGH: "text-amber-700 font-medium",
-  EVENT_CRITICAL: "text-red-700 font-semibold",
-};
+import { buildWorkOrderWhere, resolveWorkOrderListDefaults, OPEN_STATUS_FILTER, type WorkOrderListParams } from "./where";
+import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES, WORK_ORDER_PRIORITY_STYLES as PRIORITY_STYLES } from "@/lib/status-styles";
 
 export default async function WorkOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{
-    q?: string;
-    department?: string;
-    status?: string;
-    priority?: string;
-    mine?: string;
-    assignedToName?: string;
-  }>;
+  searchParams: Promise<WorkOrderListParams & { page?: string }>;
 }) {
   const user = await requireCurrentUser();
   const params = await searchParams;
   const { q, department, priority, assignedToName } = params;
-
-  // First-ever visit (no query string at all) defaults to "my in-progress work" —
-  // once the filter form has been submitted even once, every field (including
-  // cleared ones) is present as an explicit "" in the query string, so this only
-  // fires before the user has touched the filters.
-  const hasAnyFilterParam = Object.keys(params).length > 0;
-  const status = hasAnyFilterParam ? params.status : "IN_PROGRESS";
-  const mine = hasAnyFilterParam ? params.mine : "1";
+  const page = parsePage(params.page);
+  const { status, mine } = resolveWorkOrderListDefaults(params);
 
   const accessibleDeptIds = await getAccessibleDepartmentIds("VIEWER");
+  const where = buildWorkOrderWhere(params, { userId: user.id, accessibleDeptIds });
 
-  const where: Prisma.WorkOrderWhereInput = {
-    departmentId: department ? department : { in: accessibleDeptIds },
-  };
-  if (status) where.status = status as Prisma.EnumWorkOrderStatusFilter["equals"];
-  if (priority) where.priority = priority as Prisma.EnumWorkOrderPriorityFilter["equals"];
-  if (mine === "1") where.assignedToUserId = user.id;
-  if (assignedToName) {
-    where.assignedTo = { displayName: { contains: assignedToName, mode: "insensitive" } };
-  }
-  if (q) {
-    where.OR = [
-      { description: { contains: q, mode: "insensitive" } },
-      { code: { contains: q, mode: "insensitive" } },
-    ];
-  }
-
-  const [workOrders, departments, members] = await Promise.all([
+  const [workOrders, total, departments, members] = await Promise.all([
     prisma.workOrder.findMany({
       where,
       orderBy: [{ priority: "desc" }, { reportedAt: "desc" }],
       include: { asset: true, department: true, assignedTo: true },
-      take: 200,
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
     }),
+    prisma.workOrder.count({ where }),
     prisma.department.findMany({ where: { id: { in: accessibleDeptIds } }, orderBy: { name: "asc" } }),
     prisma.user.findMany({
       where: { memberships: { some: { departmentId: { in: accessibleDeptIds } } } },
@@ -77,13 +42,14 @@ export default async function WorkOrdersPage({
       select: { displayName: true },
     }),
   ]);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-neutral-900">Work Orders</h1>
-          <p className="text-sm text-neutral-500">{workOrders.length} shown</p>
+          <p className="text-sm text-neutral-500">{total} total</p>
         </div>
         <Link href="/work-orders/new" className={buttonClass()}>
           + New work order
@@ -107,6 +73,7 @@ export default async function WorkOrdersPage({
         </select>
         <select name="status" defaultValue={status ?? ""} className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
           <option value="">All statuses</option>
+          <option value={OPEN_STATUS_FILTER}>Open (not closed/cancelled)</option>
           {Object.keys(STATUS_STYLES).map((s) => (
             <option key={s} value={s}>
               {s.replace("_", " ")}
@@ -132,57 +99,80 @@ export default async function WorkOrdersPage({
         </Button>
       </form>
 
-      <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
-        <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
-          <tr>
-            <th className="px-4 py-2">WO#</th>
-            <th className="px-4 py-2">Description</th>
-            <th className="px-4 py-2">Asset</th>
-            <th className="px-4 py-2">Department</th>
-            <th className="px-4 py-2">Priority</th>
-            <th className="px-4 py-2">Assigned</th>
-            <th className="px-4 py-2">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-neutral-200">
-          {workOrders.map((wo) => (
-            <tr key={wo.id} className="hover:bg-neutral-50">
-              <td className="px-4 py-2">
-                <Link href={`/work-orders/${wo.code}`} className="font-medium text-neutral-900 hover:underline">
-                  {wo.code}
-                </Link>
-              </td>
-              <td className="px-4 py-2">
-                {wo.description.length > 70 ? `${wo.description.slice(0, 70)}…` : wo.description}
-              </td>
-              <td className="px-4 py-2 text-neutral-500">
-                {wo.asset ? (
-                  <Link href={`/assets/${wo.asset.assetTag}`} className="hover:underline">
-                    {wo.asset.assetTag}
-                  </Link>
-                ) : (
-                  "—"
-                )}
-              </td>
-              <td className="px-4 py-2 text-neutral-500">{wo.department.name}</td>
-              <td className={`px-4 py-2 ${PRIORITY_STYLES[wo.priority]}`}>{wo.priority.replace("_", " ")}</td>
-              <td className="px-4 py-2 text-neutral-500">{wo.assignedTo?.displayName ?? "—"}</td>
-              <td className="px-4 py-2">
-                <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[wo.status]}`}>
-                  {wo.status.replace("_", " ")}
-                </span>
-              </td>
-            </tr>
-          ))}
-          {workOrders.length === 0 && (
+      <SelectionProvider pageIds={workOrders.map((w) => w.id)} totalMatching={total}>
+        <SelectionToolbar
+          entityType="WorkOrder"
+          filterParams={{ q, department, status, priority, mine, assignedToName }}
+          actions={[{ label: "Bulk close selected", targetPath: "/work-orders/bulk-close" }]}
+        />
+
+        <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
+          <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
             <tr>
-              <td colSpan={7} className="px-4 py-6 text-center text-neutral-500">
-                No work orders match these filters.
-              </td>
+              <th className="w-8 px-4 py-2">
+                <SelectAllHeaderCheckbox />
+              </th>
+              <th className="px-4 py-2">WO#</th>
+              <th className="px-4 py-2">Description</th>
+              <th className="px-4 py-2">Asset</th>
+              <th className="px-4 py-2">Department</th>
+              <th className="px-4 py-2">Priority</th>
+              <th className="px-4 py-2">Assigned</th>
+              <th className="px-4 py-2">Status</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {workOrders.map((wo) => (
+              <tr key={wo.id} className="hover:bg-neutral-50">
+                <td className="px-4 py-2">
+                  <RowCheckbox id={wo.id} label={`Select ${wo.code}`} />
+                </td>
+                <td className="px-4 py-2">
+                  <Link href={`/work-orders/${wo.code}`} className="font-medium text-neutral-900 hover:underline">
+                    {wo.code}
+                  </Link>
+                </td>
+                <td className="px-4 py-2">
+                  {wo.description.length > 70 ? `${wo.description.slice(0, 70)}…` : wo.description}
+                </td>
+                <td className="px-4 py-2 text-neutral-500">
+                  {wo.asset ? (
+                    <Link href={`/assets/${wo.asset.assetTag}`} className="hover:underline">
+                      {wo.asset.assetTag}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td className="px-4 py-2 text-neutral-500">{wo.department.name}</td>
+                <td className={`px-4 py-2 ${PRIORITY_STYLES[wo.priority]}`}>{wo.priority.replace("_", " ")}</td>
+                <td className="px-4 py-2 text-neutral-500">{wo.assignedTo?.displayName ?? "—"}</td>
+                <td className="px-4 py-2">
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[wo.status]}`}>
+                    {wo.status.replace("_", " ")}
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {workOrders.length === 0 && (
+              <tr>
+                <td colSpan={8} className="px-4 py-6 text-center text-neutral-500">
+                  No work orders match these filters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </SelectionProvider>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        pageSize={PAGE_SIZE}
+        basePath="/work-orders"
+        params={params}
+      />
     </div>
   );
 }

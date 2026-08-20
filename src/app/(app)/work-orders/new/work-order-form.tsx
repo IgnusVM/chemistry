@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { createWorkOrder } from "../actions";
 import type { Department, Asset } from "@/generated/prisma/client";
 import { Button } from "@/components/button";
+import { WO_TYPES, WO_PRIORITIES } from "@/lib/constants";
 
 const inputClass = "w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm";
 
@@ -49,7 +50,7 @@ export function WorkOrderForm({
       <div className="grid grid-cols-2 gap-4">
         <Field label="Type">
           <select name="type" defaultValue="CORRECTIVE" className={inputClass}>
-            {["CORRECTIVE", "PREVENTIVE", "INSPECTION", "MODIFICATION", "DECOMMISSION"].map((t) => (
+            {WO_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
@@ -58,7 +59,7 @@ export function WorkOrderForm({
         </Field>
         <Field label="Priority">
           <select name="priority" defaultValue="NORMAL" className={inputClass}>
-            {["LOW", "NORMAL", "HIGH", "EVENT_CRITICAL"].map((p) => (
+            {WO_PRIORITIES.map((p) => (
               <option key={p} value={p}>
                 {p.replace("_", " ")}
               </option>

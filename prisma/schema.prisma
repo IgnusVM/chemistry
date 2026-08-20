@@ -130,6 +130,7 @@ model User {
   redeemedInvites     InviteCode[]          @relation("InviteUsedBy")
   partOrders          PartOrder[]
   workOrderParts      WorkOrderPart[]
+  bulkSelections      BulkSelection[]
 }
 
 model InviteCode {
@@ -442,4 +443,21 @@ model WorkOrderAttachment {
   uploadedBy User?     @relation(fields: [uploadedByUserId], references: [id])
 
   @@index([workOrderId])
+}
+
+// Short-lived handoff of a multi-select list's resolved row IDs from a list
+// page (assets/work orders) to a dedicated bulk-action page, so the URL
+// never has to carry a large id list. Created, read once, then irrelevant —
+// not cleaned up proactively (small rows, 15-min expiry, checked on read).
+model BulkSelection {
+  id              String   @id @default(cuid())
+  entityType      String
+  ids             Json
+  createdByUserId String
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+
+  createdBy User @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@index([createdByUserId])
 }

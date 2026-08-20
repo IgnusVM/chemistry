@@ -8,10 +8,8 @@ import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { buildCustomFieldsSchema, type CustomFieldDef } from "@/lib/custom-fields";
 import { parseLocationInput } from "@/lib/location-input";
+import { ASSET_STATUSES, ASSET_CONDITIONS } from "@/lib/constants";
 import type { Prisma } from "@/generated/prisma/client";
-
-const ASSET_STATUSES = ["ACTIVE", "IN_REPAIR", "STORAGE", "RETIRED", "LOST", "DESTROYED"] as const;
-const ASSET_CONDITIONS = ["NEW", "GOOD", "FAIR", "POOR", "UNSERVICEABLE"] as const;
 
 const baseAssetSchema = z.object({
   assetTag: z.string().min(1).regex(/^[A-Za-z0-9._-]+$/, "use letters, numbers, dot, dash, underscore"),

@@ -1,33 +1,40 @@
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { assetQrDataUrl } from "@/lib/qr";
+import { readBulkSelection } from "@/lib/bulk-selection";
 import { PrintButton } from "./print-button";
 
 export default async function QrSheetPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tags?: string | string[]; group?: string }>;
+  searchParams: Promise<{ tags?: string | string[]; group?: string; selection?: string }>;
 }) {
-  await requireCurrentUser();
-  const { tags, group: groupId } = await searchParams;
+  const user = await requireCurrentUser();
+  const { tags, group: groupId, selection } = await searchParams;
 
-  let assetTags: string[] = [];
-  if (groupId) {
-    const members = await prisma.assetGroupMember.findMany({
-      where: { assetGroupId: groupId },
-      include: { asset: { select: { assetTag: true } } },
-      orderBy: { asset: { assetTag: "asc" } },
+  let assets;
+  if (selection) {
+    const assetIds = await readBulkSelection("Asset", selection, user.id);
+    assets = await prisma.asset.findMany({ where: { id: { in: assetIds } }, orderBy: { assetTag: "asc" } });
+  } else {
+    let assetTags: string[] = [];
+    if (groupId) {
+      const members = await prisma.assetGroupMember.findMany({
+        where: { assetGroupId: groupId },
+        include: { asset: { select: { assetTag: true } } },
+        orderBy: { asset: { assetTag: "asc" } },
+      });
+      assetTags = members.map((m) => m.asset.assetTag);
+    } else if (tags) {
+      assetTags = Array.isArray(tags) ? tags : tags.split(",");
+    }
+    assetTags = [...new Set(assetTags.map((t) => t.trim()).filter(Boolean))];
+
+    assets = await prisma.asset.findMany({
+      where: { assetTag: { in: assetTags } },
+      orderBy: { assetTag: "asc" },
     });
-    assetTags = members.map((m) => m.asset.assetTag);
-  } else if (tags) {
-    assetTags = Array.isArray(tags) ? tags : tags.split(",");
   }
-  assetTags = [...new Set(assetTags.map((t) => t.trim()).filter(Boolean))];
-
-  const assets = await prisma.asset.findMany({
-    where: { assetTag: { in: assetTags } },
-    orderBy: { assetTag: "asc" },
-  });
 
   const cards = await Promise.all(
     assets.map(async (asset) => ({

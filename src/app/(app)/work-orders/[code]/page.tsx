@@ -9,17 +9,10 @@ import { DeleteAttachmentButton } from "./delete-attachment-button";
 import { AssetEditForm } from "./asset-edit-form";
 import { PartsUsedForm } from "./parts-used-form";
 import { DeleteWorkOrderPartButton } from "./delete-work-order-part-button";
+import { ClosedWorkOrderView } from "./closed-work-order-view";
 import { Button } from "@/components/button";
-
-const STATUS_STYLES: Record<string, string> = {
-  OPEN: "bg-blue-100 text-blue-800",
-  IN_PROGRESS: "bg-amber-100 text-amber-800",
-  WAITING_PARTS: "bg-orange-100 text-orange-800",
-  COMPLETE: "bg-green-100 text-green-800",
-  CLOSED: "bg-neutral-200 text-neutral-500",
-  CANCELLED: "bg-neutral-200 text-neutral-400",
-};
-const WO_STATUSES = Object.keys(STATUS_STYLES);
+import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
+import { WO_STATUSES } from "@/lib/constants";
 
 export default async function WorkOrderDetailPage({
   params,
@@ -43,6 +36,11 @@ export default async function WorkOrderDetailPage({
     },
   });
   if (!workOrder) notFound();
+
+  if (workOrder.status === "CLOSED") {
+    const attachmentUrls = await Promise.all(workOrder.attachments.map((a) => getAttachmentUrl(a.s3Key)));
+    return <ClosedWorkOrderView workOrder={workOrder} attachmentUrls={attachmentUrls} />;
+  }
 
   const [departmentMembers, resolutionCodes, attachmentUrls, assets, knownParts] = await Promise.all([
     prisma.departmentMembership.findMany({

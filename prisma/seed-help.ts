@@ -29,9 +29,11 @@ const ARTICLES: ArticleSeed[] = [
 
 **Something's wrong with it?** Open the asset and click **Report a problem**. That creates a work order — Chemistry's name for a maintenance ticket — pre-linked to the asset. Describe what's wrong, pick a priority, and submit. See [Creating a work order](/help/work-orders/creating-a-work-order).
 
-**Working a ticket?** Open it from the **Work Orders** tab, assign it to yourself, move its status along as you go (Open → Assigned → In Progress → Complete), attach photos if useful, and when you're done pick a resolution code and add resolution notes. See [Resolution codes explained](/help/work-orders/resolution-codes-explained).
+**Working a ticket?** Open it from the **Work Orders** tab, assign it to yourself, move its status along as you go (Open → In Progress → Complete), attach photos if useful, and when you're done pick a resolution code and add resolution notes — closing it locks the ticket down to a summary view until it's reopened. See [Resolution codes explained](/help/work-orders/resolution-codes-explained) and [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order).
 
 **Adding new gear?** Use **Assets → New asset** for one item, or **Assets → Bulk create** when you're tagging a whole batch (say, forty lanterns) at once with a shared name template and sequential tags. See [Creating an asset](/help/assets/creating-an-asset).
+
+**Handling a whole batch at once?** Select multiple rows on the Assets or Work Orders list (checkboxes, shift-click, select-all) to bulk-edit assets, bulk-close tickets, or file the same ticket against many assets in one go — see [Selecting multiple items](/help/getting-started/selecting-multiple-items).
 
 **Everything else** — divisions, departments, asset types, resolution codes, locations, and user roles — lives under the **Admin** tab, one level down, because you mostly won't need to touch it. See [What lives under Admin](/help/admin-setup/what-lives-under-admin).
 
@@ -56,6 +58,24 @@ When in doubt, search this guide from the box at the top of the **Help** tab —
 **Signing out** clears the session on that device but does not remove the device's trust — you'll still be offered the PIN next time unless you click **Forget this device** on your Account page.
 
 **Losing access to your email** means losing the ability to sign in anywhere new, since the magic link is the root of trust. If that happens, ask an org admin to update the email on your user record from **Admin → Users**.`,
+  },
+  {
+    slug: "selecting-multiple-items",
+    title: "Selecting multiple items",
+    category: "getting-started",
+    order: 2,
+    summary: "Checkboxes, shift-click ranges, and \"select all\" across pages — the shared selection UI behind every bulk action.",
+    body: `The **Assets** list, the **Work Orders** list, and an Asset Group's member list all share the same selection UI, used for bulk actions like editing many assets at once or closing many tickets at once.
+
+**Checking rows.** Click a row's checkbox to select it — clicking again deselects it. This works exactly like any checkbox; nothing special is needed for a single pick.
+
+**Shift-click for a range.** Click one checkbox, then hold Shift and click another — everything between the two (in the order shown on screen) gets selected or deselected together, matching whichever state your Shift-click set. This only works within the rows currently on screen; it can't reach across a page boundary.
+
+**Select all on this page** is the checkbox in the table header — it selects (or clears) every row currently shown.
+
+**Select all matching your filter.** Once every row on the current page is checked, a link appears offering to select everything that matches your current search/filter — not just the page you're looking at. This is what lets a bulk action cover hundreds of items without you paging through them one screen at a time. There's a cap (500 items) on how many can be selected for one bulk action at once; if your filter matches more than that, narrow it first (by department, status, or search text) rather than trying to select everything in one shot.
+
+**Once something's selected**, a toolbar appears above the list with the count selected and whatever bulk actions that list supports — bulk edit, bulk close, printing a QR sheet for the selection, and so on. Selecting "all matching filter" is re-checked at the moment you submit, so the count you see in the next step reflects what's true right then, not what it was when you clicked select-all.`,
   },
   {
     slug: "creating-an-asset",
@@ -115,9 +135,26 @@ A useful habit: when you close out a work order that fixed something, consider w
     summary: "What a group is, how it's created, and what it's useful for.",
     body: `An **Asset Group** is a named collection of assets, most often created automatically as a side effect of a [bulk create](/help/assets/bulk-creating-assets) — every asset added in one bulk-create submission is grouped together under the batch name and description you gave it (e.g. "Lamplighter batch 2026-08-19").
 
-Groups are mainly a convenience for finding "all the things I created together" later, and for bulk operations like printing a QR sheet for an entire batch at once. Open the **Asset Groups** tab to see all groups, and click into one to see and act on every asset inside it.
+Groups are mainly a convenience for finding "all the things I created together" later, and for bulk operations like printing a QR sheet for an entire batch at once. Open the **Asset Groups** tab to see all groups, and click into one to see and act on every asset inside it. You can also create an empty group directly and add assets to it by pasting a list of tags.
+
+Inside a group, check the boxes next to members (shift-click to select a range) to remove several at once with **Remove selected**, alongside the existing "apply status to all members" control. See [Selecting multiple items](/help/getting-started/selecting-multiple-items) for how that selection UI works — it's the same one used on the Assets and Work Orders lists.
 
 Groups don't affect ownership, department, or any other property of the assets inside them — they're a label for "these came from the same batch," nothing more.`,
+  },
+  {
+    slug: "bulk-editing-assets",
+    title: "Bulk-editing assets",
+    category: "assets",
+    order: 4,
+    summary: "Change status and/or location on many assets at once from the Assets list.",
+    body: `To change status or location on a batch of existing assets at once — moving a whole shelf of gear into storage after an event, say — filter or search the **Assets** list down to the ones you want, select them (see [Selecting multiple items](/help/getting-started/selecting-multiple-items)), and click **Bulk edit selected** in the toolbar that appears.
+
+The bulk edit page only offers **Status** and **Location** — nothing else can be changed in bulk, since every other field (name, type, department, custom fields) is specific enough per asset that a shared bulk value wouldn't make sense. Each is independent and optional:
+
+- Leave **Status** on "No change" to leave it alone, or pick a value to set every selected asset to it.
+- **Location** has three choices: "No change," "Clear location" (removes it without setting a new one), or "Set to…" (pick a real location, or "Other / custom…" for a location not on the formal list).
+
+Submitting applies whichever of the two you changed to every selected asset in one action, and logs it to each asset's own history individually — so if you look at one specific asset's audit trail afterward, the bulk edit shows up there too, not just in one buried log entry somewhere else.`,
   },
   {
     slug: "custom-locations",
@@ -161,7 +198,7 @@ Work orders don't have a title field — instead you write a **description** of 
 
 **Numbering is automatic.** Every work order gets a code like \`CM081926001\` — a two-letter type prefix (CM for Corrective, PM for Preventive, IN for Inspection, MO for Modification, DC for Decommission), the date it was opened (MMDDYY), and a sequence number that resets each day per type. You never assign a number yourself, and codes are permanent once issued.
 
-Once created, a work order starts in **Open** status. From there it can be assigned to someone, who moves it through **Assigned → In Progress → Waiting Parts → Complete → Closed** (or **Cancelled** if it turns out not to be needed). See [Working a ticket end to end](/help/work-orders/working-a-ticket-end-to-end) for the full lifecycle.`,
+Once created, a work order starts in **Open** status and can be assigned to someone independently of status — assignment just says who owns it. From Open, status moves through **In Progress → Waiting Parts → Complete → Closed** (or **Cancelled** if it turns out not to be needed). See [Working a ticket end to end](/help/work-orders/working-a-ticket-end-to-end) for the full lifecycle.`,
   },
   {
     slug: "working-a-ticket-end-to-end",
@@ -171,23 +208,39 @@ Once created, a work order starts in **Open** status. From there it can be assig
     summary: "Assignment, status changes, notes, photos, and closing out.",
     body: `Once a work order exists, open it from the **Work Orders** tab or from the linked asset's page.
 
-**Assign it** to yourself or someone else using the assignment control on the ticket. This is what tells the team who owns it.
+**Assign it** to yourself or someone else using the assignment control on the ticket. Assignment is tracked separately from status now — assigning someone doesn't change where the ticket is in its lifecycle, it just says who owns it.
 
-**Move it through status** as work progresses: Open → Assigned → In Progress → (Waiting Parts, if you're blocked on something) → Complete. Status changes are logged with a timestamp so there's always a record of how long each stage took.
+**Move it through status** as work progresses: Open → In Progress → (Waiting Parts, if you're blocked on something) → Complete. Status changes are logged with a timestamp so there's always a record of how long each stage took.
 
 **Add notes** as you go — anything worth recording that isn't a status change: what you found, what you tried, what you're waiting on. Notes are timestamped and attributed to whoever wrote them, and they stay on the ticket permanently.
 
 **Attach photos** of the problem or the fix directly on the ticket — see [Photos on work orders](/help/photos-documents/photos-on-work-orders).
 
-**Closing out.** When the work is actually done, pick a **resolution code** — see [Resolution codes explained](/help/work-orders/resolution-codes-explained) — and write resolution notes summarizing what actually happened. This is the single most useful thing for whoever looks at this asset's history six months from now, so be specific rather than terse.
+**Closing out.** When the work is actually done, pick a **resolution code** — see [Resolution codes explained](/help/work-orders/resolution-codes-explained) — and write resolution notes summarizing what actually happened. This is the single most useful thing for whoever looks at this asset's history six months from now, so be specific rather than terse. See [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order) for what changes once it's closed.
 
 The **reported by** field on a ticket links to that person's [account profile](/help/accounts/your-contact-profile), which shows how they'd prefer to be reached during the burn if you need to follow up with them directly.`,
+  },
+  {
+    slug: "logging-parts-used",
+    title: "Logging parts used on a work order",
+    category: "work-orders",
+    order: 2,
+    summary: "Track which parts went into a repair, with optional order history.",
+    body: `Any open work order has a **Parts used** section for recording what actually went into the fix — replaced a battery, swapped a connector, whatever the repair needed.
+
+**Logging a part.** Enter a part number and quantity. If it's a part that's been logged before on this asset's type, it's picked up automatically from a suggestions list as you type. If it's genuinely new, you also need to give it a short description — that's what creates the part record, scoped to this asset's **asset type** (a Solar Lamplighter Lantern part and a different asset type's part with the same number are tracked separately, since they're not actually the same thing just because the number matches).
+
+**Optionally logging an order at the same time.** The same form has a toggle to also record a price, a purchase link, and a date — useful when you're logging a part right after buying it, so the purchase history builds up as you go rather than needing a separate step later.
+
+**Where parts live afterward.** Every part ever logged for an asset type, along with its full order history (every time it's been bought, at what price), is visible from that asset type's page under **Admin → Asset Types** — useful for budgeting or reordering before the next event, not just for the individual ticket it was logged on.
+
+To log the same part across many tickets at once instead of one at a time, see [Bulk-closing work orders](/help/work-orders/bulk-closing-work-orders).`,
   },
   {
     slug: "resolution-codes-explained",
     title: "Resolution codes explained (CMMS)",
     category: "work-orders",
-    order: 2,
+    order: 3,
     summary: "What each of the seven resolution codes means and when to use it.",
     body: `When you close a work order, you pick a **resolution code** describing what actually happened. These are based on standard CMMS troubleshooting vocabulary and are deliberately a short, controlled list rather than free text, so patterns become visible over time (if half your "Could Not Duplicate" tickets are on the same asset, that asset probably has an intermittent fault worth digging into properly).
 
@@ -200,6 +253,46 @@ The **reported by** field on a ticket links to that person's [account profile](/
 - **Deferred** — a real issue was found but isn't being fixed right now (parts on order, lower priority than current burn needs, whatever). Leave good resolution notes explaining what's deferred and why, since this ticket is effectively becoming a to-do for later rather than a closed loop.
 
 Resolution codes describe **outcomes**, not root causes — they're deliberately separate from any notion of "failure codes." What actually broke and why belongs in the resolution notes, in your own words.`,
+  },
+  {
+    slug: "closing-and-reopening-a-work-order",
+    title: "Closing and reopening a work order",
+    category: "work-orders",
+    order: 4,
+    summary: "What locks once a ticket is closed, and how to undo it.",
+    body: `Once a work order's status is set to **Closed**, its page switches to a tighter, mostly read-only view — the resolution (code, notes, labor minutes) and the parts used are front and center, and everything else that's editable on an open ticket disappears: no status dropdown, no reassigning, no changing the linked asset, no adding parts, notes, or photos. What's already there — existing notes, photos, and the full parts list — stays visible, just locked.
+
+This is deliberate: a closed ticket is meant to be a finished record, not something that quietly keeps changing after the fact.
+
+**Reopening.** If a closed ticket needs more work — the fix didn't hold, or it was closed by mistake — click **Reopen work order** at the bottom of the closed view. This is available at any time, with no separate permission beyond what you'd already need to work the ticket. Reopening sets the status back to Open and clears the closed timestamp; everything that was locked becomes editable again immediately.
+
+To close many tickets at once instead of one at a time, see [Bulk-closing work orders](/help/work-orders/bulk-closing-work-orders).`,
+  },
+  {
+    slug: "bulk-closing-work-orders",
+    title: "Bulk-closing work orders",
+    category: "work-orders",
+    order: 5,
+    summary: "Close a whole batch of work orders at once with a shared resolution.",
+    body: `When several open tickets are all being resolved the same way — a seasonal battery swap across a dozen lanterns, say — closing them one at a time is unnecessary. From the **Work Orders** list, filter down to the ones involved, select them (see [Selecting multiple items](/help/getting-started/selecting-multiple-items)), and click **Bulk close selected**.
+
+The bulk close page only shows fields that make sense applied identically to every selected ticket: resolution code, resolution notes, and labor minutes. The **asset** field isn't there — every ticket keeps its own asset, since that's exactly the thing that's different between them.
+
+**Logging a part while bulk-closing.** The form also lets you log one part as used, applied to every selected ticket at once, tied to each ticket's own asset the same way a normal [part-used entry](/help/work-orders/logging-parts-used) would be. Because the selected tickets can be linked to assets of different asset types, logging a new part number this way can end up creating that part under more than one asset type in a single action — Chemistry shows a confirmation before doing this, naming exactly which asset types will get a new part record, so you're not surprised by it after the fact.
+
+Submitting sets every selected ticket to **Closed** with the resolution you entered, same as closing one manually — see [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order) for what that locks.`,
+  },
+  {
+    slug: "bulk-creating-work-orders",
+    title: "Bulk-creating work orders for many assets",
+    category: "work-orders",
+    order: 6,
+    summary: "File the same ticket against a whole batch of assets at once.",
+    body: `To open the same kind of ticket against many assets at once — an annual inspection across a whole fleet of lanterns, say — go to the **Assets** list, filter or search down to the assets involved, select them (see [Selecting multiple items](/help/getting-started/selecting-multiple-items)), and click **Create work orders for selected**.
+
+You'll be asked for one **description**, **type**, and **priority** — applied verbatim to every ticket created, one per selected asset. Each new ticket's **department** is taken from its own asset's department automatically, not chosen on this form, so a selection spanning multiple departments still files each ticket correctly.
+
+After submitting, you land on a confirmation page listing every ticket that was just created, each linking to its own page — from there they behave exactly like any individually-created work order.`,
   },
   {
     slug: "photos-on-work-orders",

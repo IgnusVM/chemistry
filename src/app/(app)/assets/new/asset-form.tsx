@@ -6,6 +6,7 @@ import type { CustomFieldDef } from "@/lib/custom-fields";
 import type { Department, Location } from "@/generated/prisma/client";
 import { LocationField } from "@/components/location-field";
 import { Button } from "@/components/button";
+import { ASSET_CONDITIONS, ASSET_STATUSES } from "@/lib/constants";
 
 const inputClass = "w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm";
 
@@ -82,7 +83,7 @@ export function AssetForm({
       <div className="grid grid-cols-2 gap-4">
         <Field label="Status">
           <select name="status" defaultValue="ACTIVE" className={inputClass}>
-            {["ACTIVE", "IN_REPAIR", "STORAGE", "RETIRED", "LOST", "DESTROYED"].map((s) => (
+            {ASSET_STATUSES.map((s) => (
               <option key={s} value={s}>
                 {s.replace("_", " ")}
               </option>
@@ -91,7 +92,7 @@ export function AssetForm({
         </Field>
         <Field label="Condition">
           <select name="condition" defaultValue="GOOD" className={inputClass}>
-            {["NEW", "GOOD", "FAIR", "POOR", "UNSERVICEABLE"].map((c) => (
+            {ASSET_CONDITIONS.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>

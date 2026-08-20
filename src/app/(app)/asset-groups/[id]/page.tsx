@@ -5,16 +5,12 @@ import { requireCurrentUser } from "@/lib/dal";
 import { bulkUpdateGroupStatus } from "../actions";
 import { AddAssetsForm } from "./add-assets-form";
 import { RemoveMemberButton } from "./remove-member-button";
+import { RemoveSelectedButton } from "./remove-selected-button";
 import { Button, buttonClass } from "@/components/button";
-
-const STATUS_STYLES: Record<string, string> = {
-  ACTIVE: "bg-green-100 text-green-800",
-  IN_REPAIR: "bg-amber-100 text-amber-800",
-  STORAGE: "bg-neutral-100 text-neutral-700",
-  RETIRED: "bg-neutral-200 text-neutral-500",
-  LOST: "bg-red-100 text-red-800",
-  DESTROYED: "bg-red-100 text-red-800",
-};
+import { SelectionProvider } from "@/components/selection/selection-context";
+import { SelectAllHeaderCheckbox } from "@/components/selection/select-all-checkbox";
+import { RowCheckbox } from "@/components/selection/row-checkbox";
+import { ASSET_STATUS_STYLES } from "@/lib/status-styles";
 
 export default async function AssetGroupDetailPage({
   params,
@@ -56,7 +52,7 @@ export default async function AssetGroupDetailPage({
         <div>
           <label className="block text-xs font-medium text-neutral-600">Set status for all members</label>
           <select name="status" defaultValue="ACTIVE" className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
-            {Object.keys(STATUS_STYLES).map((s) => (
+            {Object.keys(ASSET_STATUS_STYLES).map((s) => (
               <option key={s} value={s}>
                 {s.replace("_", " ")}
               </option>
@@ -68,47 +64,59 @@ export default async function AssetGroupDetailPage({
 
       <AddAssetsForm assetGroupId={group.id} />
 
-      <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
-        <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
-          <tr>
-            <th className="px-4 py-2">Tag</th>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Department</th>
-            <th className="px-4 py-2">Location</th>
-            <th className="px-4 py-2">Status</th>
-            <th className="px-4 py-2" />
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-neutral-200">
-          {group.members.map((member) => (
-            <tr key={member.assetId} className="hover:bg-neutral-50">
-              <td className="px-4 py-2">
-                <Link href={`/assets/${member.asset.assetTag}`} className="font-medium text-neutral-900 hover:underline">
-                  {member.asset.assetTag}
-                </Link>
-              </td>
-              <td className="px-4 py-2">{member.asset.name}</td>
-              <td className="px-4 py-2 text-neutral-500">{member.asset.owningDepartment.name}</td>
-              <td className="px-4 py-2 text-neutral-500">{member.asset.currentLocation?.name ?? "—"}</td>
-              <td className="px-4 py-2">
-                <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[member.asset.status]}`}>
-                  {member.asset.status.replace("_", " ")}
-                </span>
-              </td>
-              <td className="px-4 py-2 text-right">
-                <RemoveMemberButton assetGroupId={group.id} assetId={member.assetId} />
-              </td>
-            </tr>
-          ))}
-          {group.members.length === 0 && (
+      <SelectionProvider pageIds={group.members.map((m) => m.assetId)} totalMatching={group.members.length}>
+        <div className="flex items-center">
+          <RemoveSelectedButton assetGroupId={group.id} />
+        </div>
+
+        <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
+          <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
             <tr>
-              <td colSpan={6} className="px-4 py-6 text-center text-neutral-500">
-                No assets in this group yet.
-              </td>
+              <th className="w-8 px-4 py-2">
+                <SelectAllHeaderCheckbox />
+              </th>
+              <th className="px-4 py-2">Tag</th>
+              <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Department</th>
+              <th className="px-4 py-2">Location</th>
+              <th className="px-4 py-2">Status</th>
+              <th className="px-4 py-2" />
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {group.members.map((member) => (
+              <tr key={member.assetId} className="hover:bg-neutral-50">
+                <td className="px-4 py-2">
+                  <RowCheckbox id={member.assetId} label={`Select ${member.asset.assetTag}`} />
+                </td>
+                <td className="px-4 py-2">
+                  <Link href={`/assets/${member.asset.assetTag}`} className="font-medium text-neutral-900 hover:underline">
+                    {member.asset.assetTag}
+                  </Link>
+                </td>
+                <td className="px-4 py-2">{member.asset.name}</td>
+                <td className="px-4 py-2 text-neutral-500">{member.asset.owningDepartment.name}</td>
+                <td className="px-4 py-2 text-neutral-500">{member.asset.currentLocation?.name ?? "—"}</td>
+                <td className="px-4 py-2">
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${ASSET_STATUS_STYLES[member.asset.status]}`}>
+                    {member.asset.status.replace("_", " ")}
+                  </span>
+                </td>
+                <td className="px-4 py-2 text-right">
+                  <RemoveMemberButton assetGroupId={group.id} assetId={member.assetId} />
+                </td>
+              </tr>
+            ))}
+            {group.members.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-4 py-6 text-center text-neutral-500">
+                  No assets in this group yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </SelectionProvider>
     </div>
   );
 }

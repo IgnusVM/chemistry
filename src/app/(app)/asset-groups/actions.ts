@@ -7,8 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { parseTagList } from "@/lib/asset-tags";
-
-const ASSET_STATUSES = ["ACTIVE", "IN_REPAIR", "STORAGE", "RETIRED", "LOST", "DESTROYED"] as const;
+import { ASSET_STATUSES } from "@/lib/constants";
 
 const createGroupSchema = z.object({
   name: z.string().min(1),
@@ -111,6 +110,32 @@ export async function removeAssetFromGroup(assetGroupId: string, assetId: string
     action: "asset removed",
     userId: user.id,
     changes: { assetTag: asset.assetTag },
+  });
+
+  revalidatePath(`/asset-groups/${assetGroupId}`);
+}
+
+export async function removeAssetsFromGroup(assetGroupId: string, assetIds: string[]) {
+  const user = await requireCurrentUser();
+  if (assetIds.length === 0) return;
+
+  const assets = await prisma.asset.findMany({ where: { id: { in: assetIds } } });
+  const departmentIds = [...new Set(assets.map((a) => a.owningDepartmentId))];
+  for (const deptId of departmentIds) {
+    const allowed = await hasDepartmentAccess(deptId, "MEMBER");
+    if (!allowed) throw new Error("Not authorized for one or more departments among the selected assets");
+  }
+
+  const result = await prisma.assetGroupMember.deleteMany({
+    where: { assetGroupId, assetId: { in: assetIds } },
+  });
+
+  await recordAudit({
+    entityType: "AssetGroup",
+    entityId: assetGroupId,
+    action: "assets removed",
+    userId: user.id,
+    changes: { count: result.count },
   });
 
   revalidatePath(`/asset-groups/${assetGroupId}`);

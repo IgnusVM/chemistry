@@ -4,15 +4,7 @@ import { requireCurrentUser } from "@/lib/dal";
 import { getRandomQuote } from "@/lib/quotes";
 import { ChemistryLogo } from "./chemistry-logo";
 import { NewWorkOrderButton } from "./new-work-order-button";
-
-const STATUS_STYLES: Record<string, string> = {
-  OPEN: "bg-blue-100 text-blue-800",
-  IN_PROGRESS: "bg-amber-100 text-amber-800",
-  WAITING_PARTS: "bg-orange-100 text-orange-800",
-  COMPLETE: "bg-green-100 text-green-800",
-  CLOSED: "bg-neutral-200 text-neutral-500",
-  CANCELLED: "bg-neutral-200 text-neutral-400",
-};
+import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
 
 export default async function DashboardPage() {
   const user = await requireCurrentUser();
