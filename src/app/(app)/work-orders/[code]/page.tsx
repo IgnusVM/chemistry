@@ -21,33 +21,32 @@ const WO_STATUSES = Object.keys(STATUS_STYLES);
 export default async function WorkOrderDetailPage({
   params,
 }: {
-  params: Promise<{ woNumber: string }>;
+  params: Promise<{ code: string }>;
 }) {
   await requireCurrentUser();
-  const { woNumber } = await params;
-  const woNumberInt = Number(woNumber);
-  if (!Number.isInteger(woNumberInt)) notFound();
+  const { code } = await params;
 
   const workOrder = await prisma.workOrder.findUnique({
-    where: { woNumber: woNumberInt },
+    where: { code },
     include: {
       asset: true,
       department: true,
       reportedBy: true,
       assignedTo: true,
-      failureCode: true,
+      resolutionCode: true,
       notes: { orderBy: { createdAt: "asc" }, include: { user: true } },
       attachments: { orderBy: { createdAt: "desc" }, include: { uploadedBy: true } },
     },
   });
   if (!workOrder) notFound();
 
-  const [departmentMembers, attachmentUrls] = await Promise.all([
+  const [departmentMembers, resolutionCodes, attachmentUrls] = await Promise.all([
     prisma.departmentMembership.findMany({
       where: { departmentId: workOrder.departmentId },
       include: { user: true },
       orderBy: { user: { displayName: "asc" } },
     }),
+    prisma.resolutionCode.findMany({ orderBy: { label: "asc" } }),
     Promise.all(workOrder.attachments.map((a) => getAttachmentUrl(a.s3Key))),
   ]);
 
@@ -56,16 +55,15 @@ export default async function WorkOrderDetailPage({
       <div className="space-y-6 lg:col-span-2">
         <div>
           <div className="text-xs uppercase tracking-wide text-neutral-400">
-            WO-{workOrder.woNumber} · {workOrder.department.name} · {workOrder.type.replace("_", " ")}
+            {workOrder.code} · {workOrder.department.name} · {workOrder.type.replace("_", " ")}
           </div>
-          <h1 className="text-xl font-semibold text-neutral-900">{workOrder.title}</h1>
+          <h1 className="text-xl font-semibold text-neutral-900">{workOrder.description}</h1>
           <div className="mt-1 flex items-center gap-2">
             <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[workOrder.status]}`}>
               {workOrder.status.replace("_", " ")}
             </span>
             <span className="text-xs text-neutral-500">Priority: {workOrder.priority.replace("_", " ")}</span>
           </div>
-          {workOrder.description && <p className="mt-3 text-sm text-neutral-700">{workOrder.description}</p>}
         </div>
 
         <div className="grid grid-cols-2 gap-4 rounded-md border border-neutral-200 bg-white p-4 text-sm sm:grid-cols-4">
@@ -81,9 +79,20 @@ export default async function WorkOrderDetailPage({
               )
             }
           />
-          <InfoTile label="Failure code" value={workOrder.failureCode?.label ?? "—"} />
-          <InfoTile label="Reported by" value={workOrder.reportedBy?.displayName ?? "—"} />
+          <InfoTile
+            label="Reported by"
+            value={
+              workOrder.reportedBy ? (
+                <Link href={`/users/${workOrder.reportedBy.id}`} className="hover:underline">
+                  {workOrder.reportedBy.playaName ?? workOrder.reportedBy.displayName}
+                </Link>
+              ) : (
+                "—"
+              )
+            }
+          />
           <InfoTile label="Reported" value={workOrder.reportedAt.toLocaleDateString()} />
+          <InfoTile label="Resolution code" value={workOrder.resolutionCode?.label ?? "—"} />
         </div>
 
         <div className="rounded-md border border-neutral-200 bg-white p-4">
@@ -117,6 +126,19 @@ export default async function WorkOrderDetailPage({
         >
           <input type="hidden" name="workOrderId" value={workOrder.id} />
           <h2 className="text-sm font-semibold text-neutral-900">Resolution</h2>
+          <select
+            key={workOrder.resolutionCodeId ?? "none"}
+            name="resolutionCodeId"
+            defaultValue={workOrder.resolutionCodeId ?? ""}
+            className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+          >
+            <option value="">Resolution code…</option>
+            {resolutionCodes.map((rc) => (
+              <option key={rc.id} value={rc.id}>
+                {rc.label}
+              </option>
+            ))}
+          </select>
           <textarea
             name="resolutionNotes"
             rows={3}

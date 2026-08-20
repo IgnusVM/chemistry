@@ -105,6 +105,9 @@ model User {
   playaName      String?
   phone          String?
   notifyByEmail  Boolean   @default(false)
+  contactDuringBurnCell  Boolean @default(false)
+  contactDuringBurnEmail Boolean @default(false)
+  contactDuringBurnOther String?
   isOrgAdmin     Boolean   @default(false)
   pinHash        String?
   pinFailedCount Int       @default(0)
@@ -186,7 +189,6 @@ model AssetType {
 
   defaultDepartment Department? @relation(fields: [defaultDepartmentId], references: [id])
   assets            Asset[]
-  failureCodes      FailureCode[]
 }
 
 model Asset {
@@ -273,46 +275,43 @@ model AuditLog {
   @@index([createdAt])
 }
 
-model FailureCode {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  label       String
-  assetTypeId String?
-  createdAt   DateTime @default(now())
+model ResolutionCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  label     String
+  createdAt DateTime @default(now())
 
-  assetType  AssetType?  @relation(fields: [assetTypeId], references: [id])
   workOrders WorkOrder[]
 }
 
 model WorkOrder {
   id               String            @id @default(cuid())
-  woNumber         Int               @unique @default(autoincrement())
+  code             String            @unique
   assetId          String?
   departmentId     String
   type             WorkOrderType     @default(CORRECTIVE)
   priority         WorkOrderPriority @default(NORMAL)
   status           WorkOrderStatus   @default(OPEN)
-  title            String
-  description      String?
+  description      String
   reportedByUserId String?
   assignedToUserId String?
   reportedAt       DateTime          @default(now())
   startedAt        DateTime?
   completedAt      DateTime?
   closedAt         DateTime?
-  failureCodeId    String?
+  resolutionCodeId String?
   resolutionNotes  String?
   laborMinutes     Int?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
-  asset       Asset?                @relation(fields: [assetId], references: [id])
-  department  Department            @relation(fields: [departmentId], references: [id])
-  reportedBy  User?                 @relation("WorkOrderReportedBy", fields: [reportedByUserId], references: [id])
-  assignedTo  User?                 @relation("WorkOrderAssignedTo", fields: [assignedToUserId], references: [id])
-  failureCode FailureCode?          @relation(fields: [failureCodeId], references: [id])
-  notes       WorkOrderNote[]
-  attachments WorkOrderAttachment[]
+  asset          Asset?                @relation(fields: [assetId], references: [id])
+  department     Department            @relation(fields: [departmentId], references: [id])
+  reportedBy     User?                 @relation("WorkOrderReportedBy", fields: [reportedByUserId], references: [id])
+  assignedTo     User?                 @relation("WorkOrderAssignedTo", fields: [assignedToUserId], references: [id])
+  resolutionCode ResolutionCode?       @relation(fields: [resolutionCodeId], references: [id])
+  notes          WorkOrderNote[]
+  attachments    WorkOrderAttachment[]
 
   @@index([departmentId])
   @@index([status])

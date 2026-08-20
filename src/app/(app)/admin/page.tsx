@@ -5,20 +5,23 @@ import { requireOrgAdmin } from "@/lib/dal";
 export default async function AdminPage() {
   await requireOrgAdmin();
 
-  const [divisionCount, departmentCount, userCount, assetTypeCount, failureCodeCount] = await Promise.all([
-    prisma.division.count(),
-    prisma.department.count(),
-    prisma.user.count(),
-    prisma.assetType.count(),
-    prisma.failureCode.count(),
-  ]);
+  const [divisionCount, departmentCount, userCount, assetTypeCount, resolutionCodeCount, locationCount] =
+    await Promise.all([
+      prisma.division.count(),
+      prisma.department.count(),
+      prisma.user.count(),
+      prisma.assetType.count(),
+      prisma.resolutionCode.count(),
+      prisma.location.count(),
+    ]);
 
   const sections = [
     { href: "/admin/divisions", label: "Divisions", description: "Groupings above departments.", count: divisionCount },
     { href: "/admin/departments", label: "Departments", description: "Owning organizations within Alchemy.", count: departmentCount },
     { href: "/admin/users", label: "Users", description: "Accounts and department roles.", count: userCount },
     { href: "/admin/asset-types", label: "Asset Types", description: "Templates and their custom fields.", count: assetTypeCount },
-    { href: "/admin/failure-codes", label: "Failure Codes", description: "Controlled vocabulary for work orders.", count: failureCodeCount },
+    { href: "/admin/resolution-codes", label: "Resolution Codes", description: "GEMS-style outcome codes for work orders.", count: resolutionCodeCount },
+    { href: "/locations", label: "Locations", description: "Storage facilities, camps, and placements.", count: locationCount },
   ];
 
   return (

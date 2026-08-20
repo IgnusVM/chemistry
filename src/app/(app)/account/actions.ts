@@ -13,6 +13,9 @@ const contactInfoSchema = z.object({
     .optional()
     .or(z.literal("")),
   notifyByEmail: z.boolean(),
+  contactDuringBurnCell: z.boolean(),
+  contactDuringBurnEmail: z.boolean(),
+  contactDuringBurnOther: z.string().optional(),
 });
 
 export type ContactInfoFormState = { error?: string; message?: string } | undefined;
@@ -26,6 +29,9 @@ export async function updateContactInfo(
   const parsed = contactInfoSchema.safeParse({
     phone: formData.get("phone") || "",
     notifyByEmail: formData.get("notifyByEmail") === "on",
+    contactDuringBurnCell: formData.get("contactDuringBurnCell") === "on",
+    contactDuringBurnEmail: formData.get("contactDuringBurnEmail") === "on",
+    contactDuringBurnOther: formData.get("contactDuringBurnOther") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -36,6 +42,9 @@ export async function updateContactInfo(
     data: {
       phone: parsed.data.phone || null,
       notifyByEmail: parsed.data.notifyByEmail,
+      contactDuringBurnCell: parsed.data.contactDuringBurnCell,
+      contactDuringBurnEmail: parsed.data.contactDuringBurnEmail,
+      contactDuringBurnOther: parsed.data.contactDuringBurnOther || null,
     },
   });
 

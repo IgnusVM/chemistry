@@ -6,9 +6,15 @@ import { updateContactInfo } from "./actions";
 export function ContactForm({
   phone,
   notifyByEmail,
+  contactDuringBurnCell,
+  contactDuringBurnEmail,
+  contactDuringBurnOther,
 }: {
   phone: string | null;
   notifyByEmail: boolean;
+  contactDuringBurnCell: boolean;
+  contactDuringBurnEmail: boolean;
+  contactDuringBurnOther: string | null;
 }) {
   const [state, action, pending] = useActionState(updateContactInfo, undefined);
 
@@ -34,6 +40,27 @@ export function ContactForm({
         <input type="checkbox" name="notifyByEmail" defaultChecked={notifyByEmail} />
         Email me about work order updates
       </label>
+
+      <div className="border-t border-neutral-100 pt-3">
+        <div className="text-xs font-medium text-neutral-600">Method of contact during the burn</div>
+        <div className="mt-1.5 flex gap-4">
+          <label className="flex items-center gap-2 text-sm text-neutral-700">
+            <input type="checkbox" name="contactDuringBurnCell" defaultChecked={contactDuringBurnCell} />
+            Cell
+          </label>
+          <label className="flex items-center gap-2 text-sm text-neutral-700">
+            <input type="checkbox" name="contactDuringBurnEmail" defaultChecked={contactDuringBurnEmail} />
+            Email
+          </label>
+        </div>
+        <input
+          name="contactDuringBurnOther"
+          defaultValue={contactDuringBurnOther ?? ""}
+          placeholder="Other instructions — camp location, radio channel, etc."
+          className="mt-2 w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+        />
+      </div>
+
       <button
         type="submit"
         disabled={pending}

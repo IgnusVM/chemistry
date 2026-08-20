@@ -37,10 +37,9 @@ export default async function WorkOrdersPage({
   if (priority) where.priority = priority as Prisma.EnumWorkOrderPriorityFilter["equals"];
   if (mine === "1") where.assignedToUserId = user.id;
   if (q) {
-    const asNumber = Number(q);
     where.OR = [
-      { title: { contains: q, mode: "insensitive" } },
-      ...(Number.isInteger(asNumber) ? [{ woNumber: asNumber }] : []),
+      { description: { contains: q, mode: "insensitive" } },
+      { code: { contains: q, mode: "insensitive" } },
     ];
   }
 
@@ -73,7 +72,7 @@ export default async function WorkOrdersPage({
         <input
           name="q"
           defaultValue={q}
-          placeholder="Search title or WO#…"
+          placeholder="Search description or WO#…"
           className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
         />
         <select name="department" defaultValue={department ?? ""} className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
@@ -113,7 +112,7 @@ export default async function WorkOrdersPage({
         <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
           <tr>
             <th className="px-4 py-2">WO#</th>
-            <th className="px-4 py-2">Title</th>
+            <th className="px-4 py-2">Description</th>
             <th className="px-4 py-2">Asset</th>
             <th className="px-4 py-2">Department</th>
             <th className="px-4 py-2">Priority</th>
@@ -125,11 +124,13 @@ export default async function WorkOrdersPage({
           {workOrders.map((wo) => (
             <tr key={wo.id} className="hover:bg-neutral-50">
               <td className="px-4 py-2">
-                <Link href={`/work-orders/${wo.woNumber}`} className="font-medium text-neutral-900 hover:underline">
-                  WO-{wo.woNumber}
+                <Link href={`/work-orders/${wo.code}`} className="font-medium text-neutral-900 hover:underline">
+                  {wo.code}
                 </Link>
               </td>
-              <td className="px-4 py-2">{wo.title}</td>
+              <td className="px-4 py-2">
+                {wo.description.length > 70 ? `${wo.description.slice(0, 70)}…` : wo.description}
+              </td>
               <td className="px-4 py-2 text-neutral-500">
                 {wo.asset ? (
                   <Link href={`/assets/${wo.asset.assetTag}`} className="hover:underline">

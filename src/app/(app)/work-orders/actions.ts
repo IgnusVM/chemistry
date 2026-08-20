@@ -3,11 +3,13 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { sendWorkOrderAssignedEmail } from "@/lib/mailer";
 import { buildAttachmentKey, uploadAttachment, deleteAttachmentObject } from "@/lib/s3";
+import { generateWorkOrderCode } from "@/lib/work-order-code";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
 
@@ -16,13 +18,11 @@ const WO_PRIORITIES = ["LOW", "NORMAL", "HIGH", "EVENT_CRITICAL"] as const;
 const WO_STATUSES = ["OPEN", "ASSIGNED", "IN_PROGRESS", "WAITING_PARTS", "COMPLETE", "CLOSED", "CANCELLED"] as const;
 
 const createSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().optional(),
+  description: z.string().min(1),
   assetTag: z.string().optional(),
   departmentId: z.string().min(1),
   type: z.enum(WO_TYPES),
   priority: z.enum(WO_PRIORITIES),
-  failureCodeId: z.string().optional(),
 });
 
 export type WorkOrderFormState = { error?: string } | undefined;
@@ -34,13 +34,11 @@ export async function createWorkOrder(
   const user = await requireCurrentUser();
 
   const parsed = createSchema.safeParse({
-    title: formData.get("title"),
-    description: formData.get("description") || undefined,
+    description: formData.get("description"),
     assetTag: formData.get("assetTag") || undefined,
     departmentId: formData.get("departmentId"),
     type: formData.get("type"),
     priority: formData.get("priority"),
-    failureCodeId: formData.get("failureCodeId") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -56,28 +54,38 @@ export async function createWorkOrder(
     assetId = asset.id;
   }
 
-  const workOrder = await prisma.workOrder.create({
-    data: {
-      title: parsed.data.title,
-      description: parsed.data.description,
-      assetId,
-      departmentId: parsed.data.departmentId,
-      type: parsed.data.type,
-      priority: parsed.data.priority,
-      failureCodeId: parsed.data.failureCodeId || null,
-      reportedByUserId: user.id,
-    },
-  });
+  let workOrder;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const code = await generateWorkOrderCode(parsed.data.type);
+    try {
+      workOrder = await prisma.workOrder.create({
+        data: {
+          code,
+          description: parsed.data.description,
+          assetId,
+          departmentId: parsed.data.departmentId,
+          type: parsed.data.type,
+          priority: parsed.data.priority,
+          reportedByUserId: user.id,
+        },
+      });
+      break;
+    } catch (e) {
+      const isCodeCollision = e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
+      if (!isCodeCollision || attempt === 2) throw e;
+    }
+  }
+  if (!workOrder) return { error: "Could not generate a work order number. Try again." };
 
   await recordAudit({
     entityType: "WorkOrder",
     entityId: workOrder.id,
     action: "created",
     userId: user.id,
-    changes: { title: workOrder.title, type: workOrder.type, priority: workOrder.priority },
+    changes: { code: workOrder.code, type: workOrder.type, priority: workOrder.priority },
   });
 
-  redirect(`/work-orders/${workOrder.woNumber}`);
+  redirect(`/work-orders/${workOrder.code}`);
 }
 
 async function requireWorkOrderAccess(workOrderId: string, minRole: "MEMBER" | "LEAD" = "MEMBER") {
@@ -119,7 +127,7 @@ export async function updateWorkOrderStatus(formData: FormData) {
     changes: { from: workOrder.status, to: parsed.status },
   });
 
-  revalidatePath(`/work-orders/${workOrder.woNumber}`);
+  revalidatePath(`/work-orders/${workOrder.code}`);
 }
 
 const assignSchema = z.object({
@@ -158,14 +166,14 @@ export async function assignWorkOrder(formData: FormData) {
       const base = process.env.APP_BASE_URL ?? "http://localhost:3000";
       await sendWorkOrderAssignedEmail({
         email: assignee.email,
-        woNumber: workOrder.woNumber,
-        title: workOrder.title,
-        url: new URL(`/work-orders/${workOrder.woNumber}`, base).toString(),
+        code: workOrder.code,
+        description: workOrder.description,
+        url: new URL(`/work-orders/${workOrder.code}`, base).toString(),
       });
     }
   }
 
-  revalidatePath(`/work-orders/${workOrder.woNumber}`);
+  revalidatePath(`/work-orders/${workOrder.code}`);
 }
 
 const noteSchema = z.object({
@@ -185,11 +193,12 @@ export async function addWorkOrderNote(formData: FormData) {
     data: { workOrderId: workOrder.id, userId: user.id, body: parsed.body },
   });
 
-  revalidatePath(`/work-orders/${workOrder.woNumber}`);
+  revalidatePath(`/work-orders/${workOrder.code}`);
 }
 
 const resolutionSchema = z.object({
   workOrderId: z.string().min(1),
+  resolutionCodeId: z.string().optional(),
   resolutionNotes: z.string().optional(),
   laborMinutes: z.string().optional(),
 });
@@ -198,6 +207,7 @@ export async function updateResolution(formData: FormData) {
   const user = await requireCurrentUser();
   const parsed = resolutionSchema.parse({
     workOrderId: formData.get("workOrderId"),
+    resolutionCodeId: formData.get("resolutionCodeId") || undefined,
     resolutionNotes: formData.get("resolutionNotes") || undefined,
     laborMinutes: formData.get("laborMinutes") || undefined,
   });
@@ -206,6 +216,7 @@ export async function updateResolution(formData: FormData) {
   await prisma.workOrder.update({
     where: { id: workOrder.id },
     data: {
+      resolutionCodeId: parsed.resolutionCodeId || null,
       resolutionNotes: parsed.resolutionNotes,
       laborMinutes: parsed.laborMinutes ? Number(parsed.laborMinutes) : null,
     },
@@ -218,7 +229,7 @@ export async function updateResolution(formData: FormData) {
     userId: user.id,
   });
 
-  revalidatePath(`/work-orders/${workOrder.woNumber}`);
+  revalidatePath(`/work-orders/${workOrder.code}`);
 }
 
 export type AttachmentFormState = { error?: string } | undefined;
@@ -270,7 +281,7 @@ export async function uploadWorkOrderAttachments(
     changes: { count: files.length },
   });
 
-  revalidatePath(`/work-orders/${workOrder.woNumber}`);
+  revalidatePath(`/work-orders/${workOrder.code}`);
 }
 
 export async function deleteWorkOrderAttachment(attachmentId: string) {
@@ -293,5 +304,5 @@ export async function deleteWorkOrderAttachment(attachmentId: string) {
     changes: { filename: attachment.filename },
   });
 
-  revalidatePath(`/work-orders/${attachment.workOrder.woNumber}`);
+  revalidatePath(`/work-orders/${attachment.workOrder.code}`);
 }

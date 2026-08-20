@@ -22,9 +22,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link href="/work-orders" className="hover:text-neutral-900">
               Work Orders
             </Link>
-            <Link href="/locations" className="hover:text-neutral-900">
-              Locations
-            </Link>
             {user.isOrgAdmin && (
               <Link href="/admin" className="hover:text-neutral-900">
                 Admin

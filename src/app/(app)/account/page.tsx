@@ -22,7 +22,13 @@ export default async function AccountPage() {
         </p>
       </div>
 
-      <ContactForm phone={user.phone} notifyByEmail={user.notifyByEmail} />
+      <ContactForm
+        phone={user.phone}
+        notifyByEmail={user.notifyByEmail}
+        contactDuringBurnCell={user.contactDuringBurnCell}
+        contactDuringBurnEmail={user.contactDuringBurnEmail}
+        contactDuringBurnOther={user.contactDuringBurnOther}
+      />
 
       <PinForm hasPin={!!user.pinHash} />
 

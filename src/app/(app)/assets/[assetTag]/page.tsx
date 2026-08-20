@@ -128,8 +128,8 @@ export default async function AssetDetailPage({
             <ul className="mt-2 divide-y divide-neutral-200">
               {workOrders.map((wo) => (
                 <li key={wo.id} className="flex items-center justify-between py-2 text-sm">
-                  <Link href={`/work-orders/${wo.woNumber}`} className="hover:underline">
-                    WO-{wo.woNumber} · {wo.title}
+                  <Link href={`/work-orders/${wo.code}`} className="hover:underline">
+                    {wo.code} · {wo.description}
                   </Link>
                   <span className={`rounded-full px-2 py-0.5 text-xs ${WO_STATUS_STYLES[wo.status]}`}>
                     {wo.status.replace("_", " ")}
