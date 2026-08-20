@@ -1,6 +1,7 @@
 import { requireCurrentUser } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { PinForm } from "./pin-form";
+import { ProfileForm } from "./profile-form";
 import { ContactForm } from "./contact-form";
 import { RevokeDeviceButton } from "./revoke-device-button";
 import { clearPin } from "./actions";
@@ -16,11 +17,10 @@ export default async function AccountPage() {
     <div className="max-w-xl space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">Account</h1>
-        <p className="text-sm text-neutral-500">
-          {user.displayName}
-          {user.playaName && ` · "${user.playaName}"`} · {user.email}
-        </p>
+        <p className="text-sm text-neutral-500">{user.email}</p>
       </div>
+
+      <ProfileForm displayName={user.displayName} name={user.name} />
 
       <ContactForm
         phone={user.phone}

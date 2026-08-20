@@ -61,9 +61,7 @@ export default async function UsersAdminPage() {
               <div>
                 <div className="font-medium text-neutral-900">
                   {user.displayName}
-                  {user.playaName && (
-                    <span className="ml-1 text-neutral-500">&ldquo;{user.playaName}&rdquo;</span>
-                  )}
+                  {user.name && <span className="ml-1 font-normal text-neutral-500">({user.name})</span>}
                 </div>
                 <div className="text-sm text-neutral-500">{user.email}</div>
               </div>

@@ -101,7 +101,7 @@ export default async function WorkOrderDetailPage({
             value={
               workOrder.reportedBy ? (
                 <Link href={`/users/${workOrder.reportedBy.id}`} className="hover:underline">
-                  {workOrder.reportedBy.playaName ?? workOrder.reportedBy.displayName}
+                  {workOrder.reportedBy.displayName}
                 </Link>
               ) : (
                 "—"
@@ -287,7 +287,7 @@ export default async function WorkOrderDetailPage({
             {departmentMembers.map((m) => (
               <option key={m.userId} value={m.userId}>
                 {m.user.displayName}
-                {m.user.playaName ? ` "${m.user.playaName}"` : ""}
+                {m.user.name ? ` (${m.user.name})` : ""}
               </option>
             ))}
           </select>

@@ -11,7 +11,7 @@ import { appUrl } from "@/lib/app-url";
 const userSchema = z.object({
   email: z.email(),
   displayName: z.string().min(1),
-  playaName: z.string().optional(),
+  name: z.string().optional(),
 });
 
 export type UserFormState = { error?: string } | undefined;
@@ -25,7 +25,7 @@ export async function createUser(
   const parsed = userSchema.safeParse({
     email: formData.get("email"),
     displayName: formData.get("displayName"),
-    playaName: formData.get("playaName") || undefined,
+    name: formData.get("name") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };

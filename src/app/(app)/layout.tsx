@@ -33,7 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </nav>
           <div className="flex items-center gap-3 text-sm text-neutral-600">
             <Link href="/account" className="hover:text-neutral-900">
-              {user.playaName ?? user.displayName}
+              {user.displayName}
             </Link>
             <form action={logout}>
               <button type="submit" className="text-neutral-500 hover:text-neutral-900">

@@ -26,7 +26,7 @@ export default async function UserContactPage({
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">
           {user.displayName}
-          {user.playaName && ` · "${user.playaName}"`}
+          {user.name && ` (${user.name})`}
         </h1>
         <p className="text-sm text-neutral-500">
           {user.memberships.map((m) => m.department.name).join(", ") || "No department memberships"}

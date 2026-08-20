@@ -6,6 +6,40 @@ import { requireCurrentUser } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { hashPin, pinSchema } from "@/lib/pin";
 
+const profileSchema = z.object({
+  displayName: z.string().min(1, "User name is required"),
+  name: z.string().optional(),
+});
+
+export type ProfileFormState = { error?: string; message?: string } | undefined;
+
+export async function updateProfile(
+  _prevState: ProfileFormState,
+  formData: FormData,
+): Promise<ProfileFormState> {
+  const user = await requireCurrentUser();
+
+  const parsed = profileSchema.safeParse({
+    displayName: formData.get("displayName"),
+    name: formData.get("name") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      displayName: parsed.data.displayName,
+      name: parsed.data.name || null,
+    },
+  });
+
+  revalidatePath("/account");
+  revalidatePath("/", "layout");
+  return { message: "Saved." };
+}
+
 const contactInfoSchema = z.object({
   phone: z
     .string()

@@ -20,7 +20,7 @@ export default async function LoginPage({
         {showPinForm ? (
           <>
             <p className="mt-1 text-sm text-neutral-500">
-              Welcome back, {trustedUser.playaName ?? trustedUser.displayName}. Enter your PIN.
+              Welcome back, {trustedUser.displayName}. Enter your PIN.
             </p>
             <PinLoginForm next={next} />
             <Link href="/login?fresh=1" className="mt-4 block text-center text-xs text-neutral-400 hover:text-neutral-600">

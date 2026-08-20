@@ -31,7 +31,7 @@ async function main() {
     create: {
       email: "steven.a.strength@gmail.com",
       displayName: "Steven",
-      playaName: "Ignus",
+      name: "Ignus",
       isOrgAdmin: true,
     },
   });

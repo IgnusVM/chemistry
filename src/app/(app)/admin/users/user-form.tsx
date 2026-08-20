@@ -19,7 +19,7 @@ export function UserForm() {
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-neutral-600">Display name</label>
+        <label className="block text-xs font-medium text-neutral-600">User name</label>
         <input
           name="displayName"
           required
@@ -27,9 +27,9 @@ export function UserForm() {
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-neutral-600">Playa name</label>
+        <label className="block text-xs font-medium text-neutral-600">Name (optional)</label>
         <input
-          name="playaName"
+          name="name"
           className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
         />
       </div>

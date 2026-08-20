@@ -101,7 +101,7 @@ model User {
   id             String    @id @default(cuid())
   email          String    @unique
   displayName    String
-  playaName      String?
+  name           String?
   phone          String?
   notifyByEmail  Boolean   @default(false)
   contactDuringBurnCell  Boolean @default(false)
