@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chemistry
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: chemistry
+    volumes:
+      - chemistry-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chemistry -d chemistry"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      # Loopback only — nginx proxies through 127.0.0.1. Docker manages its
+      # own iptables rules and can bypass UFW, so binding 0.0.0.0 here would
+      # expose the app on the private interface too.
+      - "127.0.0.1:3001:3000"
+    environment:
+      - DATABASE_URL=postgresql://chemistry:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/chemistry?schema=public
+      - NODE_ENV=production
+      # MUST be a 32+ byte random string, distinct from any dev value.
+      # The `:?` form refuses to start the container rather than silently
+      # falling back to an insecure default.
+      - SESSION_SECRET=${SESSION_SECRET:?SESSION_SECRET is required (min 32 bytes random)}
+      - APP_BASE_URL=${APP_BASE_URL:?APP_BASE_URL is required}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM=${SMTP_FROM:-}
+      - AWS_REGION=${AWS_REGION:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - S3_BUCKET=${S3_BUCKET:-}
+      - S3_PREFIX=${S3_PREFIX:-chemistry}
+    restart: unless-stopped
+
+volumes:
+  chemistry-data:
