@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
 import type { Prisma } from "@/generated/prisma/client";
+import { buttonClass } from "@/components/button";
 
 const STATUS_STYLES: Record<string, string> = {
   OPEN: "bg-blue-100 text-blue-800",
@@ -60,10 +61,7 @@ export default async function WorkOrdersPage({
           <h1 className="text-lg font-semibold text-neutral-900">Work Orders</h1>
           <p className="text-sm text-neutral-500">{workOrders.length} shown</p>
         </div>
-        <Link
-          href="/work-orders/new"
-          className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-        >
+        <Link href="/work-orders/new" className={buttonClass()}>
           + New work order
         </Link>
       </div>

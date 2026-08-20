@@ -5,6 +5,7 @@ import { requireCurrentUser } from "@/lib/dal";
 import { bulkUpdateGroupStatus } from "../actions";
 import { AddAssetsForm } from "./add-assets-form";
 import { RemoveMemberButton } from "./remove-member-button";
+import { Button, buttonClass } from "@/components/button";
 
 const STATUS_STYLES: Record<string, string> = {
   ACTIVE: "bg-green-100 text-green-800",
@@ -42,10 +43,7 @@ export default async function AssetGroupDetailPage({
           {group.description && <p className="text-sm text-neutral-500">{group.description}</p>}
           <p className="mt-1 text-sm text-neutral-500">{group.members.length} assets</p>
         </div>
-        <Link
-          href={`/assets/qr-sheet?group=${group.id}`}
-          className="rounded-md border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
-        >
+        <Link href={`/assets/qr-sheet?group=${group.id}`} className={buttonClass("secondary")}>
           Print QR sheet
         </Link>
       </div>
@@ -65,12 +63,7 @@ export default async function AssetGroupDetailPage({
             ))}
           </select>
         </div>
-        <button
-          type="submit"
-          className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-800"
-        >
-          Apply to all {group.members.length}
-        </button>
+        <Button type="submit">Apply to all {group.members.length}</Button>
       </form>
 
       <AddAssetsForm assetGroupId={group.id} />

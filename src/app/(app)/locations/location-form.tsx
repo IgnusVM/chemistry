@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { createLocation } from "./actions";
 import type { Location } from "@/generated/prisma/client";
+import { Button } from "@/components/button";
 
 const LOCATION_TYPES = ["STORAGE_FACILITY", "CONTAINER", "ZONE", "CAMP", "PLACEMENT", "VEHICLE"];
 
@@ -36,13 +37,9 @@ export function LocationForm({ locations }: { locations: Location[] }) {
           ))}
         </select>
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
-      >
-        {pending ? "Adding…" : "Add location"}
-      </button>
+      <Button type="submit" pending={pending} pendingText="Adding…">
+        Add location
+      </Button>
       {state?.error && <p className="w-full text-sm text-red-600">{state.error}</p>}
     </form>
   );

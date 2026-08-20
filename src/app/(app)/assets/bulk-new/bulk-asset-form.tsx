@@ -4,6 +4,7 @@ import { useActionState, useMemo, useState } from "react";
 import { createAssetBatch } from "./actions";
 import type { CustomFieldDef } from "@/lib/custom-fields";
 import type { Department, Location } from "@/generated/prisma/client";
+import { Button } from "@/components/button";
 import { LocationField } from "@/components/location-field";
 
 const inputClass = "w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm";
@@ -251,13 +252,9 @@ export function BulkAssetForm({
         </Field>
       </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
-      >
-        {pending ? "Creating…" : `Create ${previewCount} asset${previewCount === 1 ? "" : "s"}`}
-      </button>
+      <Button type="submit" pending={pending} pendingText="Creating…">
+        Create {previewCount} asset{previewCount === 1 ? "" : "s"}
+      </Button>
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
     </form>
   );

@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { createAssetType } from "./actions";
 import { FieldBuilder, fieldRowsToSchema, type FieldRow } from "./field-builder";
+import { Button } from "@/components/button";
 
 export function AssetTypeForm({
   departments,
@@ -44,13 +45,9 @@ export function AssetTypeForm({
 
       <FieldBuilder rows={rows} setRows={setRows} />
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
-      >
-        {pending ? "Creating…" : "Create asset type"}
-      </button>
+      <Button type="submit" pending={pending} pendingText="Creating…">
+        Create asset type
+      </Button>
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
     </form>
   );

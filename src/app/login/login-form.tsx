@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { requestMagicLink } from "./actions";
+import { Button } from "@/components/button";
 
 export function LoginForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(requestMagicLink, undefined);
@@ -28,13 +29,9 @@ export function LoginForm({ next }: { next?: string }) {
         />
       </div>
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
-      >
-        {pending ? "Sending…" : "Send sign-in link"}
-      </button>
+      <Button type="submit" pending={pending} pendingText="Sending…" className="w-full">
+        Send sign-in link
+      </Button>
     </form>
   );
 }

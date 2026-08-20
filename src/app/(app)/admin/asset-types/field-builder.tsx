@@ -95,7 +95,7 @@ export function FieldBuilder({
             <button
               type="button"
               onClick={() => setRows((rs) => rs.filter((_, j) => j !== i))}
-              className="text-xs text-neutral-400 hover:text-red-600"
+              className="text-xs text-neutral-400 transition-colors duration-150 hover:text-red-600"
             >
               Remove
             </button>

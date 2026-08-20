@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { loginWithPin } from "./actions";
+import { Button } from "@/components/button";
 
 export function PinLoginForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(loginWithPin, undefined);
@@ -27,13 +28,9 @@ export function PinLoginForm({ next }: { next?: string }) {
         />
       </div>
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
-      >
-        {pending ? "Signing in…" : "Sign in"}
-      </button>
+      <Button type="submit" pending={pending} pendingText="Signing in…" className="w-full">
+        Sign in
+      </Button>
     </form>
   );
 }

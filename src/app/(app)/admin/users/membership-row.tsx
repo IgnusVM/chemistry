@@ -23,7 +23,7 @@ export function MembershipRow({
         type="button"
         disabled={pending}
         onClick={() => startTransition(() => removeMembership(userId, departmentId))}
-        className="ml-1 text-neutral-400 hover:text-red-600 disabled:opacity-50"
+        className="ml-1 text-neutral-400 transition-colors duration-150 hover:text-red-600 disabled:opacity-50"
         aria-label={`Remove ${departmentName}`}
       >
         ×

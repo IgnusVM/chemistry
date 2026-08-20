@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { HELP_CATEGORIES, renderHelpMarkdown } from "@/lib/help";
+import { Button, buttonClass } from "@/components/button";
 
 export default async function HelpLandingPage() {
   const user = await requireCurrentUser();
@@ -21,10 +22,7 @@ export default async function HelpLandingPage() {
           <p className="text-sm text-neutral-500">Everything you need to know about using Chemistry.</p>
         </div>
         {user.isOrgAdmin && (
-          <Link
-            href="/help/admin"
-            className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
-          >
+          <Link href="/help/admin" className={buttonClass("secondary")}>
             Manage articles
           </Link>
         )}
@@ -36,9 +34,7 @@ export default async function HelpLandingPage() {
           placeholder="Search the help guide…"
           className="w-full max-w-md rounded-md border border-neutral-300 px-3 py-2 text-sm"
         />
-        <button type="submit" className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800">
-          Search
-        </button>
+        <Button type="submit">Search</Button>
       </form>
 
       {quickGuide ? (

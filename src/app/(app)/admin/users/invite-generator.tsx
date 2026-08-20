@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { generateInviteLink } from "./actions";
+import { Button } from "@/components/button";
 
 export function InviteGenerator() {
   const [pending, startTransition] = useTransition();
@@ -10,9 +11,10 @@ export function InviteGenerator() {
 
   return (
     <div className="text-right">
-      <button
+      <Button
         type="button"
-        disabled={pending}
+        pending={pending}
+        pendingText="Generating…"
         onClick={() => {
           setCopied(false);
           startTransition(async () => {
@@ -20,10 +22,9 @@ export function InviteGenerator() {
             setLink(url);
           });
         }}
-        className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
       >
-        {pending ? "Generating…" : "Generate invite link"}
-      </button>
+        Generate invite link
+      </Button>
       {link && (
         <div className="mt-2 flex items-center gap-2">
           <input
@@ -32,16 +33,17 @@ export function InviteGenerator() {
             onFocus={(e) => e.target.select()}
             className="w-72 rounded-md border border-neutral-300 px-2 py-1 text-xs text-neutral-600"
           />
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            className="!px-1.5 !py-0.5 text-xs"
             onClick={() => {
               navigator.clipboard.writeText(link);
               setCopied(true);
             }}
-            className="text-xs font-medium text-neutral-700 hover:text-neutral-900"
           >
             {copied ? "Copied!" : "Copy"}
-          </button>
+          </Button>
         </div>
       )}
       <p className="mt-1 text-xs text-neutral-400">Expires in 7 days, single use.</p>

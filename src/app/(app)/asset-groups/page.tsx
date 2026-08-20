@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { CreateGroupForm } from "./create-group-form";
+import { buttonClass } from "@/components/button";
 
 export default async function AssetGroupsPage() {
   await requireCurrentUser();
@@ -17,10 +18,7 @@ export default async function AssetGroupsPage() {
           <h1 className="text-lg font-semibold text-neutral-900">Asset groups</h1>
           <p className="text-sm text-neutral-500">Batches created together — for bulk updates and QR sheets.</p>
         </div>
-        <Link
-          href="/assets/bulk-new"
-          className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-        >
+        <Link href="/assets/bulk-new" className={buttonClass()}>
           + Bulk create
         </Link>
       </div>

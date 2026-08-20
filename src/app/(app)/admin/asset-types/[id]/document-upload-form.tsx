@@ -1,11 +1,14 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
 import { uploadAssetTypeDocuments } from "../actions";
+import { FileInput } from "@/components/file-input";
+import { Button } from "@/components/button";
 
 export function DocumentUploadForm({ assetTypeId }: { assetTypeId: string }) {
   const [state, action, pending] = useActionState(uploadAssetTypeDocuments, undefined);
   const formRef = useRef<HTMLFormElement>(null);
+  const [resetKey, setResetKey] = useState(0);
 
   return (
     <form
@@ -13,24 +16,21 @@ export function DocumentUploadForm({ assetTypeId }: { assetTypeId: string }) {
       action={async (formData) => {
         await action(formData);
         formRef.current?.reset();
+        setResetKey((k) => k + 1);
       }}
-      className="mt-3 flex flex-wrap items-center gap-2"
+      className="mt-3 flex flex-wrap items-center gap-3"
     >
       <input type="hidden" name="assetTypeId" value={assetTypeId} />
-      <input
-        type="file"
+      <FileInput
+        key={resetKey}
         name="files"
         accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,image/*"
         multiple
-        className="text-sm"
+        label="Choose documents"
       />
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium hover:bg-neutral-100 disabled:opacity-50"
-      >
-        {pending ? "Uploading…" : "Upload document"}
-      </button>
+      <Button type="submit" variant="secondary" pending={pending} pendingText="Uploading…">
+        Upload document
+      </Button>
       {state?.error && <p className="w-full text-sm text-red-600">{state.error}</p>}
     </form>
   );

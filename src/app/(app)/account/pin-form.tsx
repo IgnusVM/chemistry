@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { setPin } from "./actions";
+import { Button } from "@/components/button";
 
 export function PinForm({ hasPin }: { hasPin: boolean }) {
   const [state, action, pending] = useActionState(setPin, undefined);
@@ -44,13 +45,9 @@ export function PinForm({ hasPin }: { hasPin: boolean }) {
           />
         </div>
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
-      >
-        {pending ? "Saving…" : hasPin ? "Update PIN" : "Set PIN"}
-      </button>
+      <Button type="submit" pending={pending} pendingText="Saving…">
+        {hasPin ? "Update PIN" : "Set PIN"}
+      </Button>
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
       {state?.message && <p className="text-sm text-green-700">{state.message}</p>}
     </form>

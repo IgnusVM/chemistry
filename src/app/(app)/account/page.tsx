@@ -34,7 +34,7 @@ export default async function AccountPage() {
 
       {user.pinHash && (
         <form action={clearPin}>
-          <button type="submit" className="text-xs text-neutral-400 hover:text-red-600">
+          <button type="submit" className="text-xs text-neutral-400 transition-colors duration-150 hover:text-red-600">
             Remove PIN sign-in entirely
           </button>
         </form>

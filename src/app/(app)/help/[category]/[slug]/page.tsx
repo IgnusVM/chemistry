@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { categoryLabel, isValidCategory, renderHelpMarkdown } from "@/lib/help";
+import { buttonClass } from "@/components/button";
 
 export default async function HelpArticlePage({
   params,
@@ -33,10 +34,7 @@ export default async function HelpArticlePage({
             <h1 className="text-xl font-semibold text-neutral-900">{article.title}</h1>
           </div>
           {user.isOrgAdmin && (
-            <Link
-              href={`/help/admin/${article.id}/edit`}
-              className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
-            >
+            <Link href={`/help/admin/${article.id}/edit`} className={buttonClass("secondary")}>
               Edit
             </Link>
           )}

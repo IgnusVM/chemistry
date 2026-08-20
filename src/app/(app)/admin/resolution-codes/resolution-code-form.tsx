@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { createResolutionCode } from "./actions";
+import { Button } from "@/components/button";
 
 export function ResolutionCodeForm() {
   const [state, action, pending] = useActionState(createResolutionCode, undefined);
@@ -26,13 +27,9 @@ export function ResolutionCodeForm() {
           className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
         />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
-      >
-        {pending ? "Adding…" : "Add resolution code"}
-      </button>
+      <Button type="submit" pending={pending} pendingText="Adding…">
+        Add resolution code
+      </Button>
       {state?.error && <p className="w-full text-sm text-red-600">{state.error}</p>}
     </form>
   );

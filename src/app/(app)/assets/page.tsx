@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import type { Prisma } from "@/generated/prisma/client";
+import { Button, buttonClass } from "@/components/button";
 
 const STATUS_STYLES: Record<string, string> = {
   ACTIVE: "bg-green-100 text-green-800",
@@ -50,16 +51,10 @@ export default async function AssetsPage({
           <p className="text-sm text-neutral-500">{assets.length} shown</p>
         </div>
         <div className="flex gap-2">
-          <Link
-            href="/assets/bulk-new"
-            className="rounded-md border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
-          >
+          <Link href="/assets/bulk-new" className={buttonClass("secondary")}>
             + Bulk create
           </Link>
-          <Link
-            href="/assets/new"
-            className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-          >
+          <Link href="/assets/new" className={buttonClass()}>
             + New asset
           </Link>
         </div>
@@ -96,19 +91,16 @@ export default async function AssetsPage({
             </option>
           ))}
         </select>
-        <button type="submit" className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-100">
+        <Button type="submit" variant="secondary">
           Filter
-        </button>
+        </Button>
       </form>
 
       <form method="get" action="/assets/qr-sheet">
         <div className="mb-2 flex justify-end">
-          <button
-            type="submit"
-            className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
-          >
+          <Button type="submit" variant="secondary">
             Print QR sheet for selected
-          </button>
+          </Button>
         </div>
         <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
           <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { createGroup } from "./actions";
+import { Button } from "@/components/button";
 
 export function CreateGroupForm() {
   const [state, action, pending] = useActionState(createGroup, undefined);
@@ -23,13 +24,9 @@ export function CreateGroupForm() {
           className="mt-1 w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
         />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 disabled:opacity-50"
-      >
-        {pending ? "Creating…" : "Create empty group"}
-      </button>
+      <Button type="submit" variant="secondary" pending={pending} pendingText="Creating…">
+        Create empty group
+      </Button>
       {state?.error && <p className="w-full text-sm text-red-600">{state.error}</p>}
     </form>
   );

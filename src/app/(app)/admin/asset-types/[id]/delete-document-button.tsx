@@ -11,7 +11,7 @@ export function DeleteDocumentButton({ documentId }: { documentId: string }) {
       type="button"
       disabled={pending}
       onClick={() => startTransition(() => deleteAssetTypeDocument(documentId))}
-      className="text-xs text-neutral-400 hover:text-red-600 disabled:opacity-50"
+      className="text-xs text-neutral-400 transition-colors duration-150 hover:text-red-600 disabled:opacity-50"
     >
       Remove
     </button>

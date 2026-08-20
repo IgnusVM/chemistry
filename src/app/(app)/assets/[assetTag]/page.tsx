@@ -6,6 +6,7 @@ import { assetQrDataUrl, assetScanUrl } from "@/lib/qr";
 import { changeAssetStatus, moveAsset } from "../actions";
 import type { CustomFieldDef } from "@/lib/custom-fields";
 import { LocationField } from "@/components/location-field";
+import { Button, buttonClass } from "@/components/button";
 
 const ASSET_STATUSES = ["ACTIVE", "IN_REPAIR", "STORAGE", "RETIRED", "LOST", "DESTROYED"];
 const WO_STATUS_STYLES: Record<string, string> = {
@@ -91,10 +92,7 @@ export default async function AssetDetailPage({
             </div>
             {asset.description && <p className="mt-2 text-sm text-neutral-700">{asset.description}</p>}
           </div>
-          <Link
-            href={`/work-orders/new?asset=${asset.assetTag}`}
-            className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
-          >
+          <Link href={`/work-orders/new?asset=${asset.assetTag}`} className={buttonClass("secondary")}>
             Report a problem
           </Link>
         </div>
@@ -213,12 +211,9 @@ export default async function AssetDetailPage({
               </option>
             ))}
           </select>
-          <button
-            type="submit"
-            className="w-full rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-800"
-          >
+          <Button type="submit" className="w-full">
             Update status
-          </button>
+          </Button>
         </form>
 
         <form
@@ -236,12 +231,9 @@ export default async function AssetDetailPage({
             placeholder="Notes (optional)"
             className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
           />
-          <button
-            type="submit"
-            className="w-full rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium hover:bg-neutral-100"
-          >
+          <Button type="submit" variant="secondary" className="w-full">
             Record move
-          </button>
+          </Button>
         </form>
       </div>
     </div>

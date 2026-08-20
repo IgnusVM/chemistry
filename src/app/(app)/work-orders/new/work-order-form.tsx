@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { createWorkOrder } from "../actions";
 import type { Department, Asset } from "@/generated/prisma/client";
+import { Button } from "@/components/button";
 
 const inputClass = "w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm";
 
@@ -70,13 +71,9 @@ export function WorkOrderForm({
         <textarea name="description" rows={4} required autoFocus className={inputClass} />
       </Field>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
-      >
-        {pending ? "Creating…" : "Create work order"}
-      </button>
+      <Button type="submit" pending={pending} pendingText="Creating…">
+        Create work order
+      </Button>
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
     </form>
   );

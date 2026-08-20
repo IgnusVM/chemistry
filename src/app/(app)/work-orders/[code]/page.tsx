@@ -6,6 +6,7 @@ import { getAttachmentUrl } from "@/lib/s3";
 import { updateWorkOrderStatus, assignWorkOrder, addWorkOrderNote, updateResolution } from "../actions";
 import { AttachmentUploadForm } from "./attachment-upload-form";
 import { DeleteAttachmentButton } from "./delete-attachment-button";
+import { Button } from "@/components/button";
 
 const STATUS_STYLES: Record<string, string> = {
   OPEN: "bg-blue-100 text-blue-800",
@@ -155,12 +156,9 @@ export default async function WorkOrderDetailPage({
               defaultValue={workOrder.laborMinutes ?? ""}
               className="w-24 rounded-md border border-neutral-300 px-2 py-1 text-sm"
             />
-            <button
-              type="submit"
-              className="ml-auto rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium hover:bg-neutral-100"
-            >
+            <Button type="submit" variant="secondary" className="ml-auto">
               Save
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -185,12 +183,9 @@ export default async function WorkOrderDetailPage({
               placeholder="Add a note…"
               className="flex-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
             />
-            <button
-              type="submit"
-              className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium hover:bg-neutral-100"
-            >
+            <Button type="submit" variant="secondary">
               Add
-            </button>
+            </Button>
           </form>
         </div>
       </div>
@@ -214,12 +209,9 @@ export default async function WorkOrderDetailPage({
               </option>
             ))}
           </select>
-          <button
-            type="submit"
-            className="w-full rounded-md bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-800"
-          >
+          <Button type="submit" className="w-full">
             Update status
-          </button>
+          </Button>
         </form>
 
         <form
@@ -242,12 +234,9 @@ export default async function WorkOrderDetailPage({
               </option>
             ))}
           </select>
-          <button
-            type="submit"
-            className="w-full rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium hover:bg-neutral-100"
-          >
+          <Button type="submit" variant="secondary" className="w-full">
             Save assignment
-          </button>
+          </Button>
         </form>
       </div>
     </div>

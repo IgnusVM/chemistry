@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireOrgAdmin } from "@/lib/dal";
 import { categoryLabel } from "@/lib/help";
+import { buttonClass } from "@/components/button";
 
 export default async function HelpAdminPage() {
   await requireOrgAdmin();
@@ -20,10 +21,7 @@ export default async function HelpAdminPage() {
           <h1 className="text-lg font-semibold text-neutral-900">Manage help articles</h1>
           <p className="text-sm text-neutral-500">{articles.length} article{articles.length === 1 ? "" : "s"}</p>
         </div>
-        <Link
-          href="/help/admin/new"
-          className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-        >
+        <Link href="/help/admin/new" className={buttonClass()}>
           + New article
         </Link>
       </div>

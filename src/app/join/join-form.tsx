@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { joinWithInvite } from "./actions";
+import { Button } from "@/components/button";
 
 export function JoinForm({ token }: { token: string }) {
   const [state, action, pending] = useActionState(joinWithInvite, undefined);
@@ -40,13 +41,9 @@ export function JoinForm({ token }: { token: string }) {
         />
       </div>
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
-      >
-        {pending ? "Creating…" : "Create account"}
-      </button>
+      <Button type="submit" pending={pending} pendingText="Creating…" className="w-full">
+        Create account
+      </Button>
     </form>
   );
 }
