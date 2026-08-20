@@ -2,20 +2,20 @@ import { MalevolentGodLogo } from "@/components/malevolent-god-logo";
 
 const FLASK_PATH = "M20 5h8v10.5l8.4 17.6A4.2 4.2 0 0 1 32.6 39H15.4a4.2 4.2 0 0 1-3.8-5.9L20 15.5V5z";
 
-// Scattered along the belly's inner edges (kept ~1 unit inside the glass outline at
+// Scattered along the belly's inner edges (kept ~2 units inside the glass outline at
 // each height — the belly tapers from ~19-29 wide near the neck to ~15-33 at the
 // bottom, so a fixed x/y grid clips outside the glass unless computed per-row) and
 // away from the elephant emblem's bounding box (x 15-33, y 21-38).
 const BUBBLES = [
-  { x: 14.5, y: 36.5, r: 0.55 },
-  { x: 34, y: 35.5, r: 0.45 },
-  { x: 17.2, y: 23.5, r: 0.4 },
-  { x: 32, y: 25.5, r: 0.5 },
-  { x: 20.3, y: 17.8, r: 0.35 },
-  { x: 27.8, y: 17.3, r: 0.4 },
-  { x: 13.8, y: 30.5, r: 0.35 },
-  { x: 34.2, y: 31, r: 0.4 },
-  { x: 24, y: 37.8, r: 0.45 },
+  { x: 16, y: 35.5, r: 0.55 },
+  { x: 32.3, y: 34.5, r: 0.45 },
+  { x: 18.8, y: 23.5, r: 0.4 },
+  { x: 30.3, y: 25.5, r: 0.5 },
+  { x: 21.8, y: 19, r: 0.35 },
+  { x: 26.3, y: 18.5, r: 0.4 },
+  { x: 15.3, y: 30.5, r: 0.35 },
+  { x: 32.5, y: 31, r: 0.4 },
+  { x: 24, y: 36.8, r: 0.45 },
 ];
 
 export function ChemistryLogo() {
