@@ -15,7 +15,7 @@ const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
 
 const WO_TYPES = ["CORRECTIVE", "PREVENTIVE", "INSPECTION", "MODIFICATION", "DECOMMISSION"] as const;
 const WO_PRIORITIES = ["LOW", "NORMAL", "HIGH", "EVENT_CRITICAL"] as const;
-const WO_STATUSES = ["OPEN", "ASSIGNED", "IN_PROGRESS", "WAITING_PARTS", "COMPLETE", "CLOSED", "CANCELLED"] as const;
+const WO_STATUSES = ["OPEN", "IN_PROGRESS", "WAITING_PARTS", "COMPLETE", "CLOSED", "CANCELLED"] as const;
 
 const createSchema = z.object({
   description: z.string().min(1),
@@ -184,10 +184,7 @@ export async function assignWorkOrder(formData: FormData) {
   const assignedToUserId = parsed.assignedToUserId || null;
   await prisma.workOrder.update({
     where: { id: workOrder.id },
-    data: {
-      assignedToUserId,
-      status: assignedToUserId && workOrder.status === "OPEN" ? "ASSIGNED" : workOrder.status,
-    },
+    data: { assignedToUserId },
   });
 
   await recordAudit({

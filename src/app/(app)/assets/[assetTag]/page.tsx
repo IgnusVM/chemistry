@@ -11,7 +11,6 @@ import { Button, buttonClass } from "@/components/button";
 const ASSET_STATUSES = ["ACTIVE", "IN_REPAIR", "STORAGE", "RETIRED", "LOST", "DESTROYED"];
 const WO_STATUS_STYLES: Record<string, string> = {
   OPEN: "bg-blue-100 text-blue-800",
-  ASSIGNED: "bg-indigo-100 text-indigo-800",
   IN_PROGRESS: "bg-amber-100 text-amber-800",
   WAITING_PARTS: "bg-orange-100 text-orange-800",
   COMPLETE: "bg-green-100 text-green-800",

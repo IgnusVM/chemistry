@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
 import type { Prisma } from "@/generated/prisma/client";
 import { Button, buttonClass } from "@/components/button";
+import { AssignedFilterFields } from "./assigned-filter-fields";
 
 const STATUS_STYLES: Record<string, string> = {
   OPEN: "bg-blue-100 text-blue-800",
-  ASSIGNED: "bg-indigo-100 text-indigo-800",
   IN_PROGRESS: "bg-amber-100 text-amber-800",
   WAITING_PARTS: "bg-orange-100 text-orange-800",
   COMPLETE: "bg-green-100 text-green-800",
@@ -121,22 +121,12 @@ export default async function WorkOrdersPage({
             </option>
           ))}
         </select>
-        <input
-          name="assignedToName"
-          list="dept-members"
-          defaultValue={assignedToName}
-          placeholder="Assigned to…"
-          className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+        <AssignedFilterFields
+          assignedToName={assignedToName}
+          mine={mine === "1"}
+          members={members}
+          displayName={user.displayName}
         />
-        <datalist id="dept-members">
-          {members.map((m) => (
-            <option key={m.displayName} value={m.displayName} />
-          ))}
-        </datalist>
-        <label className="flex items-center gap-1.5 text-sm text-neutral-600">
-          <input type="checkbox" name="mine" value="1" defaultChecked={mine === "1"} />
-          Assigned to me
-        </label>
         <Button type="submit" variant="secondary">
           Filter
         </Button>
