@@ -25,5 +25,12 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // PWA install assets are excluded here rather than added to PUBLIC_ROUTES on
+  // purpose: a "public route" also triggers the signed-in redirect above, which
+  // would bounce /sw.js to "/" for exactly the users running the installed app.
+  // These are static files with no user data, so skipping the proxy entirely is
+  // both correct and cheaper.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|offline|apple-touch-icon.png|icon-192.png|icon-512.png|icon-maskable-512.png|zxing_reader.wasm).*)",
+  ],
 };
