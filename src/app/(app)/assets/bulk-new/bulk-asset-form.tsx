@@ -247,10 +247,6 @@ export function BulkAssetForm({
         </div>
       )}
 
-      <Field label="Notes">
-        <textarea name="notes" rows={2} className={inputClass} />
-      </Field>
-
       <div className="space-y-3 rounded-md bg-neutral-50 p-3">
         <div className="text-xs font-medium text-neutral-600">Batch group</div>
         <Field label="Group name">

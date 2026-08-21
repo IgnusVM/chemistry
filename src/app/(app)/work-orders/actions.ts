@@ -10,7 +10,8 @@ import { recordAudit } from "@/lib/audit";
 import { sendWorkOrderAssignedEmail } from "@/lib/mailer";
 import { buildAttachmentKey, uploadAttachment, deleteAttachmentObject } from "@/lib/s3";
 import { generateWorkOrderCode } from "@/lib/work-order-code";
-import { WO_TYPES, WO_PRIORITIES, WO_STATUSES, ALLOWED_ATTACHMENT_TYPES } from "@/lib/constants";
+import { WO_TYPES, WO_PRIORITIES, WO_STATUSES, ALLOWED_ATTACHMENT_TYPES, NOTE_FORMATS } from "@/lib/constants";
+import { sanitizeNoteBody } from "@/lib/notes";
 
 const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 
@@ -238,6 +239,7 @@ export async function assignWorkOrder(formData: FormData) {
 const noteSchema = z.object({
   workOrderId: z.string().min(1),
   body: z.string().min(1),
+  format: z.enum(NOTE_FORMATS),
 });
 
 export async function addWorkOrderNote(formData: FormData) {
@@ -245,11 +247,24 @@ export async function addWorkOrderNote(formData: FormData) {
   const parsed = noteSchema.parse({
     workOrderId: formData.get("workOrderId"),
     body: formData.get("body"),
+    format: formData.get("format"),
   });
   const workOrder = await requireWorkOrderAccess(parsed.workOrderId);
 
   await prisma.workOrderNote.create({
-    data: { workOrderId: workOrder.id, userId: user.id, body: parsed.body },
+    data: {
+      workOrderId: workOrder.id,
+      userId: user.id,
+      body: sanitizeNoteBody(parsed.body, parsed.format),
+      format: parsed.format,
+    },
+  });
+
+  await recordAudit({
+    entityType: "WorkOrder",
+    entityId: workOrder.id,
+    action: "note added",
+    userId: user.id,
   });
 
   revalidatePath(`/work-orders/${workOrder.code}`);

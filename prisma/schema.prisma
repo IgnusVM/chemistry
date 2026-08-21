@@ -131,6 +131,9 @@ model User {
   partOrders          PartOrder[]
   workOrderParts      WorkOrderPart[]
   bulkSelections      BulkSelection[]
+  assetNotes          AssetNote[]
+  assetCodeFiles      AssetCodeFile[]
+  assetCodeFileVersions AssetCodeFileVersion[]
 }
 
 model InviteCode {
@@ -288,7 +291,6 @@ model Asset {
   currentLocationId  String?
   customLocationText String?
   customFields       Json            @default("{}")
-  notes              String?
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
   createdByUserId    String?
@@ -302,6 +304,8 @@ model Asset {
   groupMemberships AssetGroupMember[]
   locationHistory  AssetLocationHistory[]
   workOrders       WorkOrder[]
+  notes            AssetNote[]
+  codeFiles        AssetCodeFile[]
 
   @@index([owningDepartmentId])
   @@index([assetTypeId])
@@ -397,22 +401,77 @@ model WorkOrder {
   notes          WorkOrderNote[]
   attachments    WorkOrderAttachment[]
   partsUsed      WorkOrderPart[]
+  codeFileVersions AssetCodeFileVersion[]
 
   @@index([departmentId])
   @@index([status])
   @@index([assetId])
 }
 
+enum NoteFormat {
+  HTML
+  MARKDOWN
+}
+
 model WorkOrderNote {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   workOrderId String
   userId      String?
   body        String
-  createdAt   DateTime @default(now())
+  format      NoteFormat @default(HTML)
+  createdAt   DateTime   @default(now())
 
   workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
   user      User?     @relation(fields: [userId], references: [id])
 
+  @@index([workOrderId])
+}
+
+model AssetNote {
+  id        String     @id @default(cuid())
+  assetId   String
+  userId    String?
+  body      String
+  format    NoteFormat @default(HTML)
+  createdAt DateTime   @default(now())
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id])
+
+  @@index([assetId])
+}
+
+model AssetCodeFile {
+  id              String   @id @default(cuid())
+  assetId         String
+  filename        String
+  description     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdByUserId String?
+
+  asset     Asset                  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  createdBy User?                  @relation(fields: [createdByUserId], references: [id])
+  versions  AssetCodeFileVersion[]
+
+  @@unique([assetId, filename])
+  @@index([assetId])
+}
+
+model AssetCodeFileVersion {
+  id              String   @id @default(cuid())
+  codeFileId      String
+  content         String
+  message         String?
+  createdAt       DateTime @default(now())
+  createdByUserId String?
+  workOrderId     String?
+
+  codeFile  AssetCodeFile @relation(fields: [codeFileId], references: [id], onDelete: Cascade)
+  createdBy User?         @relation(fields: [createdByUserId], references: [id])
+  workOrder WorkOrder?    @relation(fields: [workOrderId], references: [id])
+
+  @@index([codeFileId])
   @@index([workOrderId])
 }
 

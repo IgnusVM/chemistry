@@ -3,6 +3,7 @@ import { FileText } from "lucide-react";
 import { reopenWorkOrder } from "../actions";
 import { Button } from "@/components/button";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
+import { renderNoteHtml } from "@/lib/notes";
 import type { Prisma } from "@/generated/prisma/client";
 
 type ClosedWorkOrder = Prisma.WorkOrderGetPayload<{
@@ -145,7 +146,10 @@ export function ClosedWorkOrderView({
             <ul className="mt-2 divide-y divide-neutral-200">
               {workOrder.notes.map((note) => (
                 <li key={note.id} className="py-2 text-sm">
-                  <div className="text-neutral-900">{note.body}</div>
+                  <div
+                    className="prose prose-sm max-w-none text-neutral-900"
+                    dangerouslySetInnerHTML={{ __html: renderNoteHtml(note.body, note.format) }}
+                  />
                   <div className="text-xs text-neutral-400">
                     {note.user?.displayName ?? "Unknown"} · {note.createdAt.toLocaleString()}
                   </div>

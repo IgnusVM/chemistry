@@ -144,9 +144,7 @@ export function AssetForm({
         </div>
       )}
 
-      <Field label="Notes">
-        <textarea name="notes" rows={3} className={inputClass} />
-      </Field>
+      <p className="text-xs text-neutral-400">Notes and code files can be added once the asset is created.</p>
 
       <Button type="submit" pending={pending} pendingText="Creating…">
         Create asset

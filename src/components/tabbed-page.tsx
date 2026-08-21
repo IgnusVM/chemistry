@@ -5,13 +5,13 @@ import { Tabs } from "@/components/tabs";
 
 const TabContext = createContext<{ active: string; setActive: (id: string) => void } | null>(null);
 
-export function WorkOrderTabsProvider({ children }: { children: ReactNode }) {
-  const [active, setActive] = useState("details");
+export function TabbedPageProvider({ children, defaultTab = "details" }: { children: ReactNode; defaultTab?: string }) {
+  const [active, setActive] = useState(defaultTab);
   return <TabContext.Provider value={{ active, setActive }}>{children}</TabContext.Provider>;
 }
 
-/** A button anywhere inside WorkOrderTabsProvider (e.g. the action bar above
- * the tabs) that jumps to a given tab — for quick-access shortcuts like
+/** A button anywhere inside TabbedPageProvider (e.g. an action bar above the
+ * tabs) that jumps to a given tab — for quick-access shortcuts like
  * "+ Note" that don't live in the tab strip itself. */
 export function JumpToTabButton({ tabId, children }: { tabId: string; children: ReactNode }) {
   const ctx = useContext(TabContext);
@@ -26,25 +26,7 @@ export function JumpToTabButton({ tabId, children }: { tabId: string; children: 
   );
 }
 
-export function WorkOrderTabs({
-  detailsContent,
-  historyContent,
-  attachmentsContent,
-}: {
-  detailsContent: ReactNode;
-  historyContent: ReactNode;
-  attachmentsContent: ReactNode;
-}) {
+export function TabbedPageTabs({ tabs }: { tabs: { id: string; label: string; content: ReactNode }[] }) {
   const ctx = useContext(TabContext);
-  return (
-    <Tabs
-      activeTab={ctx?.active}
-      onTabChange={ctx?.setActive}
-      tabs={[
-        { id: "details", label: "Details", content: detailsContent },
-        { id: "history", label: "History", content: historyContent },
-        { id: "attachments", label: "Attachments", content: attachmentsContent },
-      ]}
-    />
-  );
+  return <Tabs activeTab={ctx?.active} onTabChange={ctx?.setActive} tabs={tabs} />;
 }

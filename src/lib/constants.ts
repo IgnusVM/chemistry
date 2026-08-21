@@ -6,6 +6,7 @@ export const ASSET_CONDITIONS = ["NEW", "GOOD", "FAIR", "POOR", "UNSERVICEABLE"]
 export const WO_TYPES = ["CORRECTIVE", "PREVENTIVE", "INSPECTION", "MODIFICATION", "DECOMMISSION"] as const;
 export const WO_PRIORITIES = ["LOW", "NORMAL", "HIGH", "EVENT_CRITICAL"] as const;
 export const WO_STATUSES = ["OPEN", "IN_PROGRESS", "WAITING_PARTS", "COMPLETE", "CLOSED", "CANCELLED"] as const;
+export const NOTE_FORMATS = ["HTML", "MARKDOWN"] as const;
 
 // Photos, PDFs, and common office docs — covers repair photos, receipts, and
 // service reports, the three things attachments get used for in practice.

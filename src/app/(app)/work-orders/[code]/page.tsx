@@ -11,10 +11,13 @@ import { AssetEditForm } from "./asset-edit-form";
 import { PartsUsedForm } from "./parts-used-form";
 import { DeleteWorkOrderPartButton } from "./delete-work-order-part-button";
 import { ClosedWorkOrderView } from "./closed-work-order-view";
-import { WorkOrderTabsProvider, WorkOrderTabs, JumpToTabButton } from "./work-order-tabs";
+import { CodeFileEditorForm } from "../../assets/[assetTag]/code/code-file-editor-form";
+import { TabbedPageProvider, TabbedPageTabs, JumpToTabButton } from "@/components/tabbed-page";
+import { AddNoteForm } from "@/components/add-note-form";
 import { Button } from "@/components/button";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
 import { WO_STATUSES } from "@/lib/constants";
+import { renderNoteHtml } from "@/lib/notes";
 
 export default async function WorkOrderDetailPage({
   params,
@@ -73,6 +76,14 @@ export default async function WorkOrderDetailPage({
         })
       : Promise.resolve([]),
   ]);
+
+  const codeFiles = workOrder.assetId
+    ? await prisma.assetCodeFile.findMany({
+        where: { assetId: workOrder.assetId },
+        orderBy: { filename: "asc" },
+        include: { versions: { orderBy: { createdAt: "desc" }, take: 1 } },
+      })
+    : [];
 
   const detailsContent = (
     <>
@@ -159,26 +170,43 @@ export default async function WorkOrderDetailPage({
           {workOrder.notes.length === 0 && <li className="py-2 text-sm text-neutral-500">No notes yet.</li>}
           {workOrder.notes.map((note) => (
             <li key={note.id} className="py-2 text-sm">
-              <div className="text-neutral-900">{note.body}</div>
+              <div
+                className="prose prose-sm max-w-none text-neutral-900"
+                dangerouslySetInnerHTML={{ __html: renderNoteHtml(note.body, note.format) }}
+              />
               <div className="text-xs text-neutral-400">
                 {note.user?.displayName ?? "Unknown"} · {note.createdAt.toLocaleString()}
               </div>
             </li>
           ))}
         </ul>
-        <form action={addWorkOrderNote} className="mt-3 flex gap-2">
-          <input type="hidden" name="workOrderId" value={workOrder.id} />
-          <input
-            name="body"
-            required
-            placeholder="Add a note…"
-            className="flex-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
-          />
-          <Button type="submit" variant="secondary">
-            Add
-          </Button>
-        </form>
+        <AddNoteForm action={addWorkOrderNote} hiddenFieldName="workOrderId" hiddenFieldValue={workOrder.id} />
       </div>
+
+      {codeFiles.length > 0 && (
+        <div className="space-y-4 rounded-md border border-neutral-200 bg-white p-4">
+          <div>
+            <h2 className="text-sm font-semibold text-neutral-900">Code</h2>
+            <p className="text-xs text-neutral-500">
+              Editing here saves a new version to the asset&rsquo;s code file, linked to this ticket.
+            </p>
+          </div>
+          {codeFiles.map((file) => (
+            <div key={file.id} className="space-y-1">
+              <div className="text-xs font-medium text-neutral-600">
+                {file.filename}
+                {file.description && <span className="ml-1 font-normal text-neutral-400">— {file.description}</span>}
+              </div>
+              <CodeFileEditorForm
+                codeFileId={file.id}
+                filename={file.filename}
+                currentContent={file.versions[0]?.content ?? ""}
+                workOrderId={workOrder.id}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 
@@ -290,7 +318,7 @@ export default async function WorkOrderDetailPage({
         <InfoTile label="Reported" value={workOrder.reportedAt.toLocaleDateString()} />
       </div>
 
-      <WorkOrderTabsProvider>
+      <TabbedPageProvider>
         <div className="flex flex-wrap items-end gap-3 rounded-md border border-neutral-200 bg-white p-3">
           <form action={updateWorkOrderStatus} className="flex items-end gap-2">
             <input type="hidden" name="workOrderId" value={workOrder.id} />
@@ -356,8 +384,14 @@ export default async function WorkOrderDetailPage({
           </div>
         </div>
 
-        <WorkOrderTabs detailsContent={detailsContent} historyContent={historyContent} attachmentsContent={attachmentsContent} />
-      </WorkOrderTabsProvider>
+        <TabbedPageTabs
+          tabs={[
+            { id: "details", label: "Details", content: detailsContent },
+            { id: "history", label: "History", content: historyContent },
+            { id: "attachments", label: "Attachments", content: attachmentsContent },
+          ]}
+        />
+      </TabbedPageProvider>
     </div>
   );
 }

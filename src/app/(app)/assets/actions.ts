@@ -8,7 +8,8 @@ import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { buildCustomFieldsSchema, type CustomFieldDef } from "@/lib/custom-fields";
 import { parseLocationInput } from "@/lib/location-input";
-import { ASSET_STATUSES, ASSET_CONDITIONS } from "@/lib/constants";
+import { ASSET_STATUSES, ASSET_CONDITIONS, NOTE_FORMATS } from "@/lib/constants";
+import { sanitizeNoteBody } from "@/lib/notes";
 import type { Prisma } from "@/generated/prisma/client";
 
 const baseAssetSchema = z.object({
@@ -20,7 +21,6 @@ const baseAssetSchema = z.object({
   status: z.enum(ASSET_STATUSES),
   condition: z.enum(ASSET_CONDITIONS),
   acquisitionCost: z.coerce.number().nonnegative().optional(),
-  notes: z.string().optional(),
 });
 
 export type AssetFormState = { error?: string } | undefined;
@@ -40,7 +40,6 @@ export async function createAsset(
     status: formData.get("status"),
     condition: formData.get("condition"),
     acquisitionCost: formData.get("acquisitionCost") || undefined,
-    notes: formData.get("notes") || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -87,7 +86,6 @@ export async function createAsset(
       acquisitionCost: parsed.data.acquisitionCost,
       currentLocationId: location.locationId,
       customLocationText: location.customLocationText,
-      notes: parsed.data.notes,
       customFields,
       createdByUserId: user.id,
     },
@@ -216,6 +214,43 @@ export async function moveAsset(formData: FormData) {
     action: "moved",
     userId: user.id,
     changes: { locationId: location.locationId, customLocationText: location.customLocationText },
+  });
+
+  revalidatePath(`/assets/${asset.assetTag}`);
+}
+
+const assetNoteSchema = z.object({
+  assetId: z.string().min(1),
+  body: z.string().min(1),
+  format: z.enum(NOTE_FORMATS),
+});
+
+export async function addAssetNote(formData: FormData) {
+  const user = await requireCurrentUser();
+  const parsed = assetNoteSchema.parse({
+    assetId: formData.get("assetId"),
+    body: formData.get("body"),
+    format: formData.get("format"),
+  });
+
+  const asset = await prisma.asset.findUniqueOrThrow({ where: { id: parsed.assetId } });
+  const allowed = await hasDepartmentAccess(asset.owningDepartmentId, "MEMBER");
+  if (!allowed) throw new Error("Not authorized");
+
+  await prisma.assetNote.create({
+    data: {
+      assetId: asset.id,
+      userId: user.id,
+      body: sanitizeNoteBody(parsed.body, parsed.format),
+      format: parsed.format,
+    },
+  });
+
+  await recordAudit({
+    entityType: "Asset",
+    entityId: asset.id,
+    action: "note added",
+    userId: user.id,
   });
 
   revalidatePath(`/assets/${asset.assetTag}`);

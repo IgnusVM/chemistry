@@ -18,7 +18,6 @@ const baseSchema = z.object({
   status: z.enum(ASSET_STATUSES),
   condition: z.enum(ASSET_CONDITIONS),
   acquisitionCost: z.coerce.number().nonnegative().optional(),
-  notes: z.string().optional(),
   groupName: z.string().min(1),
   groupDescription: z.string().optional(),
 });
@@ -38,7 +37,6 @@ export async function createAssetBatch(
     status: formData.get("status"),
     condition: formData.get("condition"),
     acquisitionCost: formData.get("acquisitionCost") || undefined,
-    notes: formData.get("notes") || undefined,
     groupName: formData.get("groupName"),
     groupDescription: formData.get("groupDescription") || undefined,
   });
@@ -120,7 +118,6 @@ export async function createAssetBatch(
         acquisitionCost: parsed.data.acquisitionCost,
         currentLocationId: location.locationId,
         customLocationText: location.customLocationText,
-        notes: parsed.data.notes,
         customFields,
         createdByUserId: user.id,
       })),
