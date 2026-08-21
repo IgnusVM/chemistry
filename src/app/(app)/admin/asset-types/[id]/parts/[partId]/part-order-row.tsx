@@ -4,19 +4,22 @@ import { useState, useTransition } from "react";
 import { updatePartOrder, type PartOrderFormState } from "../../../actions";
 import { DeletePartOrderButton } from "./delete-part-order-button";
 import { Button } from "@/components/button";
+import { UserBadgeLabel } from "@/components/user-badge";
+import type { ResolvedBadge } from "@/lib/user-badge-data";
 
 const inputClass = "rounded-md border border-neutral-300 px-2 py-1 text-sm";
 
 export function PartOrderRow({
   order,
+  createdByBadge,
 }: {
   order: {
     id: string;
     price: string | null;
     quantity: number;
     orderedAt: Date;
-    createdBy: { displayName: string } | null;
   };
+  createdByBadge: ResolvedBadge | null;
 }) {
   const [editing, setEditing] = useState(false);
   const [state, setState] = useState<PartOrderFormState>(undefined);
@@ -92,7 +95,9 @@ export function PartOrderRow({
         </span>
         <span className="ml-2 text-neutral-500">qty {order.quantity}</span>
         <span className="ml-2 text-neutral-500">{order.orderedAt.toLocaleDateString()}</span>
-        <div className="text-xs text-neutral-400">Logged by {order.createdBy?.displayName ?? "Unknown"}</div>
+        <div className="text-xs text-neutral-400">
+          Logged by <UserBadgeLabel badge={createdByBadge} />
+        </div>
       </div>
       <div className="flex items-center gap-3">
         <button type="button" onClick={() => setEditing(true)} className="text-xs text-neutral-400 hover:text-neutral-700">

@@ -18,6 +18,8 @@ import { Button } from "@/components/button";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
 import { WO_STATUSES } from "@/lib/constants";
 import { renderNoteHtml } from "@/lib/notes";
+import { resolveBadge, resolveBadges } from "@/lib/user-badge-data";
+import { UserBadge, UserBadgeLabel } from "@/components/user-badge";
 
 export default async function WorkOrderDetailPage({
   params,
@@ -44,7 +46,20 @@ export default async function WorkOrderDetailPage({
 
   if (workOrder.status === "CLOSED") {
     const attachmentUrls = await Promise.all(workOrder.attachments.map((a) => getAttachmentUrl(a.s3Key)));
-    return <ClosedWorkOrderView workOrder={workOrder} attachmentUrls={attachmentUrls} />;
+    const [reportedByBadge, assignedToBadge, noteBadges] = await Promise.all([
+      resolveBadge(workOrder.reportedBy),
+      resolveBadge(workOrder.assignedTo),
+      resolveBadges(workOrder.notes.map((n) => n.user)),
+    ]);
+    return (
+      <ClosedWorkOrderView
+        workOrder={workOrder}
+        attachmentUrls={attachmentUrls}
+        reportedByBadge={reportedByBadge}
+        assignedToBadge={assignedToBadge}
+        noteBadges={noteBadges}
+      />
+    );
   }
 
   const [departmentMembers, resolutionCodes, attachmentUrls, assets, knownParts, otherWorkOrders] = await Promise.all([
@@ -84,6 +99,13 @@ export default async function WorkOrderDetailPage({
         include: { versions: { orderBy: { createdAt: "desc" }, take: 1 } },
       })
     : [];
+
+  const [reportedByBadge, assignedToBadge, noteBadges, attachmentBadges] = await Promise.all([
+    resolveBadge(workOrder.reportedBy),
+    resolveBadge(workOrder.assignedTo),
+    resolveBadges(workOrder.notes.map((n) => n.user)),
+    resolveBadges(workOrder.attachments.map((a) => a.uploadedBy)),
+  ]);
 
   const detailsContent = (
     <>
@@ -168,14 +190,14 @@ export default async function WorkOrderDetailPage({
         <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
         <ul className="mt-2 divide-y divide-neutral-200">
           {workOrder.notes.length === 0 && <li className="py-2 text-sm text-neutral-500">No notes yet.</li>}
-          {workOrder.notes.map((note) => (
+          {workOrder.notes.map((note, i) => (
             <li key={note.id} className="py-2 text-sm">
               <div
                 className="prose prose-sm max-w-none text-neutral-900"
                 dangerouslySetInnerHTML={{ __html: renderNoteHtml(note.body, note.format) }}
               />
               <div className="text-xs text-neutral-400">
-                {note.user?.displayName ?? "Unknown"} · {note.createdAt.toLocaleString()}
+                <UserBadgeLabel badge={noteBadges[i]} /> · {note.createdAt.toLocaleString()}
               </div>
             </li>
           ))}
@@ -263,7 +285,7 @@ export default async function WorkOrderDetailPage({
                 )}
               </a>
               <div className="flex items-center justify-between text-xs text-neutral-500">
-                <span className="truncate">{attachment.uploadedBy?.displayName ?? "Unknown"}</span>
+                <span className="truncate"><UserBadgeLabel badge={attachmentBadges[i]} /></span>
                 <DeleteAttachmentButton attachmentId={attachment.id} />
               </div>
             </div>
@@ -302,12 +324,18 @@ export default async function WorkOrderDetailPage({
             )
           }
         />
-        <InfoTile label="Assigned to" value={workOrder.assignedTo?.displayName ?? "Unassigned"} />
+        <InfoTile
+          label="Assigned to"
+          value={
+            workOrder.assignedTo ? <UserBadgeLabel badge={assignedToBadge} /> : "Unassigned"
+          }
+        />
         <InfoTile
           label="Reported by"
           value={
             workOrder.reportedBy ? (
-              <Link href={`/users/${workOrder.reportedBy.id}`} className="hover:underline">
+              <Link href={`/users/${workOrder.reportedBy.id}`} className="inline-flex items-center gap-1.5 hover:underline">
+                <UserBadge badge={reportedByBadge} />
                 {workOrder.reportedBy.displayName}
               </Link>
             ) : (

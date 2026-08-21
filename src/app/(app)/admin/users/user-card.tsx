@@ -6,10 +6,13 @@ import { MembershipRow } from "./membership-row";
 import { OrgAdminToggle } from "./org-admin-toggle";
 import { EditUserProfileForm } from "./edit-user-profile-form";
 import { DeleteUserButton } from "./delete-user-button";
+import { UserBadge } from "@/components/user-badge";
+import type { ResolvedBadge } from "@/lib/user-badge-data";
 
 export function UserCard({
   user,
   departments,
+  badge,
 }: {
   user: {
     id: string;
@@ -20,6 +23,7 @@ export function UserCard({
     memberships: { departmentId: string; department: { name: string }; role: "VIEWER" | "MEMBER" | "LEAD" }[];
   };
   departments: { id: string; name: string }[];
+  badge: ResolvedBadge | null;
 }) {
   const [editing, setEditing] = useState(false);
 
@@ -27,7 +31,8 @@ export function UserCard({
     <div className="rounded-md border border-neutral-200 bg-white p-4">
       <div className="flex items-center justify-between">
         <div>
-          <div className="font-medium text-neutral-900">
+          <div className="flex items-center gap-1.5 font-medium text-neutral-900">
+            <UserBadge badge={badge} size="md" />
             {user.displayName}
             {user.name && <span className="ml-1 font-normal text-neutral-500">({user.name})</span>}
           </div>

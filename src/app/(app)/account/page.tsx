@@ -3,8 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { PinForm } from "./pin-form";
 import { ProfileForm } from "./profile-form";
 import { ContactForm } from "./contact-form";
+import { AvatarForm } from "./avatar-form";
+import { BadgeForm } from "./badge-form";
 import { RevokeDeviceButton } from "./revoke-device-button";
 import { clearPin } from "./actions";
+import { getAttachmentUrl } from "@/lib/s3";
 
 export default async function AccountPage() {
   const user = await requireCurrentUser();
@@ -12,6 +15,7 @@ export default async function AccountPage() {
     where: { userId: user.id },
     orderBy: { lastUsedAt: "desc" },
   });
+  const avatarUrl = user.avatarS3Key ? await getAttachmentUrl(user.avatarS3Key) : null;
 
   return (
     <div className="max-w-xl space-y-6">
@@ -21,6 +25,10 @@ export default async function AccountPage() {
       </div>
 
       <ProfileForm displayName={user.displayName} name={user.name} />
+
+      <AvatarForm avatarUrl={avatarUrl} />
+
+      <BadgeForm badgeIcon={user.badgeIcon} badgeColor={user.badgeColor} isOrgAdmin={user.isOrgAdmin} />
 
       <ContactForm
         phone={user.phone}

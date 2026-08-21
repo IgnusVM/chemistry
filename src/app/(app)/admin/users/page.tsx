@@ -4,6 +4,7 @@ import { UserForm } from "./user-form";
 import { UserCard } from "./user-card";
 import { InviteGenerator } from "./invite-generator";
 import { RevokeInviteButton } from "./revoke-invite-button";
+import { resolveBadges } from "@/lib/user-badge-data";
 
 export default async function UsersAdminPage() {
   await requireOrgAdmin();
@@ -19,6 +20,7 @@ export default async function UsersAdminPage() {
       include: { createdBy: true },
     }),
   ]);
+  const badges = await resolveBadges(users);
 
   return (
     <div className="space-y-6">
@@ -54,8 +56,8 @@ export default async function UsersAdminPage() {
       <UserForm />
 
       <div className="space-y-3">
-        {users.map((user) => (
-          <UserCard key={user.id} user={user} departments={departments} />
+        {users.map((user, i) => (
+          <UserCard key={user.id} user={user} departments={departments} badge={badges[i]} />
         ))}
       </div>
     </div>

@@ -7,6 +7,8 @@ import { AddPartLinkForm } from "./add-part-link-form";
 import { PartLinkRow } from "./part-link-row";
 import { PartOrderRow } from "./part-order-row";
 import { EditPartHeaderForm } from "./edit-part-header-form";
+import { resolveBadges } from "@/lib/user-badge-data";
+import { UserBadgeLabel } from "@/components/user-badge";
 
 export default async function PartDetailPage({
   params,
@@ -31,6 +33,12 @@ export default async function PartDetailPage({
   });
   if (!part || part.assetTypeId !== id) notFound();
 
+  const [linkBadges, orderBadges, useBadges] = await Promise.all([
+    resolveBadges(part.links.map((l) => l.createdBy)),
+    resolveBadges(part.orders.map((o) => o.createdBy)),
+    resolveBadges(part.workOrderUses.map((u) => u.createdBy)),
+  ]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -47,10 +55,11 @@ export default async function PartDetailPage({
         <p className="text-xs text-neutral-500">Where to buy it and roughly what it costs — no order required.</p>
         {part.links.length > 0 ? (
           <ul className="mt-3 divide-y divide-neutral-200">
-            {part.links.map((link) => (
+            {part.links.map((link, i) => (
               <PartLinkRow
                 key={link.id}
                 link={{ ...link, price: link.price?.toString() ?? null }}
+                createdByBadge={linkBadges[i]}
               />
             ))}
           </ul>
@@ -64,10 +73,11 @@ export default async function PartDetailPage({
         <h2 className="text-sm font-semibold text-neutral-900">Order history</h2>
         {part.orders.length > 0 ? (
           <ul className="mt-3 divide-y divide-neutral-200">
-            {part.orders.map((order) => (
+            {part.orders.map((order, i) => (
               <PartOrderRow
                 key={order.id}
                 order={{ ...order, price: order.price?.toString() ?? null }}
+                createdByBadge={orderBadges[i]}
               />
             ))}
           </ul>
@@ -81,14 +91,14 @@ export default async function PartDetailPage({
         <h2 className="text-sm font-semibold text-neutral-900">Used on work orders</h2>
         {part.workOrderUses.length > 0 ? (
           <ul className="mt-3 divide-y divide-neutral-200">
-            {part.workOrderUses.map((use) => (
+            {part.workOrderUses.map((use, i) => (
               <li key={use.id} className="py-2 text-sm">
                 <Link href={`/work-orders/${use.workOrder.code}`} className="font-medium text-neutral-900 hover:underline">
                   {use.workOrder.code}
                 </Link>
                 <span className="ml-2 text-neutral-500">qty {use.quantity}</span>
                 <span className="ml-2 text-xs text-neutral-400">
-                  {use.createdBy?.displayName ?? "Unknown"} · {use.createdAt.toLocaleDateString()}
+                  <UserBadgeLabel badge={useBadges[i]} /> · {use.createdAt.toLocaleDateString()}
                 </span>
               </li>
             ))}

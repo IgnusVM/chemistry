@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { requireCurrentUser } from "@/lib/dal";
 import { logout } from "@/lib/auth-actions";
+import { resolveBadge } from "@/lib/user-badge-data";
+import { UserBadge } from "@/components/user-badge";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireCurrentUser();
+  const badge = await resolveBadge(user);
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-50">
@@ -32,7 +35,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Link>
           </nav>
           <div className="flex items-center gap-3 text-sm text-neutral-600">
-            <Link href="/account" className="hover:text-neutral-900">
+            <Link href="/account" className="inline-flex items-center gap-1.5 hover:text-neutral-900">
+              <UserBadge badge={badge} />
               {user.displayName}
             </Link>
             <form action={logout}>

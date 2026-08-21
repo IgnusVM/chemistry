@@ -4,13 +4,17 @@ import { useState, useTransition } from "react";
 import { updatePartLink, type PartLinkFormState } from "../../../actions";
 import { DeletePartLinkButton } from "./delete-part-link-button";
 import { Button } from "@/components/button";
+import { UserBadgeLabel } from "@/components/user-badge";
+import type { ResolvedBadge } from "@/lib/user-badge-data";
 
 const inputClass = "rounded-md border border-neutral-300 px-2 py-1 text-sm";
 
 export function PartLinkRow({
   link,
+  createdByBadge,
 }: {
-  link: { id: string; url: string; price: string | null; createdBy: { displayName: string } | null };
+  link: { id: string; url: string; price: string | null };
+  createdByBadge: ResolvedBadge | null;
 }) {
   const [editing, setEditing] = useState(false);
   const [state, setState] = useState<PartLinkFormState>(undefined);
@@ -70,7 +74,9 @@ export function PartLinkRow({
           {link.url}
         </a>
         {link.price && <span className="ml-2 text-neutral-500">${link.price.toString()}</span>}
-        <div className="text-xs text-neutral-400">Added by {link.createdBy?.displayName ?? "Unknown"}</div>
+        <div className="text-xs text-neutral-400">
+          Added by <UserBadgeLabel badge={createdByBadge} />
+        </div>
       </div>
       <div className="flex items-center gap-3">
         <button type="button" onClick={() => setEditing(true)} className="text-xs text-neutral-400 hover:text-neutral-700">

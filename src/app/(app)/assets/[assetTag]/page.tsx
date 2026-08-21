@@ -10,6 +10,8 @@ import { Button, buttonClass } from "@/components/button";
 import { ASSET_STATUSES } from "@/lib/constants";
 import { WORK_ORDER_STATUS_STYLES } from "@/lib/status-styles";
 import { renderNoteHtml } from "@/lib/notes";
+import { resolveBadges } from "@/lib/user-badge-data";
+import { UserBadgeLabel } from "@/components/user-badge";
 import { TabbedPageProvider, TabbedPageTabs, JumpToTabButton } from "@/components/tabbed-page";
 import { AddNoteForm } from "@/components/add-note-form";
 import { CreateCodeFileForm } from "./code/create-code-file-form";
@@ -153,19 +155,21 @@ export default async function AssetDetailPage({
     </>
   );
 
+  const noteBadges = await resolveBadges(asset.notes.map((n) => n.user));
+
   const notesContent = (
     <div id="notes-section" className="rounded-md border border-neutral-200 bg-white p-4">
       <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
       <ul className="mt-2 divide-y divide-neutral-200">
         {asset.notes.length === 0 && <li className="py-2 text-sm text-neutral-500">No notes yet.</li>}
-        {asset.notes.map((note) => (
+        {asset.notes.map((note, i) => (
           <li key={note.id} className="py-2 text-sm">
             <div
               className="prose prose-sm max-w-none text-neutral-900"
               dangerouslySetInnerHTML={{ __html: renderNoteHtml(note.body, note.format) }}
             />
             <div className="text-xs text-neutral-400">
-              {note.user?.displayName ?? "Unknown"} · {note.createdAt.toLocaleString()}
+              <UserBadgeLabel badge={noteBadges[i]} /> · {note.createdAt.toLocaleString()}
             </div>
           </li>
         ))}

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
+import { resolveBadge } from "@/lib/user-badge-data";
+import { UserBadge } from "@/components/user-badge";
 
 export default async function UserContactPage({
   params,
@@ -15,6 +17,7 @@ export default async function UserContactPage({
     include: { memberships: { include: { department: true } } },
   });
   if (!user) notFound();
+  const badge = await resolveBadge(user);
 
   const duringBurnMethods = [
     user.contactDuringBurnCell && "Cell",
@@ -24,7 +27,8 @@ export default async function UserContactPage({
   return (
     <div className="max-w-xl space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">
+        <h1 className="flex items-center gap-2 text-lg font-semibold text-neutral-900">
+          <UserBadge badge={badge} size="md" />
           {user.displayName}
           {user.name && ` (${user.name})`}
         </h1>
