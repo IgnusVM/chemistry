@@ -154,7 +154,7 @@ export default async function AssetDetailPage({
   );
 
   const notesContent = (
-    <div className="rounded-md border border-neutral-200 bg-white p-4">
+    <div id="notes-section" className="rounded-md border border-neutral-200 bg-white p-4">
       <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
       <ul className="mt-2 divide-y divide-neutral-200">
         {asset.notes.length === 0 && <li className="py-2 text-sm text-neutral-500">No notes yet.</li>}
@@ -196,7 +196,9 @@ export default async function AssetDetailPage({
           </details>
         </div>
       ))}
-      <CreateCodeFileForm assetId={asset.id} />
+      <div id="code-section">
+        <CreateCodeFileForm assetId={asset.id} />
+      </div>
     </>
   );
 
@@ -313,17 +315,17 @@ export default async function AssetDetailPage({
           </form>
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
-            <JumpToTabButton tabId="notes">+ Note</JumpToTabButton>
-            <JumpToTabButton tabId="code">+ Code</JumpToTabButton>
+            <JumpToTabButton tabId="notes" scrollToId="notes-section">+ Note</JumpToTabButton>
+            <JumpToTabButton tabId="code" scrollToId="code-section">+ Code</JumpToTabButton>
           </div>
         </div>
 
         <TabbedPageTabs
           tabs={[
-            { id: "details", label: "Details", content: detailsContent },
-            { id: "notes", label: "Notes", content: notesContent },
-            { id: "code", label: "Code", content: codeContent },
-            { id: "history", label: "History", content: historyContent },
+            { id: "details", label: "Details", content: detailsContent, color: "fuchsia" },
+            { id: "notes", label: "Notes", content: notesContent, color: "blue" },
+            { id: "code", label: "Code", content: codeContent, color: "violet" },
+            { id: "history", label: "History", content: historyContent, color: "amber" },
           ]}
         />
       </TabbedPageProvider>

@@ -19,6 +19,23 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Every interactive element gets a visible focus ring, app-wide — most
+   small inline buttons (Edit/Cancel/Remove links, tab strips) are plain
+   `<button>`s that don't go through the shared <Button> component and
+   had no keyboard-focus affordance at all. */
+@layer base {
+  button:focus-visible,
+  a:focus-visible,
+  select:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid #c026d3;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
 @keyframes sparkle-pop {
   0%,
   100% {
