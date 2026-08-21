@@ -107,6 +107,18 @@ export async function deleteUser(userId: string) {
   }
 
   const target = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+
+  // Their past loans survive deletion with an "Unknown" borrower, but anything
+  // still in their hands has to be accounted for first or the item is simply lost.
+  const outstanding = await prisma.assetLoan.count({
+    where: { borrowerUserId: userId, checkedInAt: null },
+  });
+  if (outstanding > 0) {
+    throw new Error(
+      `${target.displayName} still has ${outstanding} item${outstanding === 1 ? "" : "s"} checked out. Check them in first.`,
+    );
+  }
+
   if (target.isOrgAdmin) {
     const otherAdminCount = await prisma.user.count({ where: { isOrgAdmin: true, id: { not: userId } } });
     if (otherAdminCount === 0) {

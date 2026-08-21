@@ -17,6 +17,7 @@ export function EditAssetTypeForm({
     model: string | null;
     defaultDepartmentId: string | null;
     defaultAcquisitionCost: string | null;
+    loanable: boolean;
     customFieldSchema: CustomFieldDef[];
   };
   departments: { id: string; name: string }[];
@@ -94,6 +95,16 @@ export function EditAssetTypeForm({
       <p className="text-xs text-neutral-400">
         Pre-fills each new asset&rsquo;s value at creation — editable per-asset afterward.
       </p>
+
+      <label className="flex items-start gap-2 text-sm text-neutral-700">
+        <input type="checkbox" name="loanable" defaultChecked={assetType.loanable} className="mt-0.5" />
+        <span>
+          These get checked in and out
+          <span className="block text-xs text-neutral-400">
+            Adds a Loans tab to every asset of this type, for tools that get borrowed and returned.
+          </span>
+        </span>
+      </label>
 
       <FieldBuilder rows={rows} setRows={setRows} />
 

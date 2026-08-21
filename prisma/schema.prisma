@@ -95,6 +95,52 @@ model Department {
   assetTypes  AssetType[]
   assets      Asset[]
   workOrders  WorkOrder[]
+  loanPrivileges AssetLoanPrivilege[]
+}
+
+/// Grants one user the right to check assets in and out for one department.
+/// Deliberately NOT a flag on DepartmentMembership: a department lead can hand
+/// this to someone who isn't a member of their department (e.g. a Lamplighter
+/// borrowing APW tools), and that shouldn't silently make them a member.
+model AssetLoanPrivilege {
+  id              String   @id @default(cuid())
+  userId          String
+  departmentId    String
+  grantedByUserId String?
+  createdAt       DateTime @default(now())
+
+  user       User       @relation("LoanPrivilegeUser", fields: [userId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  grantedBy  User?      @relation("LoanPrivilegeGrantedBy", fields: [grantedByUserId], references: [id])
+
+  @@unique([userId, departmentId])
+  @@index([departmentId])
+}
+
+/// Append-only loan log. An open loan is a row with checkedInAt = null; a
+/// partial unique index (see the migration) enforces at most one of those per
+/// asset, so the same tool can't be checked out twice.
+model AssetLoan {
+  id                 String    @id @default(cuid())
+  assetId            String
+  // Nullable so deleting a user doesn't hit an FK wall — the log survives with
+  // an "Unknown" borrower, matching every other User relation here. deleteUser
+  // separately refuses while the user still has anything checked out.
+  borrowerUserId     String?
+  checkedOutByUserId String?
+  checkedOutAt       DateTime  @default(now())
+  checkedOutNotes    String?
+  checkedInAt        DateTime?
+  checkedInByUserId  String?
+  checkedInNotes     String?
+
+  asset        Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  borrower     User? @relation("LoanBorrower", fields: [borrowerUserId], references: [id])
+  checkedOutBy User? @relation("LoanCheckedOutBy", fields: [checkedOutByUserId], references: [id])
+  checkedInBy  User? @relation("LoanCheckedInBy", fields: [checkedInByUserId], references: [id])
+
+  @@index([assetId])
+  @@index([borrowerUserId])
 }
 
 model User {
@@ -138,6 +184,11 @@ model User {
   assetNotes          AssetNote[]
   assetCodeFiles      AssetCodeFile[]
   assetCodeFileVersions AssetCodeFileVersion[]
+  loanPrivileges      AssetLoanPrivilege[]   @relation("LoanPrivilegeUser")
+  loanPrivilegesGranted AssetLoanPrivilege[] @relation("LoanPrivilegeGrantedBy")
+  borrowedLoans       AssetLoan[]            @relation("LoanBorrower")
+  loansCheckedOut     AssetLoan[]            @relation("LoanCheckedOutBy")
+  loansCheckedIn      AssetLoan[]            @relation("LoanCheckedInBy")
 }
 
 model InviteCode {
@@ -210,6 +261,9 @@ model AssetType {
   defaultDepartmentId String?
   defaultAcquisitionCost Decimal? @db.Decimal(10, 2)
   customFieldSchema   Json     @default("[]")
+  // Opt-in: tools get checked in and out, deployed fleet assets don't. Off by
+  // default so the Loans tab only appears where borrowing is a real concept.
+  loanable            Boolean  @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -328,6 +382,7 @@ model Asset {
   workOrders       WorkOrder[]
   notes            AssetNote[]
   codeFiles        AssetCodeFile[]
+  loans            AssetLoan[]
 
   @@index([owningDepartmentId])
   @@index([assetTypeId])

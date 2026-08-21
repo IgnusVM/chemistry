@@ -398,6 +398,26 @@ Every asset and every work order is owned by exactly one department. A departmen
 Separately, a user can be flagged as an **org admin**, which is unrelated to any specific department — it grants access to the entire **Admin** tab (divisions, departments, users, asset types, resolution codes, locations) across the whole org, not just one department's data. Org admin should be reserved for people who actually need to reconfigure shared structural data, not handed out by default.`,
   },
   {
+    slug: "checking-tools-in-and-out",
+    title: "Checking tools in and out",
+    category: "assets",
+    order: 60,
+    summary: "Borrow and return shared gear, and control who's allowed to.",
+    body: `Some assets are things people borrow and bring back — APW's tools being the obvious case. Those get a **Loans** tab on their detail page where you check them out, check them back in, and see everywhere they've been.
+
+**Turning it on.** The Loans tab only appears for asset types marked as loanable, set by an org admin on the asset type (**Admin → Asset Types**, "These get checked in and out"). This is deliberately opt-in: a deployed Lamplighter lantern isn't something anyone checks out, so it shouldn't carry a tab implying otherwise. Flip it on for tool-like types only.
+
+**Checking something out.** Open the asset, go to **Loans**, add a note if it's useful ("taking it to the build site"), and check it out. The asset detail page then shows an amber **Checked out to …** badge in its header, so anyone who scans that tag immediately sees who has it without opening a tab. An item can only be checked out to one person at a time — the database enforces this, so two people tapping the button at once can't both succeed.
+
+**Checking it back in.** Anyone with check-out access for that department can check an item in, not just the person who took it. That's intentional: gear comes back to whoever happens to be at the container, and making the borrower do it personally would just mean it never gets logged. You can record its condition on return, which is worth doing when something comes back worse than it left.
+
+**Who's allowed.** Check-out access is granted per department. Anyone with **Lead** status in a department can grant it for *that department only*, and org admins can grant it for any department. Department leads and org admins always have access themselves without being listed. Manage it at **Loans → Check-out access**, or from the "Manage access" link on any loanable asset.
+
+Granting someone access to a department's tools does **not** make them a member of that department — a Lamplighter can be given access to borrow APW gear without joining APW.
+
+**Seeing what's out.** The **Loans** page lists everything currently checked out across the departments you can see, oldest first, so the things that have been out longest surface at the top. It's the page to open when you're trying to work out where something went.`,
+  },
+  {
     slug: "troubleshooting-faq",
     title: "Troubleshooting & FAQ",
     category: "troubleshooting",

@@ -17,6 +17,7 @@ const assetTypeSchema = z.object({
   model: z.string().optional(),
   defaultDepartmentId: z.string().optional(),
   defaultAcquisitionCost: z.coerce.number().nonnegative().optional(),
+  loanable: z.boolean(),
   customFieldSchema: z.string(),
 });
 
@@ -34,6 +35,7 @@ export async function createAssetType(
     model: formData.get("model") || undefined,
     defaultDepartmentId: formData.get("defaultDepartmentId") || undefined,
     defaultAcquisitionCost: formData.get("defaultAcquisitionCost") || undefined,
+    loanable: formData.get("loanable") === "on",
     customFieldSchema: formData.get("customFieldSchema") || "[]",
   });
   if (!parsed.success) {
@@ -54,6 +56,7 @@ export async function createAssetType(
       model: parsed.data.model,
       defaultDepartmentId: parsed.data.defaultDepartmentId || null,
       defaultAcquisitionCost: parsed.data.defaultAcquisitionCost ?? null,
+      loanable: parsed.data.loanable,
       customFieldSchema: fieldDefs,
     },
   });
@@ -86,6 +89,7 @@ export async function updateAssetType(
     model: formData.get("model") || undefined,
     defaultDepartmentId: formData.get("defaultDepartmentId") || undefined,
     defaultAcquisitionCost: formData.get("defaultAcquisitionCost") || undefined,
+    loanable: formData.get("loanable") === "on",
     customFieldSchema: formData.get("customFieldSchema") || "[]",
   });
   if (!parsed.success) {
@@ -107,6 +111,7 @@ export async function updateAssetType(
       model: parsed.data.model,
       defaultDepartmentId: parsed.data.defaultDepartmentId || null,
       defaultAcquisitionCost: parsed.data.defaultAcquisitionCost ?? null,
+      loanable: parsed.data.loanable,
       customFieldSchema: fieldDefs,
     },
   });

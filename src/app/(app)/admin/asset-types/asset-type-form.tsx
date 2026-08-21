@@ -43,6 +43,16 @@ export function AssetTypeForm({
         </div>
       </div>
 
+      <label className="flex items-start gap-2 text-sm text-neutral-700">
+        <input type="checkbox" name="loanable" className="mt-0.5" />
+        <span>
+          These get checked in and out
+          <span className="block text-xs text-neutral-400">
+            Adds a Loans tab to every asset of this type, for tools that get borrowed and returned.
+          </span>
+        </span>
+      </label>
+
       <FieldBuilder rows={rows} setRows={setRows} />
 
       <Button type="submit" pending={pending} pendingText="Creating…">

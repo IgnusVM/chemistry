@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PackageOpen } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { assetQrDataUrl, assetScanUrl } from "@/lib/qr";
@@ -18,6 +19,7 @@ import { CreateCodeFileForm } from "./code/create-code-file-form";
 import { CodeFileEditorForm } from "./code/code-file-editor-form";
 import { CodeFileVersionHistory } from "./code/code-file-version-history";
 import { DeleteCodeFileButton } from "./code/delete-code-file-button";
+import { LoansPanel } from "./loans/loans-panel";
 
 export default async function AssetDetailPage({
   params,
@@ -64,6 +66,14 @@ export default async function AssetDetailPage({
       take: 10,
     }),
   ]);
+
+  // Surfaced in the header so "who has this?" is answerable without opening a tab.
+  const openLoan = asset.assetType.loanable
+    ? await prisma.assetLoan.findFirst({
+        where: { assetId: asset.id, checkedInAt: null },
+        include: { borrower: true },
+      })
+    : null;
 
   const fieldDefs = (asset.assetType.customFieldSchema as unknown as CustomFieldDef[]) ?? [];
   const customFields = (asset.customFields as Record<string, unknown>) ?? {};
@@ -260,6 +270,12 @@ export default async function AssetDetailPage({
           <div className="text-sm text-neutral-500">
             {asset.assetTag} · {asset.owningDepartment.name}
           </div>
+          {openLoan && (
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-900">
+              <PackageOpen className="h-3.5 w-3.5" />
+              Checked out to {openLoan.borrower?.displayName ?? "Unknown"}
+            </div>
+          )}
           {asset.description && <p className="mt-2 text-sm text-neutral-700">{asset.description}</p>}
         </div>
         <Link href={`/work-orders/new?asset=${asset.assetTag}`} className={buttonClass("secondary")}>
@@ -328,6 +344,20 @@ export default async function AssetDetailPage({
           tabs={[
             { id: "details", label: "Details", content: detailsContent, color: "fuchsia" },
             { id: "notes", label: "Notes", content: notesContent, color: "blue" },
+            // Only asset types opted into lending get a Loans tab — a deployed
+            // lantern is never "checked out", so the tab would be dead weight.
+            ...(asset.assetType.loanable
+              ? [
+                  {
+                    id: "loans",
+                    label: "Loans",
+                    content: (
+                      <LoansPanel assetId={asset.id} departmentId={asset.owningDepartmentId} />
+                    ),
+                    color: "teal" as const,
+                  },
+                ]
+              : []),
             { id: "code", label: "Code", content: codeContent, color: "violet" },
             { id: "history", label: "History", content: historyContent, color: "amber" },
           ]}
