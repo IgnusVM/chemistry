@@ -28,23 +28,25 @@ export default async function AssetGroupsPage() {
       <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
         <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
           <tr>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Description</th>
-            <th className="px-4 py-2">Members</th>
-            <th className="px-4 py-2">Created</th>
+            <th className="px-2 py-2 sm:px-4">Name</th>
+            <th className="hidden px-2 py-2 sm:table-cell sm:px-4">Description</th>
+            <th className="px-2 py-2 sm:px-4">Members</th>
+            <th className="px-2 py-2 sm:px-4">Created</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-200">
           {groups.map((group) => (
             <tr key={group.id} className="hover:bg-neutral-50">
-              <td className="px-4 py-2">
+              <td className="px-2 py-2 sm:px-4">
                 <Link href={`/asset-groups/${group.id}`} className="font-medium text-neutral-900 hover:underline">
                   {group.name}
                 </Link>
               </td>
-              <td className="px-4 py-2 text-neutral-500">{group.description ?? "—"}</td>
-              <td className="px-4 py-2">{group._count.members}</td>
-              <td className="px-4 py-2 text-neutral-500">{group.createdAt.toLocaleDateString()}</td>
+              <td className="hidden px-2 py-2 text-neutral-500 sm:table-cell sm:px-4">
+                {group.description ?? "—"}
+              </td>
+              <td className="px-2 py-2 sm:px-4">{group._count.members}</td>
+              <td className="px-2 py-2 sm:px-4 text-neutral-500">{group.createdAt.toLocaleDateString()}</td>
             </tr>
           ))}
           {groups.length === 0 && (

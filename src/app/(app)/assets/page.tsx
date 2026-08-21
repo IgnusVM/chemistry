@@ -105,32 +105,32 @@ export default async function AssetsPage({
         <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
           <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
             <tr>
-              <th className="w-8 px-4 py-2">
+              <th className="w-8 px-2 py-2 sm:px-4">
                 <SelectAllHeaderCheckbox />
               </th>
-              <th className="px-4 py-2">Tag</th>
-              <th className="px-4 py-2">Name</th>
-              <th className="hidden px-4 py-2 lg:table-cell">Type</th>
-              <th className="hidden px-4 py-2 md:table-cell">Department</th>
-              <th className="hidden px-4 py-2 md:table-cell">Location</th>
-              <th className="px-4 py-2">Status</th>
+              <th className="px-2 py-2 sm:px-4">Tag</th>
+              <th className="px-2 py-2 sm:px-4">Name</th>
+              <th className="hidden px-2 py-2 sm:px-4 lg:table-cell">Type</th>
+              <th className="hidden px-2 py-2 sm:px-4 md:table-cell">Department</th>
+              <th className="hidden px-2 py-2 sm:px-4 md:table-cell">Location</th>
+              <th className="px-2 py-2 sm:px-4">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-200">
             {assets.map((asset) => (
               <tr key={asset.id} className="hover:bg-neutral-50">
-                <td className="px-4 py-2">
+                <td className="px-2 py-2 sm:px-4">
                   <RowCheckbox id={asset.id} label={`Select ${asset.assetTag}`} />
                 </td>
-                <td className="px-4 py-2">
+                <td className="px-2 py-2 sm:px-4">
                   <Link href={`/assets/${asset.assetTag}`} className="font-medium text-neutral-900 hover:underline">
                     {asset.assetTag}
                   </Link>
                 </td>
-                <td className="px-4 py-2">{asset.name}</td>
-                <td className="hidden px-4 py-2 text-neutral-500 lg:table-cell">{asset.assetType.name}</td>
-                <td className="hidden px-4 py-2 text-neutral-500 md:table-cell">{asset.owningDepartment.name}</td>
-                <td className="hidden px-4 py-2 text-neutral-500 md:table-cell">
+                <td className="px-2 py-2 sm:px-4">{asset.name}</td>
+                <td className="hidden px-2 py-2 sm:px-4 text-neutral-500 lg:table-cell">{asset.assetType.name}</td>
+                <td className="hidden px-2 py-2 sm:px-4 text-neutral-500 md:table-cell">{asset.owningDepartment.name}</td>
+                <td className="hidden px-2 py-2 sm:px-4 text-neutral-500 md:table-cell">
                   {asset.currentLocation?.name ??
                     (asset.customLocationText ? (
                       <>
@@ -140,7 +140,7 @@ export default async function AssetsPage({
                       "—"
                     ))}
                 </td>
-                <td className="px-4 py-2">
+                <td className="px-2 py-2 sm:px-4">
                   <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[asset.status]}`}>
                     {asset.status.replace("_", " ")}
                   </span>

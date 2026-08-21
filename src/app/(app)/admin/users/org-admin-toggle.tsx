@@ -9,7 +9,7 @@ export function OrgAdminToggle({ userId, isOrgAdmin }: { userId: string; isOrgAd
 
   return (
     <div>
-      <label className="flex items-center gap-2 text-xs text-neutral-600">
+      <label className="flex items-center gap-2 whitespace-nowrap text-xs text-neutral-600">
         <input
           type="checkbox"
           checked={isOrgAdmin}

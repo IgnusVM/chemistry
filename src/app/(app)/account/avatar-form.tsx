@@ -15,7 +15,7 @@ export function AvatarForm({ avatarUrl }: { avatarUrl: string | null }) {
       <h2 className="text-sm font-semibold text-neutral-900">Profile picture</h2>
       <p className="text-xs text-neutral-500">Used as your badge next to your name. Leave unset to use an icon instead.</p>
 
-      <div className="mt-3 flex items-center gap-4">
+      <div className="mt-3 flex flex-wrap items-center gap-4">
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={avatarUrl} alt="" className="h-16 w-16 rounded-full object-cover ring-1 ring-neutral-200" />
@@ -36,9 +36,16 @@ export function AvatarForm({ avatarUrl }: { avatarUrl: string | null }) {
               if (!result || !("error" in result)) formRef.current?.reset();
             });
           }}
-          className="space-y-2"
+          className="min-w-0 flex-1 space-y-2"
         >
-          <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp,image/gif" className="text-sm" />
+          {/* A file input's intrinsic width is wider than a small phone, so it
+              has to be explicitly constrained or it pushes the page sideways. */}
+          <input
+            type="file"
+            name="avatar"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="block w-full max-w-full text-sm"
+          />
           <div className="flex items-center gap-3">
             <Button type="submit" variant="secondary" pending={pending} pendingText="Uploading…">
               Upload

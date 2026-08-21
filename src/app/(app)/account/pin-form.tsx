@@ -17,8 +17,8 @@ export function PinForm({ hasPin }: { hasPin: boolean }) {
           Once set, signing in again on this device just needs the PIN — no email round-trip.
         </p>
       </div>
-      <div className="flex gap-3">
-        <div>
+      <div className="flex flex-wrap gap-3">
+        <div className="min-w-0 flex-1">
           <label className="block text-xs font-medium text-neutral-600">New PIN</label>
           <input
             name="pin"
@@ -28,10 +28,10 @@ export function PinForm({ hasPin }: { hasPin: boolean }) {
             minLength={4}
             maxLength={8}
             required
-            className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
           />
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <label className="block text-xs font-medium text-neutral-600">Confirm</label>
           <input
             name="confirmPin"
@@ -41,7 +41,7 @@ export function PinForm({ hasPin }: { hasPin: boolean }) {
             minLength={4}
             maxLength={8}
             required
-            className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
           />
         </div>
       </div>

@@ -29,17 +29,20 @@ export function UserCard({
 
   return (
     <div className="rounded-md border border-neutral-200 bg-white p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-1.5 font-medium text-neutral-900">
+      {/* Actions sit beside the identity on desktop but drop to their own row on
+          phones — crammed onto one line they overflow the card and clip. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 font-medium text-neutral-900">
             <UserBadge badge={badge} size="md" />
-            {user.displayName}
-            {user.name && <span className="ml-1 font-normal text-neutral-500">({user.name})</span>}
+            <span>{user.displayName}</span>
+            {user.name && <span className="font-normal text-neutral-500">({user.name})</span>}
           </div>
-          <div className="text-sm text-neutral-500">{user.email}</div>
-          <div className="font-mono text-xs text-neutral-400">{user.id}</div>
+          <div className="truncate text-sm text-neutral-500">{user.email}</div>
+          {/* cuids don't contain break opportunities, so they need break-all. */}
+          <div className="break-all font-mono text-xs text-neutral-400">{user.id}</div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2">
           {!editing && (
             <button type="button" onClick={() => setEditing(true)} className="text-xs text-neutral-400 hover:text-neutral-700">
               Edit
