@@ -49,3 +49,6 @@ next-env.d.ts
 /.windsurf/skills/prisma-*
 /skills-lock.json
 dev-server.log
+
+# Copied from node_modules by scripts/copy-zxing-wasm.mjs at build time
+/public/zxing_reader.wasm

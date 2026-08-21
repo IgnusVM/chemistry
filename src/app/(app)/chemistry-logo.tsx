@@ -20,8 +20,12 @@ const BUBBLES = [
 
 export function ChemistryLogo() {
   return (
-    <div className="flex items-center gap-6">
-      <svg viewBox="0 0 48 48" className="h-52 w-52 shrink-0 drop-shadow-sm sm:h-56 sm:w-56" fill="none">
+    <div className="flex items-center gap-3 sm:gap-6">
+      <svg
+        viewBox="0 0 48 48"
+        className="h-24 w-24 shrink-0 drop-shadow-sm sm:h-52 sm:w-52 lg:h-56 lg:w-56"
+        fill="none"
+      >
         <defs>
           <linearGradient id="chem-mark" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#f59e0b" />
@@ -76,11 +80,11 @@ export function ChemistryLogo() {
           fill="url(#chem-mark)"
         />
       </svg>
-      <div>
-        <div className="bg-gradient-to-r from-amber-500 via-fuchsia-600 to-teal-600 bg-clip-text text-4xl font-bold leading-tight tracking-tight text-transparent sm:text-5xl">
+      <div className="min-w-0">
+        <div className="bg-gradient-to-r from-amber-500 via-fuchsia-600 to-teal-600 bg-clip-text text-3xl font-bold leading-tight tracking-tight text-transparent sm:text-4xl lg:text-5xl">
           Chemistry
         </div>
-        <div className="text-xs font-medium uppercase tracking-widest text-neutral-400 sm:text-sm">
+        <div className="text-[10px] font-medium uppercase tracking-widest text-neutral-400 sm:text-xs lg:text-sm">
           Alchemy Asset Management System
         </div>
       </div>

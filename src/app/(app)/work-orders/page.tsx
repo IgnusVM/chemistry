@@ -115,10 +115,10 @@ export default async function WorkOrdersPage({
               </th>
               <th className="px-4 py-2">WO#</th>
               <th className="px-4 py-2">Description</th>
-              <th className="px-4 py-2">Asset</th>
-              <th className="px-4 py-2">Department</th>
-              <th className="px-4 py-2">Priority</th>
-              <th className="px-4 py-2">Assigned</th>
+              <th className="hidden px-4 py-2 sm:table-cell">Asset</th>
+              <th className="hidden px-4 py-2 lg:table-cell">Department</th>
+              <th className="hidden px-4 py-2 md:table-cell">Priority</th>
+              <th className="hidden px-4 py-2 lg:table-cell">Assigned</th>
               <th className="px-4 py-2">Status</th>
             </tr>
           </thead>
@@ -136,7 +136,7 @@ export default async function WorkOrdersPage({
                 <td className="px-4 py-2">
                   {wo.description.length > 70 ? `${wo.description.slice(0, 70)}…` : wo.description}
                 </td>
-                <td className="px-4 py-2 text-neutral-500">
+                <td className="hidden px-4 py-2 text-neutral-500 sm:table-cell">
                   {wo.asset ? (
                     <Link href={`/assets/${wo.asset.assetTag}`} className="hover:underline">
                       {wo.asset.assetTag}
@@ -145,9 +145,11 @@ export default async function WorkOrdersPage({
                     "—"
                   )}
                 </td>
-                <td className="px-4 py-2 text-neutral-500">{wo.department.name}</td>
-                <td className={`px-4 py-2 ${PRIORITY_STYLES[wo.priority]}`}>{wo.priority.replace("_", " ")}</td>
-                <td className="px-4 py-2 text-neutral-500">{wo.assignedTo?.displayName ?? "—"}</td>
+                <td className="hidden px-4 py-2 text-neutral-500 lg:table-cell">{wo.department.name}</td>
+                <td className={`hidden px-4 py-2 md:table-cell ${PRIORITY_STYLES[wo.priority]}`}>
+                  {wo.priority.replace("_", " ")}
+                </td>
+                <td className="hidden px-4 py-2 text-neutral-500 lg:table-cell">{wo.assignedTo?.displayName ?? "—"}</td>
                 <td className="px-4 py-2">
                   <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[wo.status]}`}>
                     {wo.status.replace("_", " ")}

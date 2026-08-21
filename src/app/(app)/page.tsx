@@ -1,16 +1,18 @@
 import Link from "next/link";
+import { ScanLine, Boxes } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { getRandomQuote } from "@/lib/quotes";
 import { ChemistryLogo } from "./chemistry-logo";
 import { NewWorkOrderButton } from "./new-work-order-button";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
+import { TERMINAL_WO_STATUSES } from "@/lib/constants";
 
 export default async function DashboardPage() {
   const user = await requireCurrentUser();
 
   const myWorkOrders = await prisma.workOrder.findMany({
-    where: { assignedToUserId: user.id, status: { notIn: ["CLOSED", "CANCELLED"] } },
+    where: { assignedToUserId: user.id, status: { notIn: [...TERMINAL_WO_STATUSES] } },
     orderBy: [{ priority: "desc" }, { reportedAt: "desc" }],
     take: 20,
   });
@@ -27,6 +29,26 @@ export default async function DashboardPage() {
       </blockquote>
 
       <NewWorkOrderButton />
+
+      {/* Phone-first quick actions — the two things you do standing in front of
+          hardware. Redundant with the bottom tab bar on purpose: this is the
+          large, unambiguous target when you've just opened the app. */}
+      <div className="grid grid-cols-2 gap-3 sm:hidden">
+        <Link
+          href="/scan"
+          className="flex flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white py-5 active:bg-neutral-50"
+        >
+          <ScanLine className="h-7 w-7 text-fuchsia-600" />
+          <span className="text-sm font-medium text-neutral-800">Scan a tag</span>
+        </Link>
+        <Link
+          href="/assets"
+          className="flex flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white py-5 active:bg-neutral-50"
+        >
+          <Boxes className="h-7 w-7 text-teal-600" />
+          <span className="text-sm font-medium text-neutral-800">Browse assets</span>
+        </Link>
+      </div>
 
       <div>
         <h2 className="text-sm font-semibold text-neutral-900">Assigned to you</h2>

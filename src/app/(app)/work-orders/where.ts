@@ -1,5 +1,6 @@
 import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
+import { TERMINAL_WO_STATUSES } from "@/lib/constants";
 
 export type WorkOrderListParams = {
   q?: string;
@@ -37,7 +38,7 @@ export function buildWorkOrderWhere(
     departmentId: params.department ? params.department : { in: ctx.accessibleDeptIds },
   };
   if (status === OPEN_STATUS_FILTER) {
-    where.status = { notIn: ["CLOSED", "CANCELLED"] };
+    where.status = { notIn: [...TERMINAL_WO_STATUSES] };
   } else if (status) {
     where.status = status as Prisma.EnumWorkOrderStatusFilter["equals"];
   }

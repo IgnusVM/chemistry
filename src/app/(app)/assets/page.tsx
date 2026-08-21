@@ -110,9 +110,9 @@ export default async function AssetsPage({
               </th>
               <th className="px-4 py-2">Tag</th>
               <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">Type</th>
-              <th className="px-4 py-2">Department</th>
-              <th className="px-4 py-2">Location</th>
+              <th className="hidden px-4 py-2 lg:table-cell">Type</th>
+              <th className="hidden px-4 py-2 md:table-cell">Department</th>
+              <th className="hidden px-4 py-2 md:table-cell">Location</th>
               <th className="px-4 py-2">Status</th>
             </tr>
           </thead>
@@ -128,9 +128,9 @@ export default async function AssetsPage({
                   </Link>
                 </td>
                 <td className="px-4 py-2">{asset.name}</td>
-                <td className="px-4 py-2 text-neutral-500">{asset.assetType.name}</td>
-                <td className="px-4 py-2 text-neutral-500">{asset.owningDepartment.name}</td>
-                <td className="px-4 py-2 text-neutral-500">
+                <td className="hidden px-4 py-2 text-neutral-500 lg:table-cell">{asset.assetType.name}</td>
+                <td className="hidden px-4 py-2 text-neutral-500 md:table-cell">{asset.owningDepartment.name}</td>
+                <td className="hidden px-4 py-2 text-neutral-500 md:table-cell">
                   {asset.currentLocation?.name ??
                     (asset.customLocationText ? (
                       <>
