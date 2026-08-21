@@ -387,7 +387,7 @@ const workOrderPartSchema = z.object({
   description: z.string().optional(),
   quantity: z.coerce.number().int().positive().default(1),
   price: z.coerce.number().nonnegative().optional(),
-  purchaseLink: z.string().url().optional(),
+  orderQuantity: z.coerce.number().int().positive().default(1),
   orderedAt: z.coerce.date().optional(),
 });
 
@@ -404,7 +404,7 @@ export async function addWorkOrderPart(
     description: formData.get("description") || undefined,
     quantity: formData.get("quantity") || undefined,
     price: formData.get("price") || undefined,
-    purchaseLink: formData.get("purchaseLink") || undefined,
+    orderQuantity: formData.get("orderQuantity") || undefined,
     orderedAt: formData.get("orderedAt") || undefined,
   });
   if (!parsed.success) {
@@ -449,12 +449,12 @@ export async function addWorkOrderPart(
     },
   });
 
-  if (parsed.data.price !== undefined || parsed.data.purchaseLink || parsed.data.orderedAt) {
+  if (parsed.data.price !== undefined || parsed.data.orderedAt) {
     await prisma.partOrder.create({
       data: {
         partId: part.id,
         price: parsed.data.price,
-        purchaseLink: parsed.data.purchaseLink,
+        quantity: parsed.data.orderQuantity,
         orderedAt: parsed.data.orderedAt,
         createdByUserId: user.id,
       },

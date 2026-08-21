@@ -281,7 +281,7 @@ export async function deletePart(partId: string) {
 const partOrderSchema = z.object({
   partId: z.string().min(1),
   price: z.coerce.number().nonnegative().optional(),
-  purchaseLink: z.string().url().optional(),
+  quantity: z.coerce.number().int().positive().default(1),
   orderedAt: z.coerce.date().optional(),
 });
 
@@ -295,7 +295,7 @@ export async function addPartOrder(
   const parsed = partOrderSchema.safeParse({
     partId: formData.get("partId"),
     price: formData.get("price") || undefined,
-    purchaseLink: formData.get("purchaseLink") || undefined,
+    quantity: formData.get("quantity") || undefined,
     orderedAt: formData.get("orderedAt") || undefined,
   });
   if (!parsed.success) {
@@ -307,7 +307,7 @@ export async function addPartOrder(
     data: {
       partId: part.id,
       price: parsed.data.price,
-      purchaseLink: parsed.data.purchaseLink,
+      quantity: parsed.data.quantity,
       orderedAt: parsed.data.orderedAt,
       createdByUserId: admin.id,
     },
@@ -318,7 +318,7 @@ export async function addPartOrder(
     entityId: part.id,
     action: "order logged",
     userId: admin.id,
-    changes: { price: parsed.data.price },
+    changes: { price: parsed.data.price, quantity: parsed.data.quantity },
   });
 
   revalidatePath(`/admin/asset-types/${part.assetTypeId}`);
@@ -338,4 +338,63 @@ export async function deletePartOrder(orderId: string) {
   });
 
   revalidatePath(`/admin/asset-types/${order.part.assetTypeId}`);
+}
+
+const partLinkSchema = z.object({
+  partId: z.string().min(1),
+  url: z.string().url(),
+  price: z.coerce.number().nonnegative().optional(),
+});
+
+export type PartLinkFormState = { error?: string } | undefined;
+
+export async function addPartLink(
+  _prevState: PartLinkFormState,
+  formData: FormData,
+): Promise<PartLinkFormState> {
+  const admin = await requireOrgAdmin();
+  const parsed = partLinkSchema.safeParse({
+    partId: formData.get("partId"),
+    url: formData.get("url"),
+    price: formData.get("price") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const part = await prisma.part.findUniqueOrThrow({ where: { id: parsed.data.partId } });
+  await prisma.partLink.create({
+    data: {
+      partId: part.id,
+      url: parsed.data.url,
+      price: parsed.data.price,
+      createdByUserId: admin.id,
+    },
+  });
+
+  await recordAudit({
+    entityType: "Part",
+    entityId: part.id,
+    action: "link added",
+    userId: admin.id,
+    changes: { url: parsed.data.url, price: parsed.data.price },
+  });
+
+  revalidatePath(`/admin/asset-types/${part.assetTypeId}`);
+}
+
+export async function deletePartLink(linkId: string) {
+  const admin = await requireOrgAdmin();
+  const link = await prisma.partLink.findUniqueOrThrow({ where: { id: linkId }, include: { part: true } });
+
+  await prisma.partLink.delete({ where: { id: linkId } });
+
+  await recordAudit({
+    entityType: "Part",
+    entityId: link.partId,
+    action: "link removed",
+    userId: admin.id,
+  });
+
+  revalidatePath(`/admin/asset-types/${link.part.assetTypeId}`);
 }

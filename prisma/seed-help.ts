@@ -234,9 +234,9 @@ The **reported by** field on a ticket links to that person's [account profile](/
 
 **Logging a part.** Enter a part number and quantity. If it's a part that's been logged before on this asset's type, it's picked up automatically from a suggestions list as you type. If it's genuinely new, you also need to give it a short description — that's what creates the part record, scoped to this asset's **asset type** (a Solar Lamplighter Lantern part and a different asset type's part with the same number are tracked separately, since they're not actually the same thing just because the number matches).
 
-**Optionally logging an order at the same time.** The same form has a toggle to also record a price, a purchase link, and a date — useful when you're logging a part right after buying it, so the purchase history builds up as you go rather than needing a separate step later.
+**Optionally logging an order at the same time.** The same form has a toggle to also record a price, a quantity, and a date — useful when you're logging a part right after buying it, so the purchase history builds up as you go rather than needing a separate step later. A purchase link isn't part of this — see below.
 
-**Where parts live afterward.** Every part ever logged for an asset type, along with its full order history (every time it's been bought, at what price), is visible from that asset type's page under **Admin → Asset Types** — useful for budgeting or reordering before the next event, not just for the individual ticket it was logged on.
+**Where parts live afterward.** Every part ever logged for an asset type is visible from that asset type's page under **Admin → Asset Types**, with two separate lists: **Links** (where to buy it and roughly what it costs — no order needed, just a reference, added directly from the part's own page) and **Order history** (an actual record of a purchase — price, quantity, and date, no link). Keeping them separate means a part can have a standing "here's where we get these" link without every order needing one, and an order doesn't get cluttered with a link that might go stale.
 
 To log the same part across many tickets at once instead of one at a time, see [Bulk-closing work orders](/help/work-orders/bulk-closing-work-orders).`,
   },

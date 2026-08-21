@@ -79,9 +79,9 @@ export function PartsUsedForm({
             <label className={labelClass}>Price ($)</label>
             <input name="price" type="number" min={0} step="0.01" className={`${inputClass} mt-1 w-full bg-white`} />
           </div>
-          <div className="min-w-[12rem] flex-1">
-            <label className={labelClass}>Purchase link</label>
-            <input name="purchaseLink" type="url" placeholder="https://…" className={`${inputClass} mt-1 w-full bg-white`} />
+          <div className="w-24">
+            <label className={labelClass}>Qty ordered</label>
+            <input name="orderQuantity" type="number" min={1} defaultValue={1} className={`${inputClass} mt-1 w-full bg-white`} />
           </div>
           <div className="w-36">
             <label className={labelClass}>Date</label>

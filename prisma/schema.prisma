@@ -129,6 +129,7 @@ model User {
   createdInvites      InviteCode[]          @relation("InviteCreatedBy")
   redeemedInvites     InviteCode[]          @relation("InviteUsedBy")
   partOrders          PartOrder[]
+  partLinks           PartLink[]
   workOrderParts      WorkOrderPart[]
   bulkSelections      BulkSelection[]
   assetNotes          AssetNote[]
@@ -225,6 +226,7 @@ model Part {
 
   assetType     AssetType       @relation(fields: [assetTypeId], references: [id], onDelete: Cascade)
   orders        PartOrder[]
+  links         PartLink[]
   workOrderUses WorkOrderPart[]
 
   @@unique([assetTypeId, partNumber])
@@ -234,8 +236,25 @@ model PartOrder {
   id              String   @id @default(cuid())
   partId          String
   price           Decimal? @db.Decimal(10, 2)
-  purchaseLink    String?
+  quantity        Int      @default(1)
   orderedAt       DateTime @default(now())
+  createdAt       DateTime @default(now())
+  createdByUserId String?
+
+  part      Part  @relation(fields: [partId], references: [id], onDelete: Cascade)
+  createdBy User? @relation(fields: [createdByUserId], references: [id])
+
+  @@index([partId])
+}
+
+// A reference purchase link for a part — where to get it and roughly what
+// it costs — kept separate from PartOrder, which instead tracks a specific
+// purchase event (price/quantity actually bought, no link).
+model PartLink {
+  id              String   @id @default(cuid())
+  partId          String
+  url             String
+  price           Decimal? @db.Decimal(10, 2)
   createdAt       DateTime @default(now())
   createdByUserId String?
 
