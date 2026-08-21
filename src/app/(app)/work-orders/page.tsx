@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
 import { Button, buttonClass } from "@/components/button";
 import { Pagination } from "@/components/pagination";
-import { PAGE_SIZE, parsePage } from "@/lib/list-page";
+import { parsePage, parsePageSize } from "@/lib/list-page";
 import { SelectionProvider } from "@/components/selection/selection-context";
 import { SelectAllHeaderCheckbox } from "@/components/selection/select-all-checkbox";
 import { RowCheckbox } from "@/components/selection/row-checkbox";
@@ -15,12 +15,13 @@ import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES, WORK_ORDER_PRIORITY_STYLES a
 export default async function WorkOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<WorkOrderListParams & { page?: string }>;
+  searchParams: Promise<WorkOrderListParams & { page?: string; pageSize?: string }>;
 }) {
   const user = await requireCurrentUser();
   const params = await searchParams;
   const { q, department, priority, assignedToName } = params;
   const page = parsePage(params.page);
+  const pageSize = parsePageSize(params.pageSize);
   const { status, mine } = resolveWorkOrderListDefaults(params);
 
   const accessibleDeptIds = await getAccessibleDepartmentIds("VIEWER");
@@ -31,8 +32,8 @@ export default async function WorkOrdersPage({
       where,
       orderBy: [{ priority: "desc" }, { reportedAt: "desc" }],
       include: { asset: true, department: true, assignedTo: true },
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     }),
     prisma.workOrder.count({ where }),
     prisma.department.findMany({ where: { id: { in: accessibleDeptIds } }, orderBy: { name: "asc" } }),
@@ -42,7 +43,7 @@ export default async function WorkOrdersPage({
       select: { displayName: true },
     }),
   ]);
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div className="space-y-6">
@@ -169,7 +170,7 @@ export default async function WorkOrdersPage({
         page={page}
         totalPages={totalPages}
         total={total}
-        pageSize={PAGE_SIZE}
+        pageSize={pageSize}
         basePath="/work-orders"
         params={params}
       />

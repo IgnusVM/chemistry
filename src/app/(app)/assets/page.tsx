@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { Button, buttonClass } from "@/components/button";
 import { Pagination } from "@/components/pagination";
-import { PAGE_SIZE, parsePage } from "@/lib/list-page";
+import { parsePage, parsePageSize } from "@/lib/list-page";
 import { SelectionProvider } from "@/components/selection/selection-context";
 import { SelectAllHeaderCheckbox } from "@/components/selection/select-all-checkbox";
 import { RowCheckbox } from "@/components/selection/row-checkbox";
@@ -14,12 +14,13 @@ import { ASSET_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
 export default async function AssetsPage({
   searchParams,
 }: {
-  searchParams: Promise<AssetListParams & { page?: string }>;
+  searchParams: Promise<AssetListParams & { page?: string; pageSize?: string }>;
 }) {
   await requireCurrentUser();
   const params = await searchParams;
   const { q, department, status, type } = params;
   const page = parsePage(params.page);
+  const pageSize = parsePageSize(params.pageSize);
 
   const where = buildAssetWhere(params);
 
@@ -28,14 +29,14 @@ export default async function AssetsPage({
       where,
       orderBy: { assetTag: "asc" },
       include: { owningDepartment: true, assetType: true, currentLocation: true },
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     }),
     prisma.asset.count({ where }),
     prisma.department.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
     prisma.assetType.findMany({ orderBy: { name: "asc" } }),
   ]);
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div className="space-y-6">
@@ -157,7 +158,7 @@ export default async function AssetsPage({
         </table>
       </SelectionProvider>
 
-      <Pagination page={page} totalPages={totalPages} total={total} pageSize={PAGE_SIZE} basePath="/assets" params={params} />
+      <Pagination page={page} totalPages={totalPages} total={total} pageSize={pageSize} basePath="/assets" params={params} />
     </div>
   );
 }
