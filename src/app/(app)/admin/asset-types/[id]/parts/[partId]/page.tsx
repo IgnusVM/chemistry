@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireOrgAdmin } from "@/lib/dal";
 import { AddPartOrderForm } from "./add-part-order-form";
-import { DeletePartOrderButton } from "./delete-part-order-button";
 import { AddPartLinkForm } from "./add-part-link-form";
-import { DeletePartLinkButton } from "./delete-part-link-button";
+import { PartLinkRow } from "./part-link-row";
+import { PartOrderRow } from "./part-order-row";
+import { EditPartHeaderForm } from "./edit-part-header-form";
 
 export default async function PartDetailPage({
   params,
@@ -36,8 +37,9 @@ export default async function PartDetailPage({
         <Link href={`/admin/asset-types/${id}`} className="text-xs text-neutral-500 hover:underline">
           ← {part.assetType.name}
         </Link>
-        <h1 className="text-lg font-semibold text-neutral-900">{part.partNumber}</h1>
-        <p className="text-sm text-neutral-500">{part.description}</p>
+        <div className="mt-2">
+          <EditPartHeaderForm part={part} />
+        </div>
       </div>
 
       <div className="rounded-md border border-neutral-200 bg-white p-4">
@@ -46,16 +48,10 @@ export default async function PartDetailPage({
         {part.links.length > 0 ? (
           <ul className="mt-3 divide-y divide-neutral-200">
             {part.links.map((link) => (
-              <li key={link.id} className="flex items-center justify-between py-2 text-sm">
-                <div>
-                  <a href={link.url} target="_blank" rel="noopener noreferrer" className="font-medium text-neutral-900 hover:underline">
-                    {link.url}
-                  </a>
-                  {link.price && <span className="ml-2 text-neutral-500">${link.price.toString()}</span>}
-                  <div className="text-xs text-neutral-400">Added by {link.createdBy?.displayName ?? "Unknown"}</div>
-                </div>
-                <DeletePartLinkButton linkId={link.id} />
-              </li>
+              <PartLinkRow
+                key={link.id}
+                link={{ ...link, price: link.price?.toString() ?? null }}
+              />
             ))}
           </ul>
         ) : (
@@ -69,19 +65,10 @@ export default async function PartDetailPage({
         {part.orders.length > 0 ? (
           <ul className="mt-3 divide-y divide-neutral-200">
             {part.orders.map((order) => (
-              <li key={order.id} className="flex items-center justify-between py-2 text-sm">
-                <div>
-                  <span className="font-medium text-neutral-900">
-                    {order.price ? `$${order.price.toString()}` : "No price logged"}
-                  </span>
-                  <span className="ml-2 text-neutral-500">qty {order.quantity}</span>
-                  <span className="ml-2 text-neutral-500">{order.orderedAt.toLocaleDateString()}</span>
-                  <div className="text-xs text-neutral-400">
-                    Logged by {order.createdBy?.displayName ?? "Unknown"}
-                  </div>
-                </div>
-                <DeletePartOrderButton orderId={order.id} />
-              </li>
+              <PartOrderRow
+                key={order.id}
+                order={{ ...order, price: order.price?.toString() ?? null }}
+              />
             ))}
           </ul>
         ) : (

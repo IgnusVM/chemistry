@@ -100,7 +100,7 @@ model Department {
 model User {
   id             String    @id @default(cuid())
   email          String    @unique
-  displayName    String
+  displayName    String    @unique
   name           String?
   phone          String?
   notifyByEmail  Boolean   @default(false)
@@ -140,13 +140,13 @@ model User {
 model InviteCode {
   id              String    @id @default(cuid())
   tokenHash       String    @unique
-  createdByUserId String
+  createdByUserId String?
   expiresAt       DateTime
   usedAt          DateTime?
   usedByUserId    String?
   createdAt       DateTime  @default(now())
 
-  createdBy User  @relation("InviteCreatedBy", fields: [createdByUserId], references: [id])
+  createdBy User? @relation("InviteCreatedBy", fields: [createdByUserId], references: [id])
   usedBy    User? @relation("InviteUsedBy", fields: [usedByUserId], references: [id])
 }
 

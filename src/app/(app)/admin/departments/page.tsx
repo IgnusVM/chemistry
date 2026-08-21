@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireOrgAdmin } from "@/lib/dal";
 import { DepartmentForm } from "./department-form";
-import { ToggleActiveButton } from "./toggle-active-button";
+import { DepartmentRow } from "./department-row";
 
 export default async function DepartmentsAdminPage() {
   await requireOrgAdmin();
@@ -36,23 +36,21 @@ export default async function DepartmentsAdminPage() {
         </thead>
         <tbody className="divide-y divide-neutral-200">
           {departments.map((dept) => (
-            <tr key={dept.id}>
-              <td className="px-4 py-2 font-medium text-neutral-900">{dept.name}</td>
-              <td className="px-4 py-2 text-neutral-500">{dept.division?.name ?? "—"}</td>
-              <td className="px-4 py-2 text-neutral-500">{dept.slug}</td>
-              <td className="px-4 py-2">{dept._count.assets}</td>
-              <td className="px-4 py-2">{dept._count.memberships}</td>
-              <td className="px-4 py-2">
-                {dept.active ? (
-                  <span className="text-green-700">Active</span>
-                ) : (
-                  <span className="text-neutral-400">Inactive</span>
-                )}
-              </td>
-              <td className="px-4 py-2 text-right">
-                <ToggleActiveButton departmentId={dept.id} active={dept.active} />
-              </td>
-            </tr>
+            <DepartmentRow
+              key={dept.id}
+              department={{
+                id: dept.id,
+                name: dept.name,
+                slug: dept.slug,
+                description: dept.description,
+                divisionId: dept.divisionId,
+                divisionName: dept.division?.name ?? null,
+                active: dept.active,
+                assetCount: dept._count.assets,
+                memberCount: dept._count.memberships,
+              }}
+              divisions={divisions}
+            />
           ))}
         </tbody>
       </table>

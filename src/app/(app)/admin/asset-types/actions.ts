@@ -255,6 +255,51 @@ export async function createPart(_prevState: PartFormState, formData: FormData):
   revalidatePath(`/admin/asset-types/${parsed.data.assetTypeId}`);
 }
 
+const updatePartSchema = z.object({
+  partId: z.string().min(1),
+  partNumber: z.string().min(1),
+  description: z.string().min(1),
+});
+
+export async function updatePart(
+  _prevState: PartFormState,
+  formData: FormData,
+): Promise<PartFormState> {
+  const admin = await requireOrgAdmin();
+  const parsed = updatePartSchema.safeParse({
+    partId: formData.get("partId"),
+    partNumber: formData.get("partNumber"),
+    description: formData.get("description"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const part = await prisma.part.findUniqueOrThrow({ where: { id: parsed.data.partId } });
+
+  const existing = await prisma.part.findUnique({
+    where: { assetTypeId_partNumber: { assetTypeId: part.assetTypeId, partNumber: parsed.data.partNumber } },
+  });
+  if (existing && existing.id !== part.id) {
+    return { error: `Part number "${parsed.data.partNumber}" already exists for this asset type.` };
+  }
+
+  await prisma.part.update({
+    where: { id: part.id },
+    data: { partNumber: parsed.data.partNumber, description: parsed.data.description },
+  });
+
+  await recordAudit({
+    entityType: "Part",
+    entityId: part.id,
+    action: "updated",
+    userId: admin.id,
+    changes: { partNumber: parsed.data.partNumber, description: parsed.data.description },
+  });
+
+  revalidatePath(`/admin/asset-types/${part.assetTypeId}/parts/${part.id}`);
+}
+
 export async function deletePart(partId: string) {
   const admin = await requireOrgAdmin();
   const part = await prisma.part.findUniqueOrThrow({
@@ -324,6 +369,49 @@ export async function addPartOrder(
   revalidatePath(`/admin/asset-types/${part.assetTypeId}`);
 }
 
+const updatePartOrderSchema = z.object({
+  orderId: z.string().min(1),
+  price: z.coerce.number().nonnegative().optional(),
+  quantity: z.coerce.number().int().positive().default(1),
+  orderedAt: z.coerce.date().optional(),
+});
+
+export async function updatePartOrder(
+  _prevState: PartOrderFormState,
+  formData: FormData,
+): Promise<PartOrderFormState> {
+  const admin = await requireOrgAdmin();
+  const parsed = updatePartOrderSchema.safeParse({
+    orderId: formData.get("orderId"),
+    price: formData.get("price") || undefined,
+    quantity: formData.get("quantity") || undefined,
+    orderedAt: formData.get("orderedAt") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const order = await prisma.partOrder.findUniqueOrThrow({ where: { id: parsed.data.orderId }, include: { part: true } });
+  await prisma.partOrder.update({
+    where: { id: order.id },
+    data: {
+      price: parsed.data.price ?? null,
+      quantity: parsed.data.quantity,
+      orderedAt: parsed.data.orderedAt ?? order.orderedAt,
+    },
+  });
+
+  await recordAudit({
+    entityType: "Part",
+    entityId: order.partId,
+    action: "order updated",
+    userId: admin.id,
+    changes: { price: parsed.data.price, quantity: parsed.data.quantity },
+  });
+
+  revalidatePath(`/admin/asset-types/${order.part.assetTypeId}/parts/${order.partId}`);
+}
+
 export async function deletePartOrder(orderId: string) {
   const admin = await requireOrgAdmin();
   const order = await prisma.partOrder.findUniqueOrThrow({ where: { id: orderId }, include: { part: true } });
@@ -381,6 +469,43 @@ export async function addPartLink(
   });
 
   revalidatePath(`/admin/asset-types/${part.assetTypeId}`);
+}
+
+const updatePartLinkSchema = z.object({
+  linkId: z.string().min(1),
+  url: z.string().url(),
+  price: z.coerce.number().nonnegative().optional(),
+});
+
+export async function updatePartLink(
+  _prevState: PartLinkFormState,
+  formData: FormData,
+): Promise<PartLinkFormState> {
+  const admin = await requireOrgAdmin();
+  const parsed = updatePartLinkSchema.safeParse({
+    linkId: formData.get("linkId"),
+    url: formData.get("url"),
+    price: formData.get("price") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const link = await prisma.partLink.findUniqueOrThrow({ where: { id: parsed.data.linkId }, include: { part: true } });
+  await prisma.partLink.update({
+    where: { id: link.id },
+    data: { url: parsed.data.url, price: parsed.data.price ?? null },
+  });
+
+  await recordAudit({
+    entityType: "Part",
+    entityId: link.partId,
+    action: "link updated",
+    userId: admin.id,
+    changes: { url: parsed.data.url, price: parsed.data.price },
+  });
+
+  revalidatePath(`/admin/asset-types/${link.part.assetTypeId}/parts/${link.partId}`);
 }
 
 export async function deletePartLink(linkId: string) {

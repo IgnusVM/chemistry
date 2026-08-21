@@ -32,9 +32,13 @@ export async function createUser(
   }
 
   const email = parsed.data.email.toLowerCase().trim();
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
+  const existingEmail = await prisma.user.findUnique({ where: { email } });
+  if (existingEmail) {
     return { error: "A user with that email already exists." };
+  }
+  const existingName = await prisma.user.findUnique({ where: { displayName: parsed.data.displayName } });
+  if (existingName) {
+    return { error: `The user name "${parsed.data.displayName}" is already taken.` };
   }
 
   const user = await prisma.user.create({
@@ -46,6 +50,78 @@ export async function createUser(
     action: "created",
     userId: admin.id,
     changes: { email },
+  });
+
+  revalidatePath("/admin/users");
+}
+
+const updateUserProfileSchema = z.object({
+  id: z.string().min(1),
+  displayName: z.string().min(1),
+  name: z.string().optional(),
+});
+
+export type UpdateUserProfileState = { error?: string } | undefined;
+
+export async function updateUserProfile(
+  _prevState: UpdateUserProfileState,
+  formData: FormData,
+): Promise<UpdateUserProfileState> {
+  const admin = await requireOrgAdmin();
+
+  const parsed = updateUserProfileSchema.safeParse({
+    id: formData.get("id"),
+    displayName: formData.get("displayName"),
+    name: formData.get("name") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const existingName = await prisma.user.findUnique({ where: { displayName: parsed.data.displayName } });
+  if (existingName && existingName.id !== parsed.data.id) {
+    return { error: `The user name "${parsed.data.displayName}" is already taken.` };
+  }
+
+  await prisma.user.update({
+    where: { id: parsed.data.id },
+    data: { displayName: parsed.data.displayName, name: parsed.data.name ?? null },
+  });
+
+  await recordAudit({
+    entityType: "User",
+    entityId: parsed.data.id,
+    action: "updated",
+    userId: admin.id,
+    changes: { displayName: parsed.data.displayName, name: parsed.data.name },
+  });
+
+  revalidatePath("/admin/users");
+}
+
+export async function deleteUser(userId: string) {
+  const admin = await requireOrgAdmin();
+
+  if (userId === admin.id) {
+    throw new Error("You can't delete your own account.");
+  }
+
+  const target = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+  if (target.isOrgAdmin) {
+    const otherAdminCount = await prisma.user.count({ where: { isOrgAdmin: true, id: { not: userId } } });
+    if (otherAdminCount === 0) {
+      throw new Error("Can't delete the last org admin — grant someone else admin first.");
+    }
+  }
+
+  await prisma.user.delete({ where: { id: userId } });
+
+  await recordAudit({
+    entityType: "User",
+    entityId: userId,
+    action: "deleted",
+    userId: admin.id,
+    changes: { email: target.email, displayName: target.displayName },
   });
 
   revalidatePath("/admin/users");

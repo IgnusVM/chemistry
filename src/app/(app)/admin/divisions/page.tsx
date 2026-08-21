@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireOrgAdmin } from "@/lib/dal";
 import { DivisionForm } from "./division-form";
+import { DivisionRow } from "./division-row";
 
 export default async function DivisionsAdminPage() {
   await requireOrgAdmin();
@@ -26,19 +27,19 @@ export default async function DivisionsAdminPage() {
             <th className="px-4 py-2">Name</th>
             <th className="px-4 py-2">Slug</th>
             <th className="px-4 py-2">Departments</th>
+            <th className="px-4 py-2" />
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-200">
           {divisions.map((div) => (
-            <tr key={div.id}>
-              <td className="px-4 py-2 font-medium text-neutral-900">{div.name}</td>
-              <td className="px-4 py-2 text-neutral-500">{div.slug}</td>
-              <td className="px-4 py-2">{div._count.departments}</td>
-            </tr>
+            <DivisionRow
+              key={div.id}
+              division={{ id: div.id, name: div.name, slug: div.slug, description: div.description, departmentCount: div._count.departments }}
+            />
           ))}
           {divisions.length === 0 && (
             <tr>
-              <td colSpan={3} className="px-4 py-6 text-center text-neutral-500">
+              <td colSpan={4} className="px-4 py-6 text-center text-neutral-500">
                 No divisions yet.
               </td>
             </tr>

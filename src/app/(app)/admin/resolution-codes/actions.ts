@@ -45,3 +45,46 @@ export async function createResolutionCode(
 
   revalidatePath("/admin/resolution-codes");
 }
+
+const updateResolutionCodeSchema = z.object({
+  id: z.string().min(1),
+  code: z
+    .string()
+    .min(2)
+    .regex(/^[A-Z0-9_]+$/, "code must be UPPER_SNAKE_CASE"),
+  label: z.string().min(1),
+});
+
+export async function updateResolutionCode(
+  _prevState: ResolutionCodeFormState,
+  formData: FormData,
+): Promise<ResolutionCodeFormState> {
+  const admin = await requireOrgAdmin();
+
+  const parsed = updateResolutionCodeSchema.safeParse({
+    id: formData.get("id"),
+    code: formData.get("code"),
+    label: formData.get("label"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const existing = await prisma.resolutionCode.findUnique({ where: { code: parsed.data.code } });
+  if (existing && existing.id !== parsed.data.id) return { error: "That code already exists." };
+
+  await prisma.resolutionCode.update({
+    where: { id: parsed.data.id },
+    data: { code: parsed.data.code, label: parsed.data.label },
+  });
+
+  await recordAudit({
+    entityType: "ResolutionCode",
+    entityId: parsed.data.id,
+    action: "updated",
+    userId: admin.id,
+    changes: { code: parsed.data.code, label: parsed.data.label },
+  });
+
+  revalidatePath("/admin/resolution-codes");
+}

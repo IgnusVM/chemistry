@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { bulkUpdateGroupStatus } from "../actions";
 import { AddAssetsForm } from "./add-assets-form";
+import { EditGroupHeader } from "./edit-group-header";
 import { RemoveMemberButton } from "./remove-member-button";
 import { RemoveSelectedButton } from "./remove-selected-button";
 import { Button, buttonClass } from "@/components/button";
@@ -34,11 +35,7 @@ export default async function AssetGroupDetailPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-neutral-900">{group.name}</h1>
-          {group.description && <p className="text-sm text-neutral-500">{group.description}</p>}
-          <p className="mt-1 text-sm text-neutral-500">{group.members.length} assets</p>
-        </div>
+        <EditGroupHeader group={group} memberCount={group.members.length} />
         <Link href={`/assets/qr-sheet?group=${group.id}`} className={buttonClass("secondary")}>
           Print QR sheet
         </Link>

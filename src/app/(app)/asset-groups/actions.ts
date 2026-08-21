@@ -41,6 +41,39 @@ export async function createGroup(
   redirect(`/asset-groups/${group.id}`);
 }
 
+const updateGroupSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string().optional(),
+});
+
+export async function updateGroup(
+  _prevState: CreateGroupFormState,
+  formData: FormData,
+): Promise<CreateGroupFormState> {
+  const user = await requireCurrentUser();
+  const parsed = updateGroupSchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+    description: formData.get("description") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const { id, ...data } = parsed.data;
+  await prisma.assetGroup.update({ where: { id }, data });
+  await recordAudit({
+    entityType: "AssetGroup",
+    entityId: id,
+    action: "updated",
+    userId: user.id,
+    changes: data,
+  });
+
+  revalidatePath(`/asset-groups/${id}`);
+}
+
 export type AddToGroupFormState = { error?: string; message?: string } | undefined;
 
 export async function addAssetsToGroup(
