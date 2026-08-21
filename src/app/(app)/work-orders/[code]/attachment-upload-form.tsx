@@ -21,9 +21,15 @@ export function AttachmentUploadForm({ workOrderId }: { workOrderId: string }) {
       className="mt-3 flex flex-wrap items-center gap-3"
     >
       <input type="hidden" name="workOrderId" value={workOrderId} />
-      <FileInput key={resetKey} name="files" accept="image/*" multiple label="Choose photos" />
+      <FileInput
+        key={resetKey}
+        name="files"
+        accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt"
+        multiple
+        label="Choose files"
+      />
       <Button type="submit" variant="secondary" pending={pending} pendingText="Uploading…">
-        Upload photos
+        Upload
       </Button>
       {state?.error && <p className="w-full text-sm text-red-600">{state.error}</p>}
     </form>

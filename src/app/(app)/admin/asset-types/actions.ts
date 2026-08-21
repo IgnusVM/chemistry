@@ -7,20 +7,9 @@ import { requireOrgAdmin } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { customFieldSchemaSchema } from "@/lib/custom-fields";
 import { buildAssetTypeDocumentKey, uploadAttachment, deleteAttachmentObject } from "@/lib/s3";
+import { ALLOWED_ATTACHMENT_TYPES as ALLOWED_DOCUMENT_TYPES } from "@/lib/constants";
 
 const MAX_DOCUMENT_BYTES = 20 * 1024 * 1024;
-const ALLOWED_DOCUMENT_TYPES = [
-  "application/pdf",
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-  "image/gif",
-  "text/plain",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-excel",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-];
 
 const assetTypeSchema = z.object({
   name: z.string().min(2),

@@ -208,15 +208,19 @@ Once created, a work order starts in **Open** status and can be assigned to some
     summary: "Assignment, status changes, notes, photos, and closing out.",
     body: `Once a work order exists, open it from the **Work Orders** tab or from the linked asset's page.
 
-**Assign it** to yourself or someone else using the assignment control on the ticket. Assignment is tracked separately from status now — assigning someone doesn't change where the ticket is in its lifecycle, it just says who owns it.
+The ticket's code, description, status, priority, and its asset/assignee/reporter stay visible at the top no matter what you're doing below — the action bar right under that handles the quick stuff (changing status, reassigning, closing), and the three tabs below it hold everything else.
 
-**Move it through status** as work progresses: Open → In Progress → (Waiting Parts, if you're blocked on something) → Complete. Status changes are logged with a timestamp so there's always a record of how long each stage took.
+**Assign it** to yourself or someone else using the assignment control in the action bar. Assignment is tracked separately from status — assigning someone doesn't change where the ticket is in its lifecycle, it just says who owns it.
 
-**Add notes** as you go — anything worth recording that isn't a status change: what you found, what you tried, what you're waiting on. Notes are timestamped and attributed to whoever wrote them, and they stay on the ticket permanently.
+**Move it through status** as work progresses, also from the action bar: Open → In Progress → (Waiting Parts, if you're blocked on something) → Complete. Status changes are logged with a timestamp so there's always a record of how long each stage took.
 
-**Attach photos** of the problem or the fix directly on the ticket — see [Photos on work orders](/help/photos-documents/photos-on-work-orders).
+**The Details tab** is the main working area: reassigning the linked asset, the resolution fields, parts used, and notes all live there. **Add notes** as you go — anything worth recording that isn't a status change: what you found, what you tried, what you're waiting on. Notes are timestamped and attributed to whoever wrote them, and they stay on the ticket permanently. The **+ Note** and **+ Part** buttons in the action bar jump straight to this tab.
 
-**Closing out.** When the work is actually done, pick a **resolution code** — see [Resolution codes explained](/help/work-orders/resolution-codes-explained) — and write resolution notes summarizing what actually happened. This is the single most useful thing for whoever looks at this asset's history six months from now, so be specific rather than terse. See [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order) for what changes once it's closed.
+**The History tab** shows every other work order ever filed against the same asset — useful for spotting a pattern before you start troubleshooting from scratch.
+
+**Attach photos, receipts, or reports** from the **Attachments** tab (or the **+ Attachment** shortcut in the action bar) — see [Attachments on work orders](/help/photos-documents/photos-on-work-orders).
+
+**Closing out.** When the work is actually done, pick a **resolution code** in the Details tab — see [Resolution codes explained](/help/work-orders/resolution-codes-explained) — write resolution notes summarizing what actually happened, and use **Save resolution** in the action bar to save them together. This is the single most useful thing for whoever looks at this asset's history six months from now, so be specific rather than terse. Use **Close ticket** in the action bar (or the status control) to actually close it — see [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order) for what changes once it's closed.
 
 The **reported by** field on a ticket links to that person's [account profile](/help/accounts/your-contact-profile), which shows how they'd prefer to be reached during the burn if you need to follow up with them directly.`,
   },
@@ -226,7 +230,7 @@ The **reported by** field on a ticket links to that person's [account profile](/
     category: "work-orders",
     order: 2,
     summary: "Track which parts went into a repair, with optional order history.",
-    body: `Any open work order has a **Parts used** section for recording what actually went into the fix — replaced a battery, swapped a connector, whatever the repair needed.
+    body: `Any open work order's **Details** tab has a **Parts used** section for recording what actually went into the fix — replaced a battery, swapped a connector, whatever the repair needed. The **+ Part** shortcut in the action bar at the top jumps straight there.
 
 **Logging a part.** Enter a part number and quantity. If it's a part that's been logged before on this asset's type, it's picked up automatically from a suggestions list as you type. If it's genuinely new, you also need to give it a short description — that's what creates the part record, scoped to this asset's **asset type** (a Solar Lamplighter Lantern part and a different asset type's part with the same number are tracked separately, since they're not actually the same thing just because the number matches).
 
@@ -296,13 +300,13 @@ After submitting, you land on a confirmation page listing every ticket that was 
   },
   {
     slug: "photos-on-work-orders",
-    title: "Photos on work orders",
+    title: "Attachments on work orders",
     category: "photos-documents",
     order: 0,
-    summary: "Attaching, viewing, and removing photos on a ticket.",
-    body: `Open a work order and scroll to the **Photos** section. You can attach one or more images directly — a photo of the damage, of the part that failed, of the fix once it's done. Each photo shows who uploaded it and can be removed by anyone with access to that ticket's department if it was added by mistake.
+    summary: "Attaching, viewing, and removing photos, receipts, and reports on a ticket.",
+    body: `Open a work order and switch to its **Attachments** tab (or click **+ Attachment** in the action bar at the top, which jumps you there). You can attach one or more files directly — a photo of the damage, of the part that failed, of the fix once it's done, or a receipt or service report worth keeping with the ticket. Each attachment shows who uploaded it and can be removed by anyone with access to that ticket's department if it was added by mistake.
 
-Photos are stored securely and served through short-lived, signed links rather than public URLs, so they aren't guessable or accessible outside Chemistry. Only image files are accepted here, up to 8MB per photo — for other document types (PDFs, manuals) see [Asset type documents](/help/photos-documents/asset-type-documents) instead, which is a separate, type-level attachment system rather than a per-ticket one.
+Files are stored securely and served through short-lived, signed links rather than public URLs, so they aren't guessable or accessible outside Chemistry. Images, PDFs, and common office document types (Word, Excel, plain text) are all accepted, up to 20MB per file — non-image files show as a filename card instead of a thumbnail. For reference material that belongs to an entire **asset type** rather than one ticket — a service manual, a wiring schematic — see [Asset type documents](/help/photos-documents/asset-type-documents) instead, which is a separate, type-level attachment system.
 
 A photo taken the moment you find a problem is worth far more than a description written from memory later — when in doubt, snap it before you touch anything.`,
   },

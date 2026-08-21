@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FileText } from "lucide-react";
 import { reopenWorkOrder } from "../actions";
 import { Button } from "@/components/button";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
@@ -115,16 +116,23 @@ export function ClosedWorkOrderView({
 
         {workOrder.attachments.length > 0 && (
           <div className="rounded-md border border-neutral-200 bg-white p-4">
-            <h2 className="text-sm font-semibold text-neutral-900">Photos</h2>
+            <h2 className="text-sm font-semibold text-neutral-900">Attachments</h2>
             <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {workOrder.attachments.map((attachment, i) => (
                 <a key={attachment.id} href={attachmentUrls[i]} target="_blank" rel="noopener noreferrer">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={attachmentUrls[i]}
-                    alt={attachment.filename}
-                    className="aspect-square w-full rounded-md border border-neutral-200 object-cover"
-                  />
+                  {attachment.mimeType.startsWith("image/") ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={attachmentUrls[i]}
+                      alt={attachment.filename}
+                      className="aspect-square w-full rounded-md border border-neutral-200 object-cover"
+                    />
+                  ) : (
+                    <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-md border border-neutral-200 bg-neutral-50 p-2 text-center">
+                      <FileText className="h-8 w-8 text-neutral-400" />
+                      <span className="line-clamp-2 text-xs text-neutral-600">{attachment.filename}</span>
+                    </div>
+                  )}
                 </a>
               ))}
             </div>

@@ -10,9 +10,9 @@ import { recordAudit } from "@/lib/audit";
 import { sendWorkOrderAssignedEmail } from "@/lib/mailer";
 import { buildAttachmentKey, uploadAttachment, deleteAttachmentObject } from "@/lib/s3";
 import { generateWorkOrderCode } from "@/lib/work-order-code";
-import { WO_TYPES, WO_PRIORITIES, WO_STATUSES } from "@/lib/constants";
+import { WO_TYPES, WO_PRIORITIES, WO_STATUSES, ALLOWED_ATTACHMENT_TYPES } from "@/lib/constants";
 
-const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
+const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 
 const createSchema = z.object({
   description: z.string().min(1),
@@ -302,14 +302,14 @@ export async function uploadWorkOrderAttachments(
   const workOrder = await requireWorkOrderAccess(workOrderId);
 
   const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
-  if (files.length === 0) return { error: "Choose at least one photo." };
+  if (files.length === 0) return { error: "Choose at least one file." };
 
   for (const file of files) {
-    if (!file.type.startsWith("image/")) {
-      return { error: `"${file.name}" isn't an image.` };
+    if (!ALLOWED_ATTACHMENT_TYPES.includes(file.type)) {
+      return { error: `"${file.name}" isn't a supported file type.` };
     }
     if (file.size > MAX_ATTACHMENT_BYTES) {
-      return { error: `"${file.name}" is over the 8MB limit.` };
+      return { error: `"${file.name}" is over the 20MB limit.` };
     }
   }
 
