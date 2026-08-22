@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { FileText, Printer } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { getAttachmentUrl } from "@/lib/s3";
@@ -14,7 +14,7 @@ import { ClosedWorkOrderView } from "./closed-work-order-view";
 import { CodeFileEditorForm } from "@/components/code/code-file-editor-form";
 import { TabbedPageProvider, TabbedPageTabs, JumpToTabButton } from "@/components/tabbed-page";
 import { AddNoteForm } from "@/components/add-note-form";
-import { Button } from "@/components/button";
+import { Button, buttonClass } from "@/components/button";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
 import { WO_STATUSES } from "@/lib/constants";
 import { renderNoteHtml } from "@/lib/notes";
@@ -411,6 +411,10 @@ export default async function WorkOrderDetailPage({
             <JumpToTabButton tabId="details" scrollToId="notes-section">+ Note</JumpToTabButton>
             <JumpToTabButton tabId="details" scrollToId="parts-section">+ Part</JumpToTabButton>
             <JumpToTabButton tabId="attachments" scrollToId="attachments-section">+ Attachment</JumpToTabButton>
+            <Link href={`/work-orders/${workOrder.code}/print`} className={buttonClass("secondary")}>
+              <Printer className="h-4 w-4" />
+              Print
+            </Link>
             <Button type="submit" form="resolution-form">
               Save resolution
             </Button>

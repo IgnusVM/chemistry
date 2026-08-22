@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { FileText, Printer } from "lucide-react";
 import { reopenWorkOrder } from "../actions";
-import { Button } from "@/components/button";
+import { Button, buttonClass } from "@/components/button";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
 import { renderNoteHtml } from "@/lib/notes";
 import type { ResolvedBadge } from "@/lib/user-badge-data";
@@ -178,6 +178,10 @@ export function ClosedWorkOrderView({
           <p className="text-xs text-neutral-500">
             This work order is closed — everything above is locked. Reopen it to make changes.
           </p>
+          <Link href={`/work-orders/${workOrder.code}/print`} className={buttonClass("secondary", "w-full")}>
+            <Printer className="h-4 w-4" />
+            Print
+          </Link>
           <form action={reopenWorkOrder}>
             <input type="hidden" name="workOrderId" value={workOrder.id} />
             <Button type="submit" variant="secondary" className="w-full">

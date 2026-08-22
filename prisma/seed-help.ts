@@ -37,6 +37,8 @@ const ARTICLES: ArticleSeed[] = [
 
 **Handling a whole batch at once?** Select multiple rows on the Assets or Work Orders list (checkboxes, shift-click, select-all) to bulk-edit assets, bulk-close tickets, or file the same ticket against many assets in one go — see [Selecting multiple items](/help/getting-started/selecting-multiple-items).
 
+**Need it in a spreadsheet?** Filter a list, press **Export**, pick your columns — see [Exporting lists to Excel](/help/getting-started/exporting-lists). Individual tickets can also be [printed](/help/work-orders/printing-a-work-order) as a signed-off paper record.
+
 **Borrowing a tool?** Asset types marked as loanable get a **Loans** tab for checking gear in and out, with a log of who had what. The **Loans** tab in the nav shows everything currently out. See [Checking tools in and out](/help/assets/checking-tools-in-and-out).
 
 **Everything else** — divisions, departments, asset types, resolution codes, locations, and user roles — lives under the **Admin** tab, one level down, because you mostly won't need to touch it. See [What lives under Admin](/help/admin-setup/what-lives-under-admin).
@@ -514,6 +516,38 @@ You'll find it under **Admin → Asset Types → (a type) → Code**. Only org a
 Deleting a user is blocked while they still have anything [checked out](/help/assets/checking-tools-in-and-out) — check the gear back in first, so it doesn't simply vanish from the record.
 
 **What isn't editable:** work order codes and asset tags are permanent identifiers, and audit log entries and notes are append-only by design. If a note is wrong, add a correcting note rather than rewriting history.`,
+  },
+  {
+    slug: "exporting-lists",
+    title: "Exporting lists to Excel",
+    category: "getting-started",
+    order: 5,
+    summary: "Filter a list, pick your columns, get a spreadsheet.",
+    body: `The **Assets** and **Work Orders** lists both have an **Export** button. The flow is: narrow the list with the filters until it shows what you want, press **Export**, tick the columns you need, and download.
+
+**The export always matches your filter.** Whatever the list is showing is exactly what comes out — same search text, same department, status, priority, and assignment filters. It isn't limited to the page you're looking at either: if your filter matches 300 assets and you're viewing 15 per page, you get all 300.
+
+**Picking columns.** The dialog lists every available column with **All / Reset / None** shortcuts. Your choice is remembered per list, so if you export the same shape every week you only pick it once. Columns always come out in a consistent order regardless of the order you ticked them, so two people exporting the same selection get identical sheets.
+
+**Custom fields.** When you filter the Assets list to a **single asset type**, that type's [custom fields](/help/admin-setup/asset-types-and-custom-fields) become available as columns — panel lot, firmware version, and so on. They're deliberately not offered across mixed types, where most rows would be blank. So to get a spreadsheet of every lantern with its panel lots, filter by the Lamplighter type first, then export.
+
+**Excel or CSV.** **Excel** (\`.xlsx\`) is the better default: dates come through as real dates and numbers as real numbers, so sorting and filtering in the spreadsheet behave properly instead of treating everything as text. Choose **CSV** if you're importing somewhere that prefers it — Google Sheets opens either one fine (**File → Import** for CSV, or just open the .xlsx directly from Drive).
+
+There's a ceiling of 10,000 rows on a single export. If you somehow need more than that, narrow the filter and export in batches.`,
+  },
+  {
+    slug: "printing-a-work-order",
+    title: "Printing a work order",
+    category: "work-orders",
+    order: 8,
+    summary: "A paper service record for a single ticket.",
+    body: `Any work order can be printed as a one-page service record — useful when a repair needs a physical paper trail, when someone's working somewhere without a phone, or when a job needs signing off.
+
+Open the ticket and click **Print** (it's in the action bar at the top of an open ticket, and alongside **Reopen** on a closed one). That opens a clean print layout with a **Print** button; everything else — the app navigation, buttons, the bottom tab bar on a phone — is automatically left off the printed page.
+
+**What's on it:** the work order number, status, priority and type; the asset with its type and location; who reported it and who it's assigned to; the full reported/started/completed/closed timeline; the problem description; the resolution code, notes, and labor minutes; every part used; the full notes log; and blank **Work performed by** / **Verified by** signature lines at the bottom.
+
+It's a separate page rather than printing the ticket screen directly, because the ticket is tabbed — printing that would only ever capture whichever tab happened to be open.`,
   },
   {
     slug: "troubleshooting-faq",

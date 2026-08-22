@@ -11,6 +11,8 @@ import { SelectionToolbar } from "@/components/selection/selection-toolbar";
 import { AssignedFilterFields } from "./assigned-filter-fields";
 import { buildWorkOrderWhere, resolveWorkOrderListDefaults, OPEN_STATUS_FILTER, type WorkOrderListParams } from "./where";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES, WORK_ORDER_PRIORITY_STYLES as PRIORITY_STYLES } from "@/lib/status-styles";
+import { ExportDialog } from "@/components/export-dialog";
+import { WORK_ORDER_COLUMNS, DEFAULT_WORK_ORDER_COLUMNS } from "@/lib/export/columns";
 
 export default async function WorkOrdersPage({
   searchParams,
@@ -52,9 +54,19 @@ export default async function WorkOrdersPage({
           <h1 className="text-lg font-semibold text-neutral-900">Work Orders</h1>
           <p className="text-sm text-neutral-500">{total} total</p>
         </div>
-        <Link href="/work-orders/new" className={buttonClass()}>
-          + New work order
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <ExportDialog
+            endpoint="/api/export/work-orders"
+            storageKey="chemistry.export.work-orders"
+            columns={WORK_ORDER_COLUMNS.map((c) => ({ key: c.key, label: c.label }))}
+            defaultColumns={DEFAULT_WORK_ORDER_COLUMNS}
+            filterParams={{ q, department, status, priority, mine, assignedToName }}
+            total={total}
+          />
+          <Link href="/work-orders/new" className={buttonClass()}>
+            + New work order
+          </Link>
+        </div>
       </div>
 
       <form className="flex flex-wrap items-center gap-2 rounded-md border border-neutral-200 bg-white p-3">

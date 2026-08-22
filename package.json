@@ -1,6 +1,6 @@
 {
   "name": "chemistry",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "dev": "node scripts/copy-zxing-wasm.mjs && next dev",
@@ -37,6 +37,7 @@
     "react-diff-viewer-continued": "^4.4.0",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
+    "write-excel-file": "^4.1.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {

@@ -14,7 +14,9 @@ Asset and maintenance management for Alchemy — serial-level asset tracking, wo
 - **Selection UI** — a shared paginated/searchable list component (checkboxes, shift-click ranges, select-all-on-page, select-all-matching-filter) used across the Assets list, Work Orders list, and Asset Group member lists to drive every bulk action. Page size is selectable (15/50/100/250).
 - **Auth** — invite-only signup, magic-link sign-in (Resend), optional PIN for trusted devices. Per-user identity badges (uploaded avatar, or icon + colour) shown wherever attribution appears.
 - **Admin** — divisions/departments/roles, asset types with custom field schemas and documents, resolution codes, locations, users. Master data is editable in place rather than delete-and-recreate; user email is deliberately immutable.
-- **Help** — an in-app wiki with search, seeded from `prisma/seed-help.ts` (30 articles).
+- **Export** — Assets and Work Orders lists export to `.xlsx` or CSV. The export re-runs the *same* where-builder the list page used, so a filtered export can never disagree with what was on screen, and it covers every match rather than the current page. Columns are user-selected (remembered per list); asset custom fields are offered as columns when the list is narrowed to a single asset type. `.xlsx` cells are genuinely typed — dates as dates, numbers as numbers.
+- **Printing** — a single work order prints as a one-page service record with signature lines, on its own route (the detail page is tabbed, so printing it directly would only capture the open tab).
+- **Help** — an in-app wiki with search, seeded from `prisma/seed-help.ts` (32 articles).
 
 ## Getting started
 
@@ -43,7 +45,7 @@ Open [http://localhost:3000](http://localhost:3000). Sign-in is by magic link �
 
 ## Stack
 
-Next.js 16 (App Router, TypeScript strict, Turbopack), Tailwind v4, Prisma 7 + Postgres (via `@prisma/adapter-pg`), JWT sessions via `jose`, S3-compatible storage for attachments/documents/avatars, Resend for transactional email. Tiptap for rich text, CodeMirror + `react-diff-viewer-continued` for code files, `barcode-detector` (zxing-wasm) for QR scanning.
+Next.js 16 (App Router, TypeScript strict, Turbopack), Tailwind v4, Prisma 7 + Postgres (via `@prisma/adapter-pg`), JWT sessions via `jose`, S3-compatible storage for attachments/documents/avatars, Resend for transactional email. Tiptap for rich text, CodeMirror + `react-diff-viewer-continued` for code files, `barcode-detector` (zxing-wasm) for QR scanning, `write-excel-file` for xlsx export (chosen over SheetJS's `xlsx`, whose npm package has been abandoned since 2022, and over `exceljs`, ~3 years stale).
 
 The PWA is hand-rolled — `app/manifest.ts` plus a service worker at `public/sw.js` — rather than `next-pwa`, which is webpack-based and unusable under Turbopack. The service worker is served from the origin root so its scope is `/` without needing a `Service-Worker-Allowed` header, and PWA assets are exempted from auth in `src/proxy.ts`'s matcher (a browser fetches the manifest and registers the worker outside a normal authenticated navigation).
 

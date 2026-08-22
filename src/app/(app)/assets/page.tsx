@@ -10,6 +10,9 @@ import { RowCheckbox } from "@/components/selection/row-checkbox";
 import { SelectionToolbar } from "@/components/selection/selection-toolbar";
 import { buildAssetWhere, type AssetListParams } from "./where";
 import { ASSET_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
+import { ExportDialog } from "@/components/export-dialog";
+import { ASSET_COLUMNS, assetCustomFieldColumns, DEFAULT_ASSET_COLUMNS } from "@/lib/export/columns";
+import type { CustomFieldDef } from "@/lib/custom-fields";
 
 export default async function AssetsPage({
   searchParams,
@@ -38,6 +41,16 @@ export default async function AssetsPage({
   ]);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
+  // Custom fields are only offered as export columns when the list is narrowed
+  // to a single asset type — across mixed types they'd be mostly blank.
+  const filteredType = type ? assetTypes.find((t) => t.id === type) : undefined;
+  const exportColumns = [
+    ...ASSET_COLUMNS,
+    ...(filteredType
+      ? assetCustomFieldColumns((filteredType.customFieldSchema as unknown as CustomFieldDef[]) ?? [])
+      : []),
+  ].map((c) => ({ key: c.key, label: c.label }));
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -45,7 +58,15 @@ export default async function AssetsPage({
           <h1 className="text-lg font-semibold text-neutral-900">Assets</h1>
           <p className="text-sm text-neutral-500">{total} total</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <ExportDialog
+            endpoint="/api/export/assets"
+            storageKey="chemistry.export.assets"
+            columns={exportColumns}
+            defaultColumns={DEFAULT_ASSET_COLUMNS}
+            filterParams={{ q, department, status, type }}
+            total={total}
+          />
           <Link href="/assets/bulk-new" className={buttonClass("secondary")}>
             + Bulk create
           </Link>
