@@ -10,6 +10,10 @@ import { DeleteDocumentButton } from "./delete-document-button";
 import { DeleteAssetTypeButton } from "./delete-asset-type-button";
 import { AddPartForm } from "./add-part-form";
 import { DeletePartButton } from "./delete-part-button";
+import { CreateCodeFileForm } from "@/components/code/create-code-file-form";
+import { CodeFileEditorForm } from "@/components/code/code-file-editor-form";
+import { CodeFileVersionHistory } from "@/components/code/code-file-version-history";
+import { DeleteCodeFileButton } from "@/components/code/delete-code-file-button";
 
 export default async function AssetTypeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requireOrgAdmin();
@@ -25,6 +29,12 @@ export default async function AssetTypeDetailPage({ params }: { params: Promise<
         include: {
           orders: { orderBy: { orderedAt: "desc" } },
           _count: { select: { workOrderUses: true } },
+        },
+      },
+      codeFiles: {
+        orderBy: { filename: "asc" },
+        include: {
+          versions: { orderBy: { createdAt: "desc" }, include: { createdBy: true, workOrder: true } },
         },
       },
     },
@@ -130,6 +140,50 @@ export default async function AssetTypeDetailPage({ params }: { params: Promise<
           </table>
         )}
         <AddPartForm assetTypeId={assetType.id} />
+      </div>
+
+      <div className="space-y-4 rounded-md border border-neutral-200 bg-white p-4">
+        <div>
+          <h2 className="text-sm font-semibold text-neutral-900">Code</h2>
+          <p className="text-xs text-neutral-500">
+            Source that runs on every {assetType.name}. A change here applies to the whole class, not
+            to one unit &mdash; which firmware a specific unit is actually flashed with is tracked as
+            a custom field on that asset.
+          </p>
+        </div>
+
+        {assetType.codeFiles.map((file) => (
+          <div key={file.id} className="space-y-3 border-t border-neutral-100 pt-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="font-mono text-sm font-medium text-neutral-900">{file.filename}</h3>
+                {file.description && <p className="text-xs text-neutral-500">{file.description}</p>}
+              </div>
+              <DeleteCodeFileButton codeFileId={file.id} />
+            </div>
+            <CodeFileEditorForm
+              codeFileId={file.id}
+              filename={file.filename}
+              currentContent={file.versions[0]?.content ?? ""}
+            />
+            <details>
+              <summary className="cursor-pointer text-xs font-medium tracking-wide text-neutral-400 uppercase">
+                Version history ({file.versions.length})
+              </summary>
+              <div className="mt-2">
+                <CodeFileVersionHistory
+                  codeFileId={file.id}
+                  filename={file.filename}
+                  versions={file.versions}
+                />
+              </div>
+            </details>
+          </div>
+        ))}
+
+        <div className="border-t border-neutral-100 pt-4">
+          <CreateCodeFileForm assetTypeId={assetType.id} />
+        </div>
       </div>
     </div>
   );

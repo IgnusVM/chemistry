@@ -11,7 +11,7 @@ import { AssetEditForm } from "./asset-edit-form";
 import { PartsUsedForm } from "./parts-used-form";
 import { DeleteWorkOrderPartButton } from "./delete-work-order-part-button";
 import { ClosedWorkOrderView } from "./closed-work-order-view";
-import { CodeFileEditorForm } from "../../assets/[assetTag]/code/code-file-editor-form";
+import { CodeFileEditorForm } from "@/components/code/code-file-editor-form";
 import { TabbedPageProvider, TabbedPageTabs, JumpToTabButton } from "@/components/tabbed-page";
 import { AddNoteForm } from "@/components/add-note-form";
 import { Button } from "@/components/button";
@@ -26,13 +26,13 @@ export default async function WorkOrderDetailPage({
 }: {
   params: Promise<{ code: string }>;
 }) {
-  await requireCurrentUser();
+  const user = await requireCurrentUser();
   const { code } = await params;
 
   const workOrder = await prisma.workOrder.findUnique({
     where: { code },
     include: {
-      asset: true,
+      asset: { include: { assetType: true } },
       department: true,
       reportedBy: true,
       assignedTo: true,
@@ -92,13 +92,16 @@ export default async function WorkOrderDetailPage({
       : Promise.resolve([]),
   ]);
 
-  const codeFiles = workOrder.assetId
-    ? await prisma.assetCodeFile.findMany({
-        where: { assetId: workOrder.assetId },
-        orderBy: { filename: "asc" },
-        include: { versions: { orderBy: { createdAt: "desc" }, take: 1 } },
-      })
-    : [];
+  // Code lives on the asset TYPE, and only org admins can change it, so this
+  // card is both scoped by type and hidden entirely from everyone else.
+  const codeFiles =
+    user.isOrgAdmin && workOrder.asset
+      ? await prisma.assetCodeFile.findMany({
+          where: { assetTypeId: workOrder.asset.assetTypeId },
+          orderBy: { filename: "asc" },
+          include: { versions: { orderBy: { createdAt: "desc" }, take: 1 } },
+        })
+      : [];
 
   const [reportedByBadge, assignedToBadge, noteBadges, attachmentBadges] = await Promise.all([
     resolveBadge(workOrder.reportedBy),
@@ -210,7 +213,9 @@ export default async function WorkOrderDetailPage({
           <div>
             <h2 className="text-sm font-semibold text-neutral-900">Code</h2>
             <p className="text-xs text-neutral-500">
-              Editing here saves a new version to the asset&rsquo;s code file, linked to this ticket.
+              Source for <span className="font-medium">{workOrder.asset?.assetType?.name}</span>.
+              Saving here publishes a new version for every asset of that type and records that it
+              came from this ticket.
             </p>
           </div>
           {codeFiles.map((file) => (

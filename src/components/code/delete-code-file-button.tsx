@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { deleteAssetCodeFile } from "../../code-file-actions";
+import { deleteAssetCodeFile } from "@/app/(app)/admin/asset-types/code-file-actions";
 
 export function DeleteCodeFileButton({ codeFileId }: { codeFileId: string }) {
   const [pending, startTransition] = useTransition();

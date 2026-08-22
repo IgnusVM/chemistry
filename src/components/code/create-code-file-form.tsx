@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import dynamic from "next/dynamic";
-import { createAssetCodeFile, type CreateCodeFileState } from "../../code-file-actions";
+import { createAssetCodeFile, type CreateCodeFileState } from "@/app/(app)/admin/asset-types/code-file-actions";
 import { Button } from "@/components/button";
 
 const CodeMirrorEditor = dynamic(() => import("@/components/code/code-mirror-editor").then((m) => m.CodeMirrorEditor), {
@@ -10,7 +10,7 @@ const CodeMirrorEditor = dynamic(() => import("@/components/code/code-mirror-edi
   loading: () => <div className="h-40 animate-pulse rounded-md border border-neutral-300 bg-neutral-50" />,
 });
 
-export function CreateCodeFileForm({ assetId }: { assetId: string }) {
+export function CreateCodeFileForm({ assetTypeId }: { assetTypeId: string }) {
   const [state, setState] = useState<CreateCodeFileState>(undefined);
   const [pending, startTransition] = useTransition();
   const [filename, setFilename] = useState("");
@@ -19,7 +19,7 @@ export function CreateCodeFileForm({ assetId }: { assetId: string }) {
 
   const submit = () => {
     const formData = new FormData();
-    formData.set("assetId", assetId);
+    formData.set("assetTypeId", assetTypeId);
     formData.set("filename", filename);
     formData.set("description", description);
     formData.set("content", content);

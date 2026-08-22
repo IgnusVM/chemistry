@@ -271,6 +271,7 @@ model AssetType {
   assets            Asset[]
   documents         AssetTypeDocument[]
   parts             Part[]
+  codeFiles         AssetCodeFile[]
 }
 
 model Part {
@@ -381,7 +382,6 @@ model Asset {
   locationHistory  AssetLocationHistory[]
   workOrders       WorkOrder[]
   notes            AssetNote[]
-  codeFiles        AssetCodeFile[]
   loans            AssetLoan[]
 
   @@index([owningDepartmentId])
@@ -518,21 +518,26 @@ model AssetNote {
   @@index([assetId])
 }
 
+/// Source that runs on a class of machine (a lantern's charging logic, say),
+/// so it lives on the AssetType rather than on each unit — 300 lanterns run one
+/// program, and a fix belongs to the design, not to the one unit it was found
+/// on. Which firmware a specific unit is actually flashed with is tracked
+/// separately as an ordinary custom field, not by this model.
 model AssetCodeFile {
   id              String   @id @default(cuid())
-  assetId         String
+  assetTypeId     String
   filename        String
   description     String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   createdByUserId String?
 
-  asset     Asset                  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  assetType AssetType              @relation(fields: [assetTypeId], references: [id], onDelete: Cascade)
   createdBy User?                  @relation(fields: [createdByUserId], references: [id])
   versions  AssetCodeFileVersion[]
 
-  @@unique([assetId, filename])
-  @@index([assetId])
+  @@unique([assetTypeId, filename])
+  @@index([assetTypeId])
 }
 
 model AssetCodeFileVersion {

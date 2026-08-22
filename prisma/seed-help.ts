@@ -475,23 +475,27 @@ You can mix modes freely; each note remembers how it was written and renders acc
 
 **A note on safety.** Note content is sanitized before it's displayed, so pasting something from a web page can't inject anything harmful into Chemistry for the next person who reads it. You may occasionally find that exotic pasted formatting is stripped — that's this working as intended.
 
-For code that's genuinely part of an asset rather than a one-off observation — firmware, a charging routine — use [code files](/help/assets/code-files-on-assets) instead, which are versioned properly.`,
+For code that's genuinely part of how a machine works — firmware, a charging routine — use [code files](/help/admin-setup/code-files-on-asset-types) instead, which live on the asset type and are properly versioned.`,
   },
   {
-    slug: "code-files-on-assets",
-    title: "Code files on an asset",
-    category: "assets",
-    order: 70,
-    summary: "Version-controlled source stored on the asset itself, editable from a work order.",
-    body: `Some assets *are* partly software — the logic that drives a solar lantern's charging behaviour, for instance. An asset's **Code** tab stores named source files directly on the asset, with full version history, so the question "what's actually running on this thing?" has an answer.
+    slug: "code-files-on-asset-types",
+    title: "Code files on an asset type",
+    category: "admin-setup",
+    order: 4,
+    summary: "Version-controlled source for a class of machine, editable from a work order.",
+    body: `Some assets *are* partly software — the logic that drives a solar lantern's charging behaviour, for instance. That code lives on the **asset type**, not on individual assets, because three hundred lanterns all run the same program. A fix belongs to the design, not to whichever unit the bug happened to be noticed on.
+
+You'll find it under **Admin → Asset Types → (a type) → Code**. Only org admins can add, edit, or remove code, because saving a version publishes it for that entire class of machine — a materially bigger act than logging a repair on one lantern.
 
 **Creating a file.** Give it a filename with an extension (\`charging-logic.py\`), an optional description of what it does, and paste the contents. The editor colours the code based on the extension — Python, C/C++/Arduino, and JavaScript/TypeScript are all recognised.
 
 **Every save is a version.** Editing a file and saving creates a new version rather than overwriting the old one, optionally with a short message describing the change, exactly like a commit. The version history under each file lists every save with its author, date, and message.
 
-**Comparing and rolling back.** Tick any two versions in the history to see a side-by-side diff of exactly what changed between them; tick one to view it on its own. If a change turns out to be wrong, **Rollback** puts the older content back — and importantly it does so by creating a *new* version rather than deleting anything, so the history of what happened stays intact. Nothing is ever silently erased.
+**Comparing and rolling back.** Tick any two versions to see a side-by-side diff of exactly what changed; tick one to view it alone. If a change turns out to be wrong, **Rollback** restores the older content by creating a *new* version rather than deleting anything, so the record of what actually happened stays intact.
 
-**Editing from a work order.** This is the point of the whole feature. If an asset has code files, its linked work orders show a **Code** card in their Details tab. Editing there saves a new version to the asset itself, tagged with the ticket it came from — so you open a ticket about a misbehaving lantern, change the code as part of fixing it, and the asset's history permanently records that this version came from that repair.`,
+**Changing code from a work order.** This is the normal path. If a ticket's asset has a type with code files, org admins see a **Code** card in the ticket's Details tab. Saving there publishes a new version for the whole class *and* records which ticket it came from — so a fault reported on one lantern, diagnosed and fixed, leaves a permanent link between the repair and the code change it produced.
+
+**What this does not track.** Publishing a version doesn't flash anything. The code here is the canonical source; which firmware a specific unit is actually *running* is a separate question, tracked as an ordinary [custom field](/help/admin-setup/asset-types-and-custom-fields) on the asset (for example "Firmware Version") and updated by whoever does the flashing. Don't read a new version here as meaning the fleet has it.`,
   },
   {
     slug: "editing-records",
@@ -533,7 +537,14 @@ Deleting a user is blocked while they still have anything [checked out](/help/as
   },
 ];
 
+// Slugs that used to ship in this file and have since been renamed or dropped.
+// Listed explicitly rather than deleting everything not in ARTICLES, because
+// articles can also be hand-authored through /help/admin and those must survive.
+const RETIRED_SLUGS = ["code-files-on-assets"];
+
 async function main() {
+  await prisma.helpArticle.deleteMany({ where: { slug: { in: RETIRED_SLUGS } } });
+
   for (const article of ARTICLES) {
     await prisma.helpArticle.upsert({
       where: { slug: article.slug },

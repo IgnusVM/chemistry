@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import dynamic from "next/dynamic";
-import { saveAssetCodeVersion, type SaveCodeVersionState } from "../../code-file-actions";
+import { saveAssetCodeVersion, type SaveCodeVersionState } from "@/app/(app)/admin/asset-types/code-file-actions";
 import { Button } from "@/components/button";
 
 const CodeMirrorEditor = dynamic(() => import("@/components/code/code-mirror-editor").then((m) => m.CodeMirrorEditor), {

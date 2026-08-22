@@ -15,10 +15,6 @@ import { resolveBadges } from "@/lib/user-badge-data";
 import { UserBadgeLabel } from "@/components/user-badge";
 import { TabbedPageProvider, TabbedPageTabs, JumpToTabButton } from "@/components/tabbed-page";
 import { AddNoteForm } from "@/components/add-note-form";
-import { CreateCodeFileForm } from "./code/create-code-file-form";
-import { CodeFileEditorForm } from "./code/code-file-editor-form";
-import { CodeFileVersionHistory } from "./code/code-file-version-history";
-import { DeleteCodeFileButton } from "./code/delete-code-file-button";
 import { LoansPanel } from "./loans/loans-panel";
 
 export default async function AssetDetailPage({
@@ -41,12 +37,6 @@ export default async function AssetDetailPage({
         take: 20,
       },
       notes: { orderBy: { createdAt: "asc" }, include: { user: true } },
-      codeFiles: {
-        orderBy: { filename: "asc" },
-        include: {
-          versions: { orderBy: { createdAt: "desc" }, include: { createdBy: true, workOrder: true } },
-        },
-      },
     },
   });
   if (!asset) notFound();
@@ -188,34 +178,6 @@ export default async function AssetDetailPage({
     </div>
   );
 
-  const codeContent = (
-    <>
-      {asset.codeFiles.map((file) => (
-        <div key={file.id} className="space-y-3 rounded-md border border-neutral-200 bg-white p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-sm font-semibold text-neutral-900">{file.filename}</h2>
-              {file.description && <p className="text-xs text-neutral-500">{file.description}</p>}
-            </div>
-            <DeleteCodeFileButton codeFileId={file.id} />
-          </div>
-          <CodeFileEditorForm codeFileId={file.id} filename={file.filename} currentContent={file.versions[0]?.content ?? ""} />
-          <details>
-            <summary className="cursor-pointer text-xs font-medium tracking-wide text-neutral-400 uppercase">
-              Version history ({file.versions.length})
-            </summary>
-            <div className="mt-2">
-              <CodeFileVersionHistory codeFileId={file.id} filename={file.filename} versions={file.versions} />
-            </div>
-          </details>
-        </div>
-      ))}
-      <div id="code-section">
-        <CreateCodeFileForm assetId={asset.id} />
-      </div>
-    </>
-  );
-
   const historyContent = (
     <>
       {workOrders.length > 0 && (
@@ -336,7 +298,6 @@ export default async function AssetDetailPage({
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <JumpToTabButton tabId="notes" scrollToId="notes-section">+ Note</JumpToTabButton>
-            <JumpToTabButton tabId="code" scrollToId="code-section">+ Code</JumpToTabButton>
           </div>
         </div>
 
@@ -358,7 +319,6 @@ export default async function AssetDetailPage({
                   },
                 ]
               : []),
-            { id: "code", label: "Code", content: codeContent, color: "violet" },
             { id: "history", label: "History", content: historyContent, color: "amber" },
           ]}
         />

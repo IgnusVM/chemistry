@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { rollbackAssetCodeVersion } from "../../code-file-actions";
+import { rollbackAssetCodeVersion } from "@/app/(app)/admin/asset-types/code-file-actions";
 
 const CodeMirrorEditor = dynamic(() => import("@/components/code/code-mirror-editor").then((m) => m.CodeMirrorEditor), {
   ssr: false,
