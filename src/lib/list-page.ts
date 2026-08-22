@@ -1,4 +1,6 @@
-export const PAGE_SIZE_OPTIONS = [15, 50, 100, 250] as const;
+// 10 rather than 15 so a default page clears the viewport without scrolling —
+// 15 was just over the line on the laptop sizes this actually gets used on.
+export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100, 250] as const;
 export const DEFAULT_PAGE_SIZE: number = PAGE_SIZE_OPTIONS[0];
 
 export function parsePage(pageParam: string | undefined): number {

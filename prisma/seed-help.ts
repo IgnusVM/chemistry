@@ -81,7 +81,7 @@ When in doubt, search this guide from the box at the top of the **Help** tab —
 
 **Select all matching your filter.** Once every row on the current page is checked, a link appears offering to select everything that matches your current search/filter — not just the page you're looking at. This is what lets a bulk action cover hundreds of items without you paging through them one screen at a time. There's a cap (500 items) on how many can be selected for one bulk action at once; if your filter matches more than that, narrow it first (by department, status, or search text) rather than trying to select everything in one shot.
 
-**How many rows you see.** Lists show 15 rows by default, chosen so a page fits on one screen without scrolling — including on a phone. The **Show: 15 / 50 / 100 / 250** control at the bottom of the list switches to a longer page when you'd rather scan a lot at once, and it sticks to the current filter and search as you page through.
+**How many rows you see.** Lists show 10 rows by default, chosen so a page fits on one screen without scrolling — including on a phone. The **Show: 10 / 25 / 50 / 100 / 250** control at the bottom of the list switches to a longer page when you'd rather scan a lot at once, and it sticks to the current filter and search as you page through.
 
 **Once something's selected**, a toolbar appears above the list with the count selected and whatever bulk actions that list supports — bulk edit, bulk close, printing a QR sheet for the selection, and so on. Selecting "all matching filter" is re-checked at the moment you submit, so the count you see in the next step reflects what's true right then, not what it was when you clicked select-all.`,
   },
