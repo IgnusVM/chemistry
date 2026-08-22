@@ -1,16 +1,128 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Class-based dark mode. Tailwind v4 defaults `dark:` to prefers-color-scheme,
+   but the theme is user-selectable (light / dark / follow the system), so it has
+   to key off a class we control on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Always white, in both themes. For text and icons sitting on a brand-coloured
+     or media background — a fuchsia button, the camera viewfinder — where the
+     surface doesn't invert, so the foreground mustn't either. Distinct from
+     `text-white`, which maps to --color-white and *does* invert (correct for the
+     dark pills that become light pills). */
+  --color-onaccent: #ffffff;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Elephant emblem inside the Chemistry flask — near-black on light, pale on
+     dark, since the flask interior is transparent and takes the page ground. */
+  --chem-emblem: #0a0414;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/*
+ * Dark theme.
+ *
+ * Rather than adding `dark:` variants to ~840 colour utilities across 127 files,
+ * this remaps the palette variables those utilities already compile to
+ * (`bg-white` emits `background-color: var(--color-white)`). One consequence
+ * worth knowing: new components inherit dark mode automatically — there's no
+ * `dark:` prefix for anyone to forget.
+ *
+ * The neutral ramp is inverted by role, not mechanically: 50 is the page
+ * ground, `white` is the raised card above it, 200/300 are borders, 400/500 are
+ * muted and secondary text, and 900 is primary text.
+ */
+.dark {
+  --background: #0f0f12;
+  --foreground: #fafafa;
+  --chem-emblem: #d9d4e4;
+
+  /* Native scrollbars, form controls, and date pickers follow this. */
+  color-scheme: dark;
+
+  /* Card / raised surface — sits above the neutral-50 page ground. */
+  --color-white: #18181b;
+
+  --color-neutral-50: #0f0f12;
+  --color-neutral-100: #1f1f23;
+  --color-neutral-200: #2e2e34;
+  --color-neutral-300: #3f3f46;
+  --color-neutral-400: #8b8b93;
+  --color-neutral-500: #a1a1aa;
+  --color-neutral-600: #b4b4bb;
+  --color-neutral-700: #d4d4d8;
+  --color-neutral-800: #e4e4e7;
+  --color-neutral-900: #fafafa;
+  --color-neutral-950: #ffffff;
+
+  /* Tinted panel grounds (the -50 steps) are near-white in light mode and would
+     glare on a dark page, so they become deep tints of the same hue. The -100
+     chip backgrounds are deliberately left bright: a light pill on a dark card
+     is legible and reads as a badge, which is what they are. */
+  --color-fuchsia-50: #2a1229;
+  --color-amber-50: #2a2010;
+  --color-red-50: #2d1416;
+  --color-green-50: #10251a;
+  --color-blue-50: #101f38;
+  --color-emerald-50: #0f2620;
+  --color-teal-50: #0d2427;
+  --color-violet-50: #1e1533;
+
+  /* Borders that pair with those tinted panels. */
+  --color-fuchsia-300: #7d3f79;
+  --color-amber-200: #5c4718;
+  --color-red-200: #5c2a2e;
+
+  /* Error text needs a little more lift against a dark ground. */
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+}
+
+/*
+ * Paper is always light. Without this, printing a work order while in dark mode
+ * emits a black page — unreadable on paper and a genuine waste of toner. Values
+ * restore Tailwind's stock light palette rather than unsetting the variables,
+ * since a guaranteed-invalid custom property would break every utility using it.
+ */
+@media print {
+  .dark {
+    --background: #ffffff;
+    --foreground: #171717;
+    --chem-emblem: #0a0414;
+    color-scheme: light;
+
+    --color-white: #ffffff;
+    --color-neutral-50: #fafafa;
+    --color-neutral-100: #f5f5f5;
+    --color-neutral-200: #e5e5e5;
+    --color-neutral-300: #d4d4d4;
+    --color-neutral-400: #a3a3a3;
+    --color-neutral-500: #737373;
+    --color-neutral-600: #525252;
+    --color-neutral-700: #404040;
+    --color-neutral-800: #262626;
+    --color-neutral-900: #171717;
+    --color-neutral-950: #0a0a0a;
+
+    --color-fuchsia-50: #fdf4ff;
+    --color-amber-50: #fffbeb;
+    --color-red-50: #fef2f2;
+    --color-green-50: #f0fdf4;
+    --color-blue-50: #eff6ff;
+    --color-emerald-50: #ecfdf5;
+    --color-teal-50: #f0fdfa;
+    --color-violet-50: #f5f3ff;
+
+    --color-fuchsia-300: #f0abfc;
+    --color-amber-200: #fde68a;
+    --color-red-200: #fecaca;
+    --color-red-600: #dc2626;
+    --color-red-700: #b91c1c;
+  }
 }
 
 body {

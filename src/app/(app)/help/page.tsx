@@ -42,7 +42,7 @@ export default async function HelpLandingPage() {
           <div className="text-xs uppercase tracking-wide text-neutral-400">Quick guide</div>
           <h2 className="mt-1 text-lg font-semibold text-neutral-900">{quickGuide.title}</h2>
           <div
-            className="prose prose-neutral prose-sm mt-3 max-w-none"
+            className="prose dark:prose-invert prose-neutral prose-sm mt-3 max-w-none"
             dangerouslySetInnerHTML={{ __html: renderHelpMarkdown(quickGuide.body) }}
           />
         </div>

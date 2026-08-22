@@ -5,6 +5,7 @@ import { ProfileForm } from "./profile-form";
 import { ContactForm } from "./contact-form";
 import { AvatarForm } from "./avatar-form";
 import { BadgeForm } from "./badge-form";
+import { ThemeToggle } from "@/components/theme";
 import { RevokeDeviceButton } from "./revoke-device-button";
 import { clearPin } from "./actions";
 import { getAttachmentUrl } from "@/lib/s3";
@@ -22,6 +23,16 @@ export default async function AccountPage() {
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">Account</h1>
         <p className="text-sm text-neutral-500">{user.email}</p>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-neutral-200 bg-white p-4">
+        <div>
+          <h2 className="text-sm font-semibold text-neutral-900">Appearance</h2>
+          <p className="text-xs text-neutral-500">
+            Saved on this device. &ldquo;System&rdquo; follows your phone or computer&rsquo;s setting.
+          </p>
+        </div>
+        <ThemeToggle />
       </div>
 
       <ProfileForm displayName={user.displayName} name={user.name} />

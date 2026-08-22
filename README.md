@@ -16,6 +16,7 @@ Asset and maintenance management for Alchemy — serial-level asset tracking, wo
 - **Admin** — divisions/departments/roles, asset types with custom field schemas and documents, resolution codes, locations, users. Master data is editable in place rather than delete-and-recreate; user email is deliberately immutable.
 - **Export** — Assets and Work Orders lists export to `.xlsx` or CSV. The export re-runs the *same* where-builder the list page used, so a filtered export can never disagree with what was on screen, and it covers every match rather than the current page. Columns are user-selected (remembered per list); asset custom fields are offered as columns when the list is narrowed to a single asset type. `.xlsx` cells are genuinely typed — dates as dates, numbers as numbers.
 - **Printing** — a single work order prints as a one-page service record with signature lines, on its own route (the detail page is tabbed, so printing it directly would only capture the open tab).
+- **Theming** — light / dark / follow-system, set per device, with an inline pre-paint script so there's no flash of the wrong theme. Implemented by remapping Tailwind v4's palette variables under `.dark` rather than adding `dark:` variants to ~840 utilities, which means new components theme automatically. Print always forces light.
 - **Help** — an in-app wiki with search, seeded from `prisma/seed-help.ts` (32 articles).
 
 ## Getting started

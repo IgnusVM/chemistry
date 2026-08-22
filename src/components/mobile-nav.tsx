@@ -19,6 +19,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { logout } from "@/lib/auth-actions";
+import { ThemeToggle } from "@/components/theme";
 
 type Item = { href: string; label: string; Icon: typeof Home };
 
@@ -85,7 +86,11 @@ export function MobileNav({ isOrgAdmin }: { isOrgAdmin: boolean }) {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="divide-y divide-neutral-100">
+            <div className="flex items-center justify-between px-4 py-3">
+              <span className="text-sm text-neutral-800">Theme</span>
+              <ThemeToggle />
+            </div>
+            <nav className="divide-y divide-neutral-100 border-t border-neutral-100">
               {links.map(({ href, label, Icon }) => (
                 <Link
                   key={href}
@@ -124,7 +129,7 @@ export function MobileNav({ isOrgAdmin }: { isOrgAdmin: boolean }) {
             className="flex flex-1 flex-col items-center justify-center gap-0.5 py-2"
             aria-label="Scan a QR tag"
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-fuchsia-600 text-white shadow-md shadow-fuchsia-600/30">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-fuchsia-600 text-onaccent shadow-md shadow-fuchsia-600/30">
               <ScanLine className="h-5 w-5" />
             </span>
             <span className="text-[10px] font-medium text-neutral-500">Scan</span>

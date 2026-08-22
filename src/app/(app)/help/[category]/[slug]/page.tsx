@@ -41,7 +41,7 @@ export default async function HelpArticlePage({
         </div>
 
         <div
-          className="prose prose-neutral prose-sm max-w-none rounded-md border border-neutral-200 bg-white p-6"
+          className="prose dark:prose-invert prose-neutral prose-sm max-w-none rounded-md border border-neutral-200 bg-white p-6"
           dangerouslySetInnerHTML={{ __html: renderHelpMarkdown(article.body) }}
         />
       </div>

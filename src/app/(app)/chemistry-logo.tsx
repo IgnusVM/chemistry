@@ -47,7 +47,9 @@ export function ChemistryLogo() {
 
         <g
           clipPath="url(#chem-flask-clip)"
-          style={{ color: "#0a0414" }}
+          // Via a CSS variable rather than a literal: the emblem is stroked
+          // near-black, which disappears against a dark page.
+          style={{ color: "var(--chem-emblem)" }}
           stroke="currentColor"
           strokeWidth="18"
           strokeLinejoin="round"

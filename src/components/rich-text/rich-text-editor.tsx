@@ -37,7 +37,7 @@ export function RichTextEditor({
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none min-h-32 px-3 py-2 focus:outline-none",
+        class: "prose dark:prose-invert prose-sm max-w-none min-h-32 px-3 py-2 focus:outline-none",
       },
     },
   });

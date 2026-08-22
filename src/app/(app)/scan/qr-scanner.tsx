@@ -193,14 +193,14 @@ export function QrScanner() {
           <>
             {/* Framing guide — purely visual; detection runs on the whole frame. */}
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="h-48 w-48 rounded-2xl border-2 border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]" />
+              <div className="h-48 w-48 rounded-2xl border-2 border-onaccent/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]" />
             </div>
             {torchSupported && (
               <button
                 type="button"
                 onClick={toggleTorch}
                 aria-pressed={torchOn}
-                className="absolute bottom-3 right-3 rounded-full bg-white/90 p-3 text-neutral-800 shadow-md"
+                className="absolute bottom-3 right-3 rounded-full bg-onaccent/90 p-3 text-neutral-900 dark:text-neutral-50 shadow-md"
                 aria-label={torchOn ? "Turn off flashlight" : "Turn on flashlight"}
               >
                 {torchOn ? <FlashlightOff className="h-5 w-5" /> : <Flashlight className="h-5 w-5" />}
@@ -210,14 +210,14 @@ export function QrScanner() {
         )}
 
         {status === "starting" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-white/80">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-onaccent/80">
             <Loader2 className="h-6 w-6 animate-spin" />
             Starting camera…
           </div>
         )}
 
         {status === "error" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center text-sm text-white/80">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center text-sm text-onaccent/80">
             <CameraOff className="h-7 w-7" />
             <p>{error}</p>
           </div>

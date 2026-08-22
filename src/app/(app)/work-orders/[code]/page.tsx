@@ -196,7 +196,7 @@ export default async function WorkOrderDetailPage({
           {workOrder.notes.map((note, i) => (
             <li key={note.id} className="py-2 text-sm">
               <div
-                className="prose prose-sm max-w-none text-neutral-900"
+                className="prose dark:prose-invert prose-sm max-w-none text-neutral-900"
                 dangerouslySetInnerHTML={{ __html: renderNoteHtml(note.body, note.format) }}
               />
               <div className="text-xs text-neutral-400">

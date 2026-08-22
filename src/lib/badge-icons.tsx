@@ -59,7 +59,7 @@ export function isOrgAdminOnlyBadgeIcon(key: string): boolean {
 /** "Navy" is the actual brand Void Navy from the Malevolent Gods brand guide, not a generic Tailwind blue. */
 export const BADGE_COLORS: Record<string, { label: string; className: string }> = {
   neutral: { label: "Gray", className: "text-neutral-500" },
-  navy: { label: "Navy", className: "text-[#172554]" },
+  navy: { label: "Navy", className: "text-[#172554] dark:text-[#8fb0f0]" },
   fuchsia: { label: "Fuchsia", className: "text-fuchsia-600" },
   teal: { label: "Teal", className: "text-teal-600" },
   amber: { label: "Amber", className: "text-amber-600" },

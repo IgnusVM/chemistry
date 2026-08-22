@@ -4,6 +4,7 @@ import { logout } from "@/lib/auth-actions";
 import { resolveBadge } from "@/lib/user-badge-data";
 import { UserBadge } from "@/components/user-badge";
 import { MobileNav } from "@/components/mobile-nav";
+import { ThemeCycleButton } from "@/components/theme";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireCurrentUser();
@@ -49,6 +50,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <UserBadge badge={badge} />
               <span className="truncate">{user.displayName}</span>
             </Link>
+            <ThemeCycleButton />
             <form action={logout} className="hidden sm:block">
               <button type="submit" className="text-neutral-500 hover:text-neutral-900">
                 Sign out

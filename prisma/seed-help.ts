@@ -360,6 +360,8 @@ The QR code encodes the asset's tag, so as long as the sticker is legible, the a
     summary: "What's on your account page, what's public within the app, and how notifications work.",
     body: `Your account page (click your name in the top-right nav) lets you set optional contact details: phone number, and how you'd prefer to be reached **during the burn specifically**, since normal channels (email, cell service) may not be reliable on playa. You can check any combination of **cell**, **email**, and a free-text **other** field for anything not covered — a radio channel, a camp location where you can usually be found, whatever's actually reliable for you that week.
 
+**Light or dark.** The **Appearance** control at the top of your account page switches between **Light**, **Dark**, and **System** (which follows whatever your phone or laptop is set to). It's saved per device rather than to your account, so your phone can sit on dark for night shifts while a shared laptop stays light. There's a quick toggle in the top bar too, and on a phone it's in the **More** sheet. Printing always comes out light regardless, so a printed work order is readable on paper.
+
 **Your badge.** Your account page also sets the small icon shown next to your name throughout Chemistry — on notes, work order attribution, attachments, and part logs. Upload a **profile picture** and that's used; otherwise pick an **icon and colour** from the list. If you set neither, you get a default wrench. It's purely so you can pick your own entries out of a list at a glance.
 
 **Email notifications** are opt-in — toggle **notify by email** if you want a heads-up when something like a work order assignment happens. Leave it off if you'd rather just check Chemistry directly.

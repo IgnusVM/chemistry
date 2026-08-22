@@ -69,7 +69,7 @@ export function SelectionToolbar({
               className={
                 action.variant === "secondary"
                   ? "rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 hover:border-fuchsia-300 hover:bg-fuchsia-50/60"
-                  : "rounded-md bg-fuchsia-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-fuchsia-700"
+                  : "rounded-md bg-fuchsia-600 px-3 py-1.5 text-sm font-medium text-onaccent hover:bg-fuchsia-700"
               }
             >
               {action.label}

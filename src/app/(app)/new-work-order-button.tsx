@@ -14,7 +14,7 @@ export function NewWorkOrderButton() {
   return (
     <Link
       href="/work-orders/new"
-      className="group relative isolate flex w-full items-center gap-4 overflow-hidden rounded-2xl bg-[length:250%_250%] bg-[0%_50%] px-6 py-5 text-white shadow-lg shadow-fuchsia-500/20 hover:scale-[1.02] hover:bg-[25%_50%] hover:shadow-2xl hover:shadow-fuchsia-500/40 active:scale-[0.98] sm:w-auto"
+      className="group relative isolate flex w-full items-center gap-4 overflow-hidden rounded-2xl bg-[length:250%_250%] bg-[0%_50%] px-6 py-5 text-onaccent shadow-lg shadow-fuchsia-500/20 hover:scale-[1.02] hover:bg-[25%_50%] hover:shadow-2xl hover:shadow-fuchsia-500/40 active:scale-[0.98] sm:w-auto"
       style={{
         backgroundImage:
           "linear-gradient(115deg, #f59e0b, #db2777, #9333ea, #db2777, #f59e0b)",
@@ -25,7 +25,7 @@ export function NewWorkOrderButton() {
       {SPARKLES.map((s, i) => (
         <Sparkle
           key={i}
-          className="pointer-events-none absolute text-white opacity-0 group-hover:opacity-90"
+          className="pointer-events-none absolute text-onaccent opacity-0 group-hover:opacity-90"
           style={{
             top: s.top,
             left: s.left,
@@ -42,7 +42,7 @@ export function NewWorkOrderButton() {
       </span>
       <span className="relative z-10 text-left">
         <span className="block text-base font-semibold">New Work Order</span>
-        <span className="block text-xs text-white/80">Report a problem or request work</span>
+        <span className="block text-xs text-onaccent/80">Report a problem or request work</span>
       </span>
     </Link>
   );
