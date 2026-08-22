@@ -52,6 +52,14 @@ The PWA is hand-rolled — `app/manifest.ts` plus a service worker at `public/sw
 
 `npm run prebuild` copies the zxing reader wasm out of `node_modules` into `public/` so scanning is served from our own origin rather than a CDN; the copied file is gitignored and regenerated each build.
 
+## Backups
+
+Nightly `pg_dump` to S3-compatible object storage, with a tested restore path.
+Scripts in `scripts/backup/`, runbook and handover checklist in
+[docs/BACKUP.md](docs/BACKUP.md). Nothing account-specific lives in the scripts —
+all of it is in `/etc/chemistry-backup.env`, so transferring ownership of the
+system is a config change rather than a code change.
+
 ## Deploying
 
 `git push`, then on the server: `cd /opt/chemistry && git pull && docker compose -f docker-compose.prod.yml up -d --build`. Migrations and both seed scripts run automatically on container start.
