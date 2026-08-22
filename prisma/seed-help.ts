@@ -25,7 +25,9 @@ const ARTICLES: ArticleSeed[] = [
 
 **Sign in.** Enter your email on the sign-in page and a one-time link is sent to you. After you use it once on a device, Chemistry offers to remember that device with a short PIN so you don't need email every time — see [Signing in](/help/getting-started/signing-in).
 
-**Find an asset.** Every physical asset — every lantern, tool, vehicle, structure component — has a tag and a QR code. Scan the code or search the **Assets** tab to open its page. From there you can see its status, condition, location, custom fields, and full history.
+**Find an asset.** Every physical asset — every lantern, tool, vehicle, structure component — has a tag and a QR code. Tap **Scan** in the bottom bar on a phone, or search the **Assets** tab, to open its page: status, condition, location, custom fields, and full history. If the thing you scanned already has an open ticket, the scan tells you before anything else, so you don't start work someone's already doing.
+
+**On your phone.** Chemistry installs to your home screen and is laid out for one-handed use in the field. See [Using Chemistry on your phone](/help/getting-started/using-chemistry-on-your-phone) — including an honest account of what does and doesn't work without signal.
 
 **Something's wrong with it?** Open the asset and click **Report a problem**. That creates a work order — Chemistry's name for a maintenance ticket — pre-linked to the asset. Describe what's wrong, pick a priority, and submit. See [Creating a work order](/help/work-orders/creating-a-work-order).
 
@@ -34,6 +36,8 @@ const ARTICLES: ArticleSeed[] = [
 **Adding new gear?** Use **Assets → New asset** for one item, or **Assets → Bulk create** when you're tagging a whole batch (say, forty lanterns) at once with a shared name template and sequential tags. See [Creating an asset](/help/assets/creating-an-asset).
 
 **Handling a whole batch at once?** Select multiple rows on the Assets or Work Orders list (checkboxes, shift-click, select-all) to bulk-edit assets, bulk-close tickets, or file the same ticket against many assets in one go — see [Selecting multiple items](/help/getting-started/selecting-multiple-items).
+
+**Borrowing a tool?** Asset types marked as loanable get a **Loans** tab for checking gear in and out, with a log of who had what. The **Loans** tab in the nav shows everything currently out. See [Checking tools in and out](/help/assets/checking-tools-in-and-out).
 
 **Everything else** — divisions, departments, asset types, resolution codes, locations, and user roles — lives under the **Admin** tab, one level down, because you mostly won't need to touch it. See [What lives under Admin](/help/admin-setup/what-lives-under-admin).
 
@@ -74,6 +78,8 @@ When in doubt, search this guide from the box at the top of the **Help** tab —
 **Select all on this page** is the checkbox in the table header — it selects (or clears) every row currently shown.
 
 **Select all matching your filter.** Once every row on the current page is checked, a link appears offering to select everything that matches your current search/filter — not just the page you're looking at. This is what lets a bulk action cover hundreds of items without you paging through them one screen at a time. There's a cap (500 items) on how many can be selected for one bulk action at once; if your filter matches more than that, narrow it first (by department, status, or search text) rather than trying to select everything in one shot.
+
+**How many rows you see.** Lists show 15 rows by default, chosen so a page fits on one screen without scrolling — including on a phone. The **Show: 15 / 50 / 100 / 250** control at the bottom of the list switches to a longer page when you'd rather scan a lot at once, and it sticks to the current filter and search as you page through.
 
 **Once something's selected**, a toolbar appears above the list with the count selected and whatever bulk actions that list supports — bulk edit, bulk close, printing a QR sheet for the selection, and so on. Selecting "all matching filter" is re-checked at the moment you submit, so the count you see in the next step reflects what's true right then, not what it was when you clicked select-all.`,
   },
@@ -328,9 +334,19 @@ Documents can be removed the same way they're added, from the same page, by any 
     category: "qr-codes",
     order: 0,
     summary: "How the QR code on an asset works and how to print sheets for a batch.",
-    body: `Every asset gets a QR code the moment it's created, visible on its detail page. Scanning it with any phone camera opens a short URL — \`/a/{assetTag}\` — that takes you straight to that asset's page, no searching required. This is the fastest way to look something up while standing next to it: scan, and you're on its page with its full history, status, and a **Report a problem** button one tap away.
+    body: `Every asset gets a QR code the moment it's created, visible on its detail page. Scanning it opens a short URL — \`/a/{assetTag}\` — that takes you straight to that asset, no searching required. This is the fastest way to look something up while standing next to it.
 
-**Printing QR codes.** From the **Assets** list, check the boxes next to the assets you want and click **Print QR sheet for selected** to generate a printable sheet with all their codes at once — the fast path after a [bulk create](/help/assets/bulk-creating-assets), where you've just tagged a whole batch and need physical stickers or labels for each one.
+**Scanning from inside Chemistry.** The **Scan** button in the middle of the bottom tab bar (on phones) opens a built-in scanner. Point it at a sticker and it jumps straight to the asset. A few things worth knowing:
+
+- There's a **flashlight toggle** where the phone supports it, which you will want after dark.
+- If a sticker is damaged, scuffed, or the light is hopeless, you can **type the tag by hand** in the box underneath instead.
+- The scanner needs camera permission the first time. If you accidentally deny it, you'll need to re-allow camera access for the site in your browser settings.
+
+Your phone's own camera app works too and does the same thing — the built-in scanner just saves you leaving the app.
+
+**If the asset already has an open ticket, scanning tells you.** Rather than dropping you straight onto the asset page, a scan stops and shows any open work orders on that asset first, with a button to open one directly. This is usually the thing you actually wanted to know — *is somebody already on this?* — and it stops two people unknowingly working the same fault. If there's nothing open, the scan goes straight through to the asset as normal, with no extra tap.
+
+**Printing QR codes.** From the **Assets** list, check the boxes next to the assets you want and click **Print QR sheet for selected** to generate a printable sheet with all their codes at once — the fast path after a [bulk create](/help/assets/bulk-creating-assets), where you've just tagged a whole batch and need physical stickers for each one.
 
 The QR code encodes the asset's tag, so as long as the sticker is legible, the asset can always be found even if its name or location changes later.`,
   },
@@ -341,6 +357,8 @@ The QR code encodes the asset's tag, so as long as the sticker is legible, the a
     order: 0,
     summary: "What's on your account page, what's public within the app, and how notifications work.",
     body: `Your account page (click your name in the top-right nav) lets you set optional contact details: phone number, and how you'd prefer to be reached **during the burn specifically**, since normal channels (email, cell service) may not be reliable on playa. You can check any combination of **cell**, **email**, and a free-text **other** field for anything not covered — a radio channel, a camp location where you can usually be found, whatever's actually reliable for you that week.
+
+**Your badge.** Your account page also sets the small icon shown next to your name throughout Chemistry — on notes, work order attribution, attachments, and part logs. Upload a **profile picture** and that's used; otherwise pick an **icon and colour** from the list. If you set neither, you get a default wrench. It's purely so you can pick your own entries out of a list at a glance.
 
 **Email notifications** are opt-in — toggle **notify by email** if you want a heads-up when something like a work order assignment happens. Leave it off if you'd rather just check Chemistry directly.
 
@@ -360,6 +378,10 @@ The QR code encodes the asset's tag, so as long as the sticker is legible, the a
 - **Asset Types** — the templates that define a class of asset and its custom fields, fully editable after creation, with a Documents section for manuals and schematics. See [Asset types and custom fields](/help/admin-setup/asset-types-and-custom-fields).
 - **Resolution Codes** — the CMMS-based outcome codes used when closing work orders.
 - **Locations** — the shared, reusable place hierarchy assets can be moved between.
+
+Nearly all of this is editable in place after creation rather than delete-and-recreate — see [Fixing mistakes: what's editable](/help/admin-setup/editing-records).
+
+One thing that is deliberately **not** admin-only: [check-out access](/help/assets/checking-tools-in-and-out) for borrowable tools is managed at **Loans → Check-out access**, where any department **lead** can grant it for their own department without needing org admin.
 
 Everything under Admin is deliberately one level down from the main nav, since most day-to-day work only touches **Assets** and **Work Orders**. If you're not an org admin, you won't see this tab at all — ask an existing admin (visible from **Admin → Users**) if you need something here changed.`,
   },
@@ -393,7 +415,7 @@ Every asset and every work order is owned by exactly one department. A departmen
 
 - **Viewer** — can see the department's assets and work orders but not create or change them.
 - **Member** — the normal working role: can create and update assets and work orders for that department.
-- **Lead** — same as Member, plus recognized as the department's point of contact.
+- **Lead** — same as Member, plus recognized as the department's point of contact. Leads can also grant [tool check-out access](/help/assets/checking-tools-in-and-out) for their own department, and can check gear out on someone else's behalf — the one place a department role carries real permissions beyond org admin.
 
 Separately, a user can be flagged as an **org admin**, which is unrelated to any specific department — it grants access to the entire **Admin** tab (divisions, departments, users, asset types, resolution codes, locations) across the whole org, not just one department's data. Org admin should be reserved for people who actually need to reconfigure shared structural data, not handed out by default.`,
   },
@@ -416,6 +438,78 @@ Separately, a user can be flagged as an **org admin**, which is unrelated to any
 Granting someone access to a department's tools does **not** make them a member of that department — a Lamplighter can be given access to borrow APW gear without joining APW.
 
 **Seeing what's out.** The **Loans** page lists everything currently checked out across the departments you can see, oldest first, so the things that have been out longest surface at the top. It's the page to open when you're trying to work out where something went.`,
+  },
+  {
+    slug: "using-chemistry-on-your-phone",
+    title: "Using Chemistry on your phone",
+    category: "getting-started",
+    order: 3,
+    summary: "Install it to your home screen, and what does and doesn't work without signal.",
+    body: `Chemistry is built to be used one-handed while standing in front of something, not just at a desk. On a phone the top nav collapses and you get a **bottom tab bar** — Home, Assets, **Scan**, Tickets, More — with Scan deliberately in the middle as the biggest target, since that's the thing you do most often out in the field.
+
+**Installing it.** You can add Chemistry to your home screen so it opens like an app, full screen with no browser chrome:
+
+- **iPhone/iPad** — open it in Safari, tap the Share button, then **Add to Home Screen**. (This only works from Safari, not Chrome on iOS.)
+- **Android** — Chrome usually offers an **Install** prompt on its own; if it doesn't, use the browser menu and pick **Install app** or **Add to Home screen**.
+
+Installing also gets you long-press shortcuts on the icon for **Scan**, **New work order**, and **My work orders**.
+
+**What works without signal — and what doesn't.** Be clear-eyed about this, because the playa is not a place with reliable service. The app's own files are cached, so it opens quickly and doesn't sit on a blank screen. **Your data is not cached.** Assets, work orders, and loans all need a connection, and if you're offline you'll get a plain "No signal" page rather than stale or wrong information. Anything already on screen stays readable.
+
+There's no offline queue yet — you can't file a work order with no signal and have it send later. That's a known gap, deliberately not faked, and it's planned work rather than something quietly half-done.`,
+  },
+  {
+    slug: "notes-and-rich-text",
+    title: "Writing notes",
+    category: "getting-started",
+    order: 4,
+    summary: "Rich text or Markdown notes on both assets and work orders.",
+    body: `Both **assets** and **work orders** have a **Notes** section for anything that doesn't fit a structured field — what you observed, what you tried, what the next person should know. Notes are append-only and stamped with who wrote them and when, so they read as a running record rather than something that quietly changes.
+
+**Two modes, picked per note.** Above the editor there's a **Rich text** / **Markdown** toggle:
+
+- **Rich text** gives you a toolbar — bold, italic, bulleted and numbered lists, block quotes, code blocks, indent/outdent, plus font and size. Use this for ordinary write-ups.
+- **Markdown** is a plain text box that accepts Markdown syntax. Use this when you're pasting something structured — most usefully a fenced code block (triple backticks) for a log dump, an error message, or a config snippet, where rich text formatting would just get in the way.
+
+You can mix modes freely; each note remembers how it was written and renders accordingly.
+
+**A note on safety.** Note content is sanitized before it's displayed, so pasting something from a web page can't inject anything harmful into Chemistry for the next person who reads it. You may occasionally find that exotic pasted formatting is stripped — that's this working as intended.
+
+For code that's genuinely part of an asset rather than a one-off observation — firmware, a charging routine — use [code files](/help/assets/code-files-on-assets) instead, which are versioned properly.`,
+  },
+  {
+    slug: "code-files-on-assets",
+    title: "Code files on an asset",
+    category: "assets",
+    order: 70,
+    summary: "Version-controlled source stored on the asset itself, editable from a work order.",
+    body: `Some assets *are* partly software — the logic that drives a solar lantern's charging behaviour, for instance. An asset's **Code** tab stores named source files directly on the asset, with full version history, so the question "what's actually running on this thing?" has an answer.
+
+**Creating a file.** Give it a filename with an extension (\`charging-logic.py\`), an optional description of what it does, and paste the contents. The editor colours the code based on the extension — Python, C/C++/Arduino, and JavaScript/TypeScript are all recognised.
+
+**Every save is a version.** Editing a file and saving creates a new version rather than overwriting the old one, optionally with a short message describing the change, exactly like a commit. The version history under each file lists every save with its author, date, and message.
+
+**Comparing and rolling back.** Tick any two versions in the history to see a side-by-side diff of exactly what changed between them; tick one to view it on its own. If a change turns out to be wrong, **Rollback** puts the older content back — and importantly it does so by creating a *new* version rather than deleting anything, so the history of what happened stays intact. Nothing is ever silently erased.
+
+**Editing from a work order.** This is the point of the whole feature. If an asset has code files, its linked work orders show a **Code** card in their Details tab. Editing there saves a new version to the asset itself, tagged with the ticket it came from — so you open a ticket about a misbehaving lantern, change the code as part of fixing it, and the asset's history permanently records that this version came from that repair.`,
+  },
+  {
+    slug: "editing-records",
+    title: "Fixing mistakes: what's editable",
+    category: "admin-setup",
+    order: 3,
+    summary: "Nearly everything can be corrected after the fact — here's where.",
+    body: `Typos happen, especially at 3am in a dusty container. Almost every record in Chemistry can be corrected after creation rather than deleted and re-made.
+
+**Org admins can edit** part numbers and descriptions, part links and order history, divisions, departments, resolution codes, locations, and asset group names — each from an inline **Edit** control on the row or card itself. Asset types have always been editable from their own page.
+
+**Validation still applies.** Renaming something to a value that's already taken is refused with a clear message rather than silently creating a duplicate — part numbers within an asset type, department and division slugs, and resolution codes are all still unique. Re-parenting a location is checked for loops, so you can't accidentally make a location its own ancestor and break the tree.
+
+**Users** are a partial exception. An org admin can change someone's **user name** and optional name, and can delete an account outright, but **email addresses can't be edited** — a person's email is how they sign in, so changing it would effectively hand their account to someone else. If an email is genuinely wrong, delete the account and send a fresh invite. User names must be unique so that attribution is never ambiguous, and each user's internal ID is shown on their card for when you need to refer to an exact account.
+
+Deleting a user is blocked while they still have anything [checked out](/help/assets/checking-tools-in-and-out) — check the gear back in first, so it doesn't simply vanish from the record.
+
+**What isn't editable:** work order codes and asset tags are permanent identifiers, and audit log entries and notes are append-only by design. If a note is wrong, add a correcting note rather than rewriting history.`,
   },
   {
     slug: "troubleshooting-faq",

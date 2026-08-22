@@ -4,13 +4,17 @@ Asset and maintenance management for Alchemy — serial-level asset tracking, wo
 
 ## Features
 
-- **Assets** — serial-level tracking with per-asset-type custom fields, QR codes, location history, and acquisition value. Single or bulk creation (sequential tags or a pasted list), asset groups, and bulk edit (status/location) across a filtered selection.
-- **Work orders** — auto-numbered tickets (`CM081926001`-style codes) with type/priority/status, assignment (tracked independently of status), photos, notes, and GEMS-style resolution codes. Closing a ticket switches it to a locked summary view until reopened. Bulk creation (one ticket per selected asset with shared fields) and bulk closing (shared resolution across a selection, with cross-asset-type part-logging safeguards) are both supported.
-- **Parts** — per-asset-type parts list with order history (price/link/date); logging a part used on a work order auto-creates it under the asset's type on first use.
-- **Selection UI** — a shared paginated/searchable list component (checkboxes, shift-click ranges, select-all-on-page, select-all-matching-filter) used across the Assets list, Work Orders list, and Asset Group member lists to drive every bulk action.
-- **Auth** — invite-only signup, magic-link sign-in (Resend), optional PIN for trusted devices.
-- **Admin** — divisions/departments/roles, asset types with custom field schemas and documents, resolution codes, locations, users.
-- **Help** — an in-app wiki with search, seeded from `prisma/seed-help.ts`.
+- **Assets** — serial-level tracking with per-asset-type custom fields, QR codes, location history, and acquisition value. Single or bulk creation (sequential tags or a pasted list), asset groups, and bulk edit (status/location) across a filtered selection. Detail pages are tabbed (Details / Notes / Loans / Code / History).
+- **Work orders** — auto-numbered tickets (`CM081926001`-style codes) with type/priority/status, assignment (tracked independently of status), attachments, notes, and GEMS-style resolution codes. Closing a ticket switches it to a locked summary view until reopened. Bulk creation (one ticket per selected asset with shared fields) and bulk closing (shared resolution across a selection, with cross-asset-type part-logging safeguards) are both supported.
+- **Notes** — rich-text (Tiptap) or Markdown per note, on both assets and work orders, sanitized at write *and* read time.
+- **Code files** — version-controlled source stored on an asset (firmware, control logic) with per-save history, side-by-side diffs, and rollback-as-a-new-version. Editable from a linked work order, which stamps the resulting version with the ticket it came from.
+- **Loans** — opt-in per asset type: check tools in and out with a full loan log. Access is granted per department by that department's lead (or an org admin); a partial unique index guarantees an asset can only be on loan once at a time.
+- **Parts** — per-asset-type parts list with two distinct lists: reference **links** (URL + price, no order implied) and **order history** (price/quantity/date). Logging a part used on a work order auto-creates it under the asset's type on first use.
+- **Mobile / PWA** — installable to a phone home screen, with a bottom tab bar and an in-app QR scanner (native `BarcodeDetector` where available, self-hosted zxing-wasm fallback on iOS). Scanning an asset with open tickets surfaces them before navigating. Static assets are cached offline; **application data is not** — see the Help article for the honest limits.
+- **Selection UI** — a shared paginated/searchable list component (checkboxes, shift-click ranges, select-all-on-page, select-all-matching-filter) used across the Assets list, Work Orders list, and Asset Group member lists to drive every bulk action. Page size is selectable (15/50/100/250).
+- **Auth** — invite-only signup, magic-link sign-in (Resend), optional PIN for trusted devices. Per-user identity badges (uploaded avatar, or icon + colour) shown wherever attribution appears.
+- **Admin** — divisions/departments/roles, asset types with custom field schemas and documents, resolution codes, locations, users. Master data is editable in place rather than delete-and-recreate; user email is deliberately immutable.
+- **Help** — an in-app wiki with search, seeded from `prisma/seed-help.ts` (30 articles).
 
 ## Getting started
 
@@ -39,7 +43,11 @@ Open [http://localhost:3000](http://localhost:3000). Sign-in is by magic link �
 
 ## Stack
 
-Next.js 16 (App Router, TypeScript strict), Tailwind v4, Prisma 7 + Postgres (via `@prisma/adapter-pg`), JWT sessions via `jose`, S3-compatible storage for photos/documents, Resend for transactional email.
+Next.js 16 (App Router, TypeScript strict, Turbopack), Tailwind v4, Prisma 7 + Postgres (via `@prisma/adapter-pg`), JWT sessions via `jose`, S3-compatible storage for attachments/documents/avatars, Resend for transactional email. Tiptap for rich text, CodeMirror + `react-diff-viewer-continued` for code files, `barcode-detector` (zxing-wasm) for QR scanning.
+
+The PWA is hand-rolled — `app/manifest.ts` plus a service worker at `public/sw.js` — rather than `next-pwa`, which is webpack-based and unusable under Turbopack. The service worker is served from the origin root so its scope is `/` without needing a `Service-Worker-Allowed` header, and PWA assets are exempted from auth in `src/proxy.ts`'s matcher (a browser fetches the manifest and registers the worker outside a normal authenticated navigation).
+
+`npm run prebuild` copies the zxing reader wasm out of `node_modules` into `public/` so scanning is served from our own origin rather than a CDN; the copied file is gitignored and regenerated each build.
 
 ## Deploying
 
