@@ -33,6 +33,11 @@ services:
       # falling back to an insecure default.
       - SESSION_SECRET=${SESSION_SECRET:?SESSION_SECRET is required (min 32 bytes random)}
       - APP_BASE_URL=${APP_BASE_URL:?APP_BASE_URL is required}
+      # Grants org-admin to this address on every start. Safe to leave set;
+      # it upserts. Required for the very first boot of a new deployment,
+      # otherwise nobody can administer the instance.
+      - BOOTSTRAP_ADMIN_EMAIL=${BOOTSTRAP_ADMIN_EMAIL:-}
+      - BOOTSTRAP_ADMIN_NAME=${BOOTSTRAP_ADMIN_NAME:-}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - EMAIL_FROM=${EMAIL_FROM:-}
       - AWS_REGION=${AWS_REGION:-}

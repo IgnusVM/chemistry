@@ -3,39 +3,23 @@
 What's protected, how to restore it, and how to hand the whole thing to someone
 else without leaving a trail of personal credentials behind.
 
-## Current state (2026-08-23)
+## What this gives you
 
-Fully configured and verified.
+Once configured per [DEPLOYMENT.md](DEPLOYMENT.md) section 13:
 
-- Nightly backup at 03:20 UTC, staleness check at 08:40, logging to
-  `/var/log/chemistry-backup.log`.
-- Writes to `s3://malevolentgods-dan-assets/chemistry-backups/YYYY/MM/`.
-- Authenticated as the dedicated IAM user **`chemistry-backup`** — separate from
-  the application's key.
-- **Bucket versioning is on** (confirmed: objects return a real `VersionId`).
+- A nightly database backup, uploaded to object storage.
+- A morning staleness check that fails loudly if the newest backup is too old.
+- A tested restore path, including a safe scratch-database mode.
+- A backup identity that is structurally **incapable of deleting backups**.
 
-Verified end to end, not merely configured:
+That last property is the one worth insisting on. Retention is a bucket lifecycle
+rule, enforced by the storage provider, not by anything running on the server. An
+attacker who takes the server, or a bug that runs the wrong command, cannot reach
+back and destroy the history.
 
-| Property | Result |
-|---|---|
-| Backup writes and confirms byte count | ✅ 60,813 bytes |
-| `--verify` can list | ✅ |
-| Restore reproduces live data | ✅ 300 assets / 2 WOs / 2 users / 31 audit |
-| **Backup key cannot delete a backup** | ✅ AccessDenied |
-| **Backup key cannot reach outside its prefix** | ✅ AccessDenied |
-
-That fourth row is the one that matters most: the identity writing backups is
-structurally incapable of destroying them. Retention happens through a bucket
-lifecycle rule instead.
-
-Two leftovers, neither harmful:
-
-- Two early test backups remain under the old `chemistry/backups/` prefix. The
-  backup key deliberately cannot delete them; remove them from the console if you
-  want the bucket tidy, or leave them to a lifecycle rule.
-- The lifecycle rules themselves can't be verified from the server, because
-  neither key holds `s3:GetLifecycleConfiguration`. If backups ever stop expiring,
-  check them in the console first.
+Verify each of these after setup rather than assuming them — the checks are in
+DEPLOYMENT.md, and the important one is that a restore reproduces live row counts
+exactly.
 
 ### A note on permissions and restores
 
@@ -205,16 +189,18 @@ their name and the old ones revoked:
 | `POSTGRES_PASSWORD` | `/opt/chemistry/.env` + compose | Rotate |
 | Server SSH access | Hetzner VM | Their keys added, previous keys removed |
 | DNS | Cloudflare | `chemistry.*` record moved to their zone or account |
-| GitHub repo | `IgnusVM/chemistry` | Transfer ownership, or fork and repoint the deploy key |
+| GitHub repo | The Git remote | Transfer ownership, or fork and repoint the deploy key |
 | Deploy key | `~/.ssh/chemistry_deploy_key` on the VM | Regenerate against their repo |
 
 Two things to watch, because they're shared rather than Chemistry-specific:
 
-- **The VM is shared with DAN.** A clean handover means moving Chemistry to its
-  own host, not handing over a box running someone else's project.
-- **The S3 bucket is shared with DAN** (`malevolentgods-dan-assets`, `chemistry/`
-  prefix). Same reasoning — the new owner should get their own bucket, with
-  objects copied across and the prefix repointed.
+- **If the VM runs anything besides Chemistry**, a clean handover means moving
+  Chemistry to its own host rather than handing over a box running an unrelated
+  project.
+- **If the bucket is shared with another application**, the new owner should get
+  their own bucket, with objects copied across and `S3_PREFIX` repointed. The
+  prefix-scoped IAM policies mean sharing is safe day to day; it is only a
+  handover problem.
 
 Neither blocks anything today. Both are much easier to deal with deliberately at
 handover time than to discover midway through one.

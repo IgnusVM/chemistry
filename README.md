@@ -1,6 +1,6 @@
 # Chemistry
 
-Asset and maintenance management for Alchemy — serial-level asset tracking, work orders, parts, and failure history for the Lamplighter fleet and beyond. Live at [chemistry.distributed-authoring-nexus.com](https://chemistry.distributed-authoring-nexus.com).
+Asset and maintenance management for Alchemy — serial-level asset tracking, work orders, parts, and failure history for the Lamplighter fleet and beyond.
 
 ## Features
 
@@ -62,4 +62,19 @@ system is a config change rather than a code change.
 
 ## Deploying
 
-`git push`, then on the server: `cd /opt/chemistry && git pull && docker compose -f docker-compose.prod.yml up -d --build`. Migrations and both seed scripts run automatically on container start.
+Full start-to-finish setup instructions — server, Docker, object storage, email,
+DNS, TLS, and backups — are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). It
+assumes nothing pre-existing and creates every account and credential from
+scratch.
+
+Once an installation exists, deploying an update is:
+
+```bash
+git pull && docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Migrations and both seed scripts run automatically on container start.
+
+The first administrator of a new deployment comes from `BOOTSTRAP_ADMIN_EMAIL`;
+sign-up is invite-only, so without it a fresh instance has nobody who can invite
+anyone.

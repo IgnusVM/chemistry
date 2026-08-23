@@ -25,16 +25,30 @@ const LAMPLIGHTER_CUSTOM_FIELDS: CustomFieldDef[] = [
 ];
 
 async function main() {
-  const ignus = await prisma.user.upsert({
-    where: { email: "steven.a.strength@gmail.com" },
-    update: { isOrgAdmin: true },
-    create: {
-      email: "steven.a.strength@gmail.com",
-      displayName: "Steven",
-      name: "Ignus",
-      isOrgAdmin: true,
-    },
-  });
+  // The first org admin comes from the environment, never from source. A
+  // hardcoded address would make every deployment of this repo bootstrap
+  // somebody else's account as its administrator.
+  //
+  // Unset is a legitimate state: the structural seed still runs, and the
+  // instance simply has no admin until BOOTSTRAP_ADMIN_EMAIL is provided.
+  // Re-running the seed later is how you grant it.
+  const bootstrapEmail = process.env.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase();
+  const admin = bootstrapEmail
+    ? await prisma.user.upsert({
+        where: { email: bootstrapEmail },
+        update: { isOrgAdmin: true },
+        create: {
+          email: bootstrapEmail,
+          displayName: process.env.BOOTSTRAP_ADMIN_NAME?.trim() || bootstrapEmail.split("@")[0],
+          isOrgAdmin: true,
+        },
+      })
+    : null;
+
+  if (!admin) {
+    console.log("BOOTSTRAP_ADMIN_EMAIL is not set — seeding structure only, with no org admin.");
+    console.log("  Set it and re-run this seed to grant the first administrator.");
+  }
 
   const ops = await prisma.division.upsert({
     where: { slug: "ops" },
@@ -69,16 +83,20 @@ async function main() {
 
   const lamplighters = departmentsBySlug.get("lamplighters")!;
 
-  await prisma.departmentMembership.upsert({
-    where: { userId_departmentId: { userId: ignus.id, departmentId: lamplighters.id } },
-    update: { role: "LEAD" },
-    create: { userId: ignus.id, departmentId: lamplighters.id, role: "LEAD" },
-  });
+  // Only when there is an admin to attach — otherwise leave the department
+  // unled rather than inventing a placeholder user to own it.
+  if (admin) {
+    await prisma.departmentMembership.upsert({
+      where: { userId_departmentId: { userId: admin.id, departmentId: lamplighters.id } },
+      update: { role: "LEAD" },
+      create: { userId: admin.id, departmentId: lamplighters.id, role: "LEAD" },
+    });
 
-  await prisma.department.update({
-    where: { id: lamplighters.id },
-    data: { leadUserId: ignus.id },
-  });
+    await prisma.department.update({
+      where: { id: lamplighters.id },
+      data: { leadUserId: admin.id },
+    });
+  }
 
   let storage = await prisma.location.findFirst({
     where: { name: "Home Base Storage", parentLocationId: null },
@@ -131,7 +149,7 @@ async function main() {
   }
 
   console.log(
-    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, org admin ${ignus.email}, Lamplighter asset type, ${storage.name}, and ${RESOLUTION_CODES.length} resolution codes.`,
+    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, ${admin ? `org admin ${admin.email}, ` : "no org admin, "}Lamplighter asset type, ${storage.name}, and ${RESOLUTION_CODES.length} resolution codes.`,
   );
 }
 
