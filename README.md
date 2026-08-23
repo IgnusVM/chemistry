@@ -78,3 +78,7 @@ Migrations and both seed scripts run automatically on container start.
 The first administrator of a new deployment comes from `BOOTSTRAP_ADMIN_EMAIL`;
 sign-up is invite-only, so without it a fresh instance has nobody who can invite
 anyone.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
