@@ -4,6 +4,7 @@ import { createSession } from "@/lib/session";
 import { trustThisDevice } from "@/lib/device-trust";
 import { prisma } from "@/lib/prisma";
 import { appUrl } from "@/lib/app-url";
+import { safeNextPath } from "@/lib/safe-redirect";
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
@@ -26,6 +27,6 @@ export async function GET(req: NextRequest) {
     data: { pinFailedCount: 0, pinLockedUntil: null },
   });
 
-  const destination = next && next.startsWith("/") ? next : "/";
+  const destination = safeNextPath(next);
   return NextResponse.redirect(appUrl(destination));
 }

@@ -1,6 +1,6 @@
 import "server-only";
 import { marked } from "marked";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeRichHtml } from "@/lib/sanitize";
 import type { NoteFormat } from "@/generated/prisma/client";
 
 /**
@@ -14,7 +14,7 @@ import type { NoteFormat } from "@/generated/prisma/client";
  */
 export function renderNoteHtml(body: string, format: NoteFormat): string {
   const html = format === "MARKDOWN" ? (marked.parse(body, { async: false, gfm: true, breaks: false }) as string) : body;
-  return DOMPurify.sanitize(html);
+  return sanitizeRichHtml(html);
 }
 
 /**
@@ -25,5 +25,5 @@ export function renderNoteHtml(body: string, format: NoteFormat): string {
  */
 export function sanitizeNoteBody(body: string, format: NoteFormat): string {
   if (format === "MARKDOWN") return body;
-  return DOMPurify.sanitize(body);
+  return sanitizeRichHtml(body);
 }

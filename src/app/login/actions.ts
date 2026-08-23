@@ -7,6 +7,7 @@ import { issueAndSendMagicLink } from "@/lib/magic-link";
 import { getTrustedDeviceUser, touchTrustedDevice } from "@/lib/device-trust";
 import { pinSchema, verifyPin } from "@/lib/pin";
 import { createSession } from "@/lib/session";
+import { safeNextPath } from "@/lib/safe-redirect";
 
 const emailSchema = z.email();
 
@@ -84,6 +85,6 @@ export async function loginWithPin(
   await createSession(user.id);
   await touchTrustedDevice();
 
-  const destination = typeof next === "string" && next.startsWith("/") ? next : "/";
+  const destination = safeNextPath(next);
   redirect(destination);
 }
