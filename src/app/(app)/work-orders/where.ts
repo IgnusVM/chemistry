@@ -28,15 +28,19 @@ export function resolveWorkOrderListDefaults(params: WorkOrderListParams) {
   };
 }
 
+// Reads are org-wide: any signed-in user can see any work order, the same way
+// assets have always behaved. `department` is therefore an ordinary filter and
+// nothing here is an access boundary — write authorization is enforced per
+// record by requireWorkOrderAccess and by the bulk actions, which re-check
+// hasDepartmentAccess against each record they actually touch.
 export function buildWorkOrderWhere(
   params: WorkOrderListParams,
-  ctx: { userId: string; accessibleDeptIds: string[] },
+  ctx: { userId: string },
 ): Prisma.WorkOrderWhereInput {
   const { status, mine } = resolveWorkOrderListDefaults(params);
 
-  const where: Prisma.WorkOrderWhereInput = {
-    departmentId: params.department ? params.department : { in: ctx.accessibleDeptIds },
-  };
+  const where: Prisma.WorkOrderWhereInput = {};
+  if (params.department) where.departmentId = params.department;
   if (status === OPEN_STATUS_FILTER) {
     where.status = { notIn: [...TERMINAL_WO_STATUSES] };
   } else if (status) {

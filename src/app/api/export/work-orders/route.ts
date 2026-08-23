@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
+import { requireCurrentUser } from "@/lib/dal";
 import { buildWorkOrderWhere, type WorkOrderListParams } from "@/app/(app)/work-orders/where";
 import { WORK_ORDER_COLUMNS } from "@/lib/export/columns";
 import {
@@ -30,10 +30,10 @@ export async function GET(req: NextRequest) {
     assignedToName: sp.get("assignedToName") ?? undefined,
   };
 
-  // Department scoping is applied by the shared where-builder, so an export can
-  // never reach past what this user is allowed to see in the list itself.
-  const accessibleDeptIds = await getAccessibleDepartmentIds("VIEWER");
-  const where = buildWorkOrderWhere(params, { userId: user.id, accessibleDeptIds });
+  // Reuses the list's own where-builder, so an export always matches exactly
+  // what the filters showed on screen. Reads are org-wide by design; this is a
+  // fidelity guarantee, not an access boundary.
+  const where = buildWorkOrderWhere(params, { userId: user.id });
 
   const columns = WORK_ORDER_COLUMNS.filter((c) => requested.includes(c.key));
   if (columns.length === 0) {

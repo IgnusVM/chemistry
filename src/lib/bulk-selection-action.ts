@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
+import { requireCurrentUser } from "@/lib/dal";
 import { createBulkSelection, MAX_BULK_ITEMS } from "@/lib/bulk-selection";
 import { buildAssetWhere } from "@/app/(app)/assets/where";
 import { buildWorkOrderWhere } from "@/app/(app)/work-orders/where";
@@ -33,8 +33,7 @@ export async function enterBulkSelection(formData: FormData) {
       const rows = await prisma.asset.findMany({ where, select: { id: true }, take: MAX_BULK_ITEMS + 1 });
       ids = rows.map((r) => r.id);
     } else if (entityType === "WorkOrder") {
-      const accessibleDeptIds = await getAccessibleDepartmentIds("VIEWER");
-      const where = buildWorkOrderWhere(rawParams, { userId: user.id, accessibleDeptIds });
+      const where = buildWorkOrderWhere(rawParams, { userId: user.id });
       const rows = await prisma.workOrder.findMany({ where, select: { id: true }, take: MAX_BULK_ITEMS + 1 });
       ids = rows.map((r) => r.id);
     } else {

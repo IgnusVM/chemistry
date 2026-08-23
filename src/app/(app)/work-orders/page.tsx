@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
+import { requireCurrentUser } from "@/lib/dal";
 import { Button, buttonClass } from "@/components/button";
 import { Pagination } from "@/components/pagination";
 import { parsePage, parsePageSize } from "@/lib/list-page";
@@ -26,8 +26,7 @@ export default async function WorkOrdersPage({
   const pageSize = parsePageSize(params.pageSize);
   const { status, mine } = resolveWorkOrderListDefaults(params);
 
-  const accessibleDeptIds = await getAccessibleDepartmentIds("VIEWER");
-  const where = buildWorkOrderWhere(params, { userId: user.id, accessibleDeptIds });
+  const where = buildWorkOrderWhere(params, { userId: user.id });
 
   const [workOrders, total, departments, members] = await Promise.all([
     prisma.workOrder.findMany({
@@ -38,9 +37,8 @@ export default async function WorkOrdersPage({
       take: pageSize,
     }),
     prisma.workOrder.count({ where }),
-    prisma.department.findMany({ where: { id: { in: accessibleDeptIds } }, orderBy: { name: "asc" } }),
+    prisma.department.findMany({ orderBy: { name: "asc" } }),
     prisma.user.findMany({
-      where: { memberships: { some: { departmentId: { in: accessibleDeptIds } } } },
       orderBy: { displayName: "asc" },
       select: { displayName: true },
     }),
