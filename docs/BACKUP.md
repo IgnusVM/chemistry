@@ -3,25 +3,39 @@
 What's protected, how to restore it, and how to hand the whole thing to someone
 else without leaving a trail of personal credentials behind.
 
-## Current state (2026-08-22)
+## Current state (2026-08-23)
 
-Running nightly at 03:20 UTC on the app server, with a staleness check at 08:40.
-A backup and a full scratch restore have both been tested end to end — the
-restore reproduced live row counts exactly (300 assets, 2 work orders, 2 users,
-31 audit entries).
+Fully configured and verified.
 
-**One thing is deliberately unfinished:** the backup currently authenticates with
-the *application's* S3 key, because no separate identity exists yet. That means
-backups live under `chemistry/backups/` (the only prefix that key can reach) and,
-more importantly, that a compromise of the app could reach the backups.
+- Nightly backup at 03:20 UTC, staleness check at 08:40, logging to
+  `/var/log/chemistry-backup.log`.
+- Writes to `s3://malevolentgods-dan-assets/chemistry-backups/YYYY/MM/`.
+- Authenticated as the dedicated IAM user **`chemistry-backup`** — separate from
+  the application's key.
+- **Bucket versioning is on** (confirmed: objects return a real `VersionId`).
 
-To close that gap — a five-minute job in the AWS console, and the only change
-needed is to `/etc/chemistry-backup.env`, no script edits:
+Verified end to end, not merely configured:
 
-1. Create the PutObject-only IAM user described below.
-2. Put its keys in `/etc/chemistry-backup.env`.
-3. Optionally move `BACKUP_S3_PREFIX` out to a top-level `chemistry-backups/`,
-   or a separate bucket entirely.
+| Property | Result |
+|---|---|
+| Backup writes and confirms byte count | ✅ 60,813 bytes |
+| `--verify` can list | ✅ |
+| Restore reproduces live data | ✅ 300 assets / 2 WOs / 2 users / 31 audit |
+| **Backup key cannot delete a backup** | ✅ AccessDenied |
+| **Backup key cannot reach outside its prefix** | ✅ AccessDenied |
+
+That fourth row is the one that matters most: the identity writing backups is
+structurally incapable of destroying them. Retention happens through a bucket
+lifecycle rule instead.
+
+Two leftovers, neither harmful:
+
+- Two early test backups remain under the old `chemistry/backups/` prefix. The
+  backup key deliberately cannot delete them; remove them from the console if you
+  want the bucket tidy, or leave them to a lifecycle rule.
+- The lifecycle rules themselves can't be verified from the server, because
+  neither key holds `s3:GetLifecycleConfiguration`. If backups ever stop expiring,
+  check them in the console first.
 
 ### A note on permissions and restores
 
@@ -98,9 +112,13 @@ policy allows only `PutObject` on the backup prefix:
 }
 ```
 
-`ListBucket` is needed for `--verify` and `--list`. Restores are an occasional,
-deliberate act — run them with an admin credential rather than granting this one
-`GetObject`.
+The deployed policy also grants `s3:GetObject` on the same prefix, so `--verify`
+and restore-by-key work with this identity. Drop that statement if you'd rather
+it be strictly write-only; restores then need an admin credential instead.
+
+There is deliberately no `s3:DeleteObject`. Verified: this key gets AccessDenied
+attempting to delete a backup, and cannot read or list outside
+`chemistry-backups/`.
 
 ### 2. Bucket settings
 
