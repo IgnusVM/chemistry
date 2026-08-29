@@ -93,7 +93,7 @@ Both nullable, neither rewriting existing data (Constitution Principle III).
 
 | Model | Column | Purpose |
 |---|---|---|
-| `Division` | `leadUserId String?` | Division-lead entitlement (D6). **The flagged assumption** — mirrors `Department.leadUserId` exactly. Deletable with one query clause if rejected. |
+| `Division` | `leadUserId String?` | Division-lead entitlement (D6). **Confirmed 2026-08-28.** Mirrors `Department.leadUserId` exactly, including the `onDelete` behaviour and the named relation. Requires an administration control to populate it (FR-005c) or it is inert. |
 | `WorkOrder` | *(none)* | The `card Card?` back-relation adds no column. |
 
 `Department`, `DepartmentMembership`, `User`, and `WorkOrder` gain back-relations only — no schema columns, no data migration.

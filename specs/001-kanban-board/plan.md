@@ -60,11 +60,12 @@ Everything else follows the codebase's existing grain: server actions with per-r
 
 Design also *removed* an anticipated complexity: the data model expected to need a hand-written partial unique index, and does not. Postgres permits multiple NULLs in a unique index, so `workOrderId String? @unique` already means "at most one card per work order, unlimited standalone cards". Recorded in `data-model.md` explicitly, because writing an unnecessary partial index because the constitution mentions them would be cargo cult.
 
-One item needs explicit justification rather than silent acceptance:
+One item, previously flagged as an assumption, is now **confirmed** (2026-08-28):
 
-| Item | Why it is not a violation |
-|------|--------------------------|
-| Adding `Division.leadUserId` | Principle III permits additive change; this is one nullable column mirroring `Department.leadUserId` exactly. It is flagged in the spec as the assumption most likely to be wrong, and the plan is structured so the roll-up works without it — division-lead is an *enhancement* to entitlement, not a prerequisite. If rejected, delete the column and one branch of the entitlement query. |
+| Item | Status |
+|------|--------|
+| Adding `Division.leadUserId` | **Confirmed** — required so a division lead (Ops) sees their departments' boards. One nullable column mirroring `Department.leadUserId`, additive per Principle III. |
+| Administration control to set it | **Required, and larger than it looks.** `Department.leadUserId` is written only by the seed; no admin screen sets any lead today. Without a control, a division lead column cannot be populated and the roll-up branch is dead code, so FR-005c is in scope. |
 
 ## Project Structure
 

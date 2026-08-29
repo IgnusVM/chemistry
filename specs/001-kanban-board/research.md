@@ -126,7 +126,9 @@ Division-lead visibility is layered as an **additional union term**, not a repla
 
 Layering division-lead as a union term rather than a new branch means the roll-up is correct with or without `Division.leadUserId` existing. If the assumption is rejected, one clause is deleted and nothing else changes.
 
-**The gap this exposes** (flagged in the spec): `Department` has `leadUserId`; `Division` does not, and there is no division membership. So "the Ops lead sees all Ops departments" is currently inexpressible. The alternative — the Ops lead simply holds `LEAD` membership in each Ops department — needs no schema change at all and may be the better answer for an organization this size.
+**Resolved 2026-08-28**: division lead is being added. `Division.leadUserId` mirrors `Department.leadUserId`.
+
+**The larger half of that decision**: no administration screen currently sets *any* lead. `Department.leadUserId` is populated only by the seed. A column nobody can populate makes the roll-up branch dead code, so the control to assign a division lead is part of this feature (FR-005c), not a follow-up. The equivalent control for department lead is a separate decision and is deliberately not bundled here.
 
 **Alternatives rejected**:
 - *A new `BoardPermission` model.* Directly contradicts FR-005 and adds an authorization surface to reason about separately from every other one.

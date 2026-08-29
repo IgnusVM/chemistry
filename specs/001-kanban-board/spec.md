@@ -144,6 +144,9 @@ An org admin adjusts a board's columns and colour coding. Defaults work untouche
 - **FR-003**: Creating, editing, and moving cards MUST require membership of that department at the existing write role, or org-admin. This MUST be enforced per record at the data layer, not only in the interface.
 - **FR-004**: The interface MUST NOT offer actions the current user is not permitted to perform.
 - **FR-005**: A roll-up view MUST show every board the current user is entitled to see, deriving that entitlement from the existing division/department/role model without introducing a new permission concept.
+- **FR-005a**: A division MUST be able to have a designated lead, mirroring the existing department lead.
+- **FR-005b**: A division lead MUST see the boards of every department in their division in the roll-up.
+- **FR-005c**: An org admin MUST be able to assign and change a division's lead through the administration interface.
 
 **Columns**
 
@@ -219,7 +222,8 @@ An org admin adjusts a board's columns and colour coding. Defaults work untouche
 
 ## Assumptions
 
-- **A division-lead concept does not currently exist and is assumed to be added.** `Department` carries `leadUserId`, but `Division` has no lead and no membership, so "the Ops lead sees all Ops departments" cannot be expressed today. The assumption is a `leadUserId` on `Division`, mirroring the existing department pattern exactly. **This is the one assumption most likely to be wrong** — the alternative is that a division lead simply holds LEAD membership in each of their departments, needing no schema change. Flagged for confirmation.
+- **A division-lead concept is being added** (confirmed 2026-08-28). `Department` carries `leadUserId` but `Division` had no equivalent, so "the Ops lead sees all Ops departments" was inexpressible. A `leadUserId` on `Division` mirrors the department pattern exactly.
+- **Setting a lead needs interface that does not exist yet.** `Department.leadUserId` is in the schema but is written only by the seed — no administration screen assigns it. Division lead therefore requires both the column and the means to set it (FR-005c), or the feature is inert. Whether to add the same control for department lead is a separate decision, deliberately not bundled here.
 - **Cards are per-department and not per-team.** Teams are not modelled in the application; tags carry team identity instead, which is why tags exist in this feature rather than being deferred.
 - **Boards are created implicitly** with their department rather than needing setup, so the board concept never has to be explained.
 - **Offline writes are out of scope for this feature.** The application does not have them yet. The board must fail honestly on a dropped network rather than pretend, and offline capability is a separate piece of work.
