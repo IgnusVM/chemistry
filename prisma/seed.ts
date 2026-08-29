@@ -174,11 +174,22 @@ async function main() {
   ];
 
   const allDepartments = await prisma.department.findMany({ select: { id: true } });
-  for (const dept of allDepartments) {
+  const allDivisions = await prisma.division.findMany({ select: { id: true } });
+
+  // Divisions get a board too, visible only to the division lead and org
+  // admins. Unlike a department board it gets no auto-created work order
+  // cards -- a ticket shows up there only when someone attaches it to a card
+  // deliberately.
+  const boardOwners: ({ departmentId: string } | { divisionId: string })[] = [
+    ...allDepartments.map((d) => ({ departmentId: d.id })),
+    ...allDivisions.map((v) => ({ divisionId: v.id })),
+  ];
+
+  for (const owner of boardOwners) {
     const board = await prisma.board.upsert({
-      where: { departmentId: dept.id },
+      where: "departmentId" in owner ? { departmentId: owner.departmentId } : { divisionId: owner.divisionId },
       update: {},
-      create: { departmentId: dept.id },
+      create: owner,
     });
     // Columns are matched on (boardId, position) rather than deleted and
     // recreated: recreating would orphan every card on the board every time
@@ -193,7 +204,7 @@ async function main() {
   }
 
   console.log(
-    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, ${admin ? `org admin ${admin.email}, ` : "no org admin, "}Lamplighter asset type, ${storage.name}, and ${RESOLUTION_CODES.length} resolution codes. Task boards: ${allDepartments.length}.`,
+    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, ${admin ? `org admin ${admin.email}, ` : "no org admin, "}Lamplighter asset type, ${storage.name}, and ${RESOLUTION_CODES.length} resolution codes. Task boards: ${allDepartments.length} department + ${allDivisions.length} division.`,
   );
 }
 

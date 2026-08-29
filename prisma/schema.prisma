@@ -78,6 +78,7 @@ model Division {
 
   lead        User?        @relation("DivisionLead", fields: [leadUserId], references: [id])
   departments Department[]
+  board       Board?
 }
 
 model Department {
@@ -624,13 +625,25 @@ model BulkSelection {
 // See specs/001-kanban-board/research.md D1.
 // ---------------------------------------------------------------------------
 
+// A board belongs to EITHER a department or a division, never both and never
+// neither. Prisma cannot express "exactly one of these two is set", so a CHECK
+// constraint is hand-written into the migration -- see
+// Board_owner_exactly_one in the task-board-division migration.
+//
+// Division boards differ from department boards in two ways that matter:
+//   - they are visible only to the division lead and org admins (the app's
+//     first restricted read -- see constitution Principle II)
+//   - they get no auto-created work order cards; a ticket appears on one only
+//     when a user attaches it to a card deliberately
 model Board {
   id           String   @id @default(cuid())
-  departmentId String   @unique
+  departmentId String?  @unique
+  divisionId   String?  @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  department Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  department Department?   @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  division   Division?     @relation(fields: [divisionId], references: [id], onDelete: Cascade)
   columns    BoardColumn[]
   cards      Card[]
 }

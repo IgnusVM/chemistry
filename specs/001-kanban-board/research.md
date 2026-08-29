@@ -179,6 +179,29 @@ Per Constitution Principle I, these must be read in `node_modules/next/dist/docs
 
 ---
 
+## D9. Division boards, and the first restricted read
+
+**Decision** (2026-08-29): every division gets a board alongside its departments'. It is visible to **the division lead and org admins only** — not to leads of departments within it, and not to members. It auto-creates no work order cards; a ticket appears only when someone attaches it to a card deliberately.
+
+A board is owned by exactly one of a department or a division, enforced by a hand-written CHECK constraint since Prisma cannot express it.
+
+**Rationale**: A department board answers "what is my team doing". A division board answers a different question — what is happening across the departments, and what needs deciding — and the answer is often not yet public. That is why it is restricted where everything else is open.
+
+Auto-rolling work orders into it was considered and declined by the requester: a division board carrying every ticket from every department in it becomes mostly tickets, burying the cross-department cards it exists for. Manual attachment keeps the board about coordination while still letting a specific ticket be pointed at.
+
+Writes match reads exactly. There is nobody who should see a division board but be unable to change it, and inventing a viewer tier would add a concept for no one.
+
+**404 rather than 403** for an unentitled request: a refusal confirms the board exists, which is itself information about the division. Behaving as though it does not exist gives nothing away.
+
+**Cost, stated honestly**: this breaks the app's clean "reads are org-wide" story, which was itself the fix for an earlier access bug. That is why the constitution was amended to 1.1.0 rather than the exception being made quietly, and why the rule lives in exactly one named function (`canViewDivisionBoard`) with a set-valued companion (`visibleDivisionIds`) so the index filters at the query rather than hiding links.
+
+**Alternatives rejected**:
+- *Division board readable org-wide like everything else.* Keeps the model uniform and was rejected by the requester, who restricted it deliberately.
+- *Visible to all department leads in the division.* The plural in "leads" suggested it; the requester chose the tight reading. Widening later is one clause in one function.
+- *A separate `DivisionBoard` model.* Avoids the nullable-owner pair and duplicates columns, cards, and every query that touches them.
+
+---
+
 ## Decision summary
 
 | # | Decision | Consequence |
@@ -191,3 +214,4 @@ Per Constitution Principle I, these must be read in `node_modules/next/dist/docs
 | D6 | Reuse `getAccessibleDepartmentIds` | No new permission concept; works with or without division-lead |
 | D7 | Time-bounded Done | Active board stays readable; nothing is destroyed |
 | D8 | Confirm framework specifics first | Principle I; D3 depends on the answer |
+| D9 | Division boards, leads only | First restricted read; constitution amended to 1.1.0 rather than the exception made quietly |

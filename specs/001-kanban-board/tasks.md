@@ -157,6 +157,27 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 ---
 
+## Phase 8b: Division boards (added 2026-08-29)
+
+**Goal**: Each division gets a board, visible to its lead and org admins only.
+
+- [X] T060 Make `Board` owned by either a department or a division in `prisma/schema.prisma`, with a hand-written `Board_owner_exactly_one` CHECK constraint in the migration since Prisma cannot express it
+- [X] T061 Seed one board per division in `prisma/seed.ts`, idempotently, alongside the department boards
+- [X] T062 Add `canViewDivisionBoard` and `visibleDivisionIds` to `src/lib/board-auth.ts` — the single named home for the app's first restricted read
+- [X] T063 Split `getBoardView` into `getDepartmentBoard` and `getDivisionBoard` in `src/lib/board.ts`, sharing one loader, with `BoardView.owner` carrying the kind
+- [X] T064 Create `src/app/(app)/board/division/[divisionSlug]/page.tsx`, returning 404 rather than 403 for an unentitled request so the board's existence is not confirmed
+- [X] T065 List visible division boards in `src/app/(app)/board/page.tsx`, filtered at the query rather than hidden in the interface
+- [X] T066 Verify the restricted read by execution: org admin sees it, ordinary member gets 404, division lead sees it, and a department LEAD who is not the division lead still gets 404
+
+### Still to do — manual ticket attachment (FR-005g)
+
+- [ ] T067 Add a `CardWorkOrderRef` join in `prisma/schema.prisma` so a card can reference work orders as context, distinct from `Card.workOrderId` which means the card *is* that work order
+- [ ] T068 Add `attachWorkOrder` and `detachWorkOrder` to `src/app/(app)/board/actions.ts`, guarded by `requireCardAccess`
+- [ ] T069 Show attached tickets on the card in `src/app/(app)/board/card.tsx`, visually distinct from a work-order-backed card so the two relationships are not confused
+- [ ] T070 Verify a division board never auto-creates a work order card, and that an attached ticket does not move when the work order's status changes — it is a reference, not a backing
+
+---
+
 ## Phase 9: Polish and release readiness
 
 - [ ] T054 [P] Seed 200 cards onto one board via a throwaway script, and confirm `src/app/(app)/board/[departmentSlug]/board-view.tsx` stays readable and responsive at phone width (SC-009)

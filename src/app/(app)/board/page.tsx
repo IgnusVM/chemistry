@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, Lock } from "lucide-react";
 import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
 import { listBoardsForUser } from "@/lib/board";
+import { visibleDivisionIds } from "@/lib/board-auth";
 
 /**
  * Board index.
@@ -13,14 +14,44 @@ import { listBoardsForUser } from "@/lib/board";
 export default async function BoardIndexPage() {
   await requireCurrentUser();
   const accessible = await getAccessibleDepartmentIds("VIEWER");
-  const { mine, others } = await listBoardsForUser(accessible);
+  const visibleDivisions = await visibleDivisionIds();
+  const { divisions, mine, others } = await listBoardsForUser(accessible, visibleDivisions);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">Boards</h1>
-        <p className="text-sm text-neutral-500">One per department.</p>
+        <p className="text-sm text-neutral-500">One per department, plus divisions you lead.</p>
       </div>
+
+      {divisions.length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="text-xs font-semibold tracking-wide text-neutral-500 uppercase">
+            Divisions
+          </h2>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {divisions.map((v) => (
+              <li key={v.id}>
+                <Link
+                  href={`/board/division/${v.slug}`}
+                  className="flex items-center gap-3 rounded-lg border border-violet-200 bg-violet-50/50 p-3 hover:border-violet-300 hover:bg-violet-50"
+                >
+                  <Lock className="h-4 w-4 shrink-0 text-violet-400" aria-hidden />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-medium text-neutral-900">
+                      {v.name}
+                      {!v.active ? (
+                        <span className="ml-1.5 text-xs font-normal text-neutral-400">(inactive)</span>
+                      ) : null}
+                    </span>
+                    <span className="block truncate text-xs text-violet-700">Leads only</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {mine.length === 0 ? (
         <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">

@@ -118,8 +118,17 @@ export type BoardCard = {
 
 export type BoardColumnView = ColumnMapping & { color: string | null; cards: BoardCard[] };
 
+/** A board belongs to exactly one owner, of one of two kinds. */
+export type BoardOwner = {
+  kind: "department" | "division";
+  id: string;
+  name: string;
+  slug: string;
+  active: boolean;
+};
+
 export type BoardView = {
-  department: { id: string; name: string; slug: string; active: boolean };
+  owner: BoardOwner;
   boardId: string;
   columns: BoardColumnView[];
 };
@@ -137,24 +146,10 @@ const CARD_SELECT = {
   owner: { select: { id: true, displayName: true } },
 } as const;
 
-/**
- * The board, as rendered.
- *
- * Reads are org-wide by design (FR-002) — any signed-in user may look at any
- * department's board. Authorization applies to writes, per record, elsewhere.
- *
- * Returns null when the slug matches no department, so the caller can 404
- * rather than render an empty board that looks broken.
- */
-export async function getBoardView(departmentSlug: string): Promise<BoardView | null> {
-  const department = await prisma.department.findUnique({
-    where: { slug: departmentSlug },
-    select: { id: true, name: true, slug: true, active: true, board: { select: { id: true } } },
-  });
-  if (!department?.board) return null;
-
+/** Shared: everything after we know which board we are looking at. */
+async function loadBoard(boardId: string, owner: BoardOwner): Promise<BoardView> {
   const columns = await prisma.boardColumn.findMany({
-    where: { boardId: department.board.id },
+    where: { boardId },
     orderBy: { position: "asc" },
     select: {
       id: true,
@@ -171,7 +166,7 @@ export async function getBoardView(departmentSlug: string): Promise<BoardView | 
   assertBoardInvariant(columns);
 
   const cards = await prisma.card.findMany({
-    where: { boardId: department.board.id, archivedAt: null, workOrderId: null },
+    where: { boardId, archivedAt: null, workOrderId: null },
     orderBy: [{ position: "asc" }, { id: "asc" }],
     select: CARD_SELECT,
   });
@@ -184,15 +179,57 @@ export async function getBoardView(departmentSlug: string): Promise<BoardView | 
   }
 
   return {
-    department: {
-      id: department.id,
-      name: department.name,
-      slug: department.slug,
-      active: department.active,
-    },
-    boardId: department.board.id,
+    owner,
+    boardId,
     columns: columns.map((col) => ({ ...col, cards: byColumn.get(col.id) ?? [] })),
   };
+}
+
+/**
+ * A department's board.
+ *
+ * Reads are org-wide (FR-002) — any signed-in user may look at any department's
+ * board. Authorization applies to writes, per record, elsewhere.
+ *
+ * Returns null when the slug matches no department, so the caller can 404
+ * rather than render an empty board that looks broken.
+ */
+export async function getDepartmentBoard(slug: string): Promise<BoardView | null> {
+  const department = await prisma.department.findUnique({
+    where: { slug },
+    select: { id: true, name: true, slug: true, active: true, board: { select: { id: true } } },
+  });
+  if (!department?.board) return null;
+  return loadBoard(department.board.id, {
+    kind: "department",
+    id: department.id,
+    name: department.name,
+    slug: department.slug,
+    active: department.active,
+  });
+}
+
+/**
+ * A division's board.
+ *
+ * **Restricted read.** The caller MUST check `canViewDivisionBoard` first —
+ * this function does not, so that the permission decision stays in the one
+ * named place the amended Principle II requires rather than being duplicated
+ * here and drifting.
+ */
+export async function getDivisionBoard(slug: string): Promise<BoardView | null> {
+  const division = await prisma.division.findUnique({
+    where: { slug },
+    select: { id: true, name: true, slug: true, active: true, board: { select: { id: true } } },
+  });
+  if (!division?.board) return null;
+  return loadBoard(division.board.id, {
+    kind: "division",
+    id: division.id,
+    name: division.name,
+    slug: division.slug,
+    active: division.active,
+  });
 }
 
 /**
@@ -202,7 +239,10 @@ export async function getBoardView(departmentSlug: string): Promise<BoardView | 
  * the departments they actually belong to first, and let them reach the rest.
  * The full roll-up with cards is a later story.
  */
-export async function listBoardsForUser(accessibleDepartmentIds: string[]) {
+export async function listBoardsForUser(
+  accessibleDepartmentIds: string[],
+  visibleDivisionIds: string[],
+) {
   const departments = await prisma.department.findMany({
     where: { board: { isNot: null } },
     orderBy: { name: "asc" },
@@ -212,11 +252,21 @@ export async function listBoardsForUser(accessibleDepartmentIds: string[]) {
       slug: true,
       active: true,
       division: { select: { name: true } },
-      _count: { select: { workOrders: true } },
     },
   });
+
+  // Division boards are filtered by the caller-supplied visible set rather
+  // than listed and hidden in the interface — an unlisted board must be
+  // genuinely unreachable, not merely unlinked.
+  const divisions = await prisma.division.findMany({
+    where: { board: { isNot: null }, id: { in: visibleDivisionIds } },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, slug: true, active: true },
+  });
+
   const mine = new Set(accessibleDepartmentIds);
   return {
+    divisions,
     mine: departments.filter((d) => mine.has(d.id)),
     others: departments.filter((d) => !mine.has(d.id)),
   };

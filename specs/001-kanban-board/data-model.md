@@ -10,17 +10,27 @@ Five new models, two added nullable columns, nothing existing altered. Conventio
 
 ### `Board`
 
-One per department, created implicitly (D5).
+One per department **and one per division**, created implicitly (D5, D9).
 
 | Field | Type | Notes |
 |---|---|---|
 | `id` | `String @id @default(cuid())` | |
-| `departmentId` | `String @unique` | **Unique enforces one board per department** |
+| `departmentId` | `String? @unique` | Set for department boards |
+| `divisionId` | `String? @unique` | Set for division boards |
 | `createdAt` / `updatedAt` | `DateTime` | |
 
-Relations: `department Department @relation(fields:[departmentId], references:[id], onDelete: Cascade)`, `columns BoardColumn[]`, `cards Card[]`.
+Relations: `department Department?`, `division Division?` (both `onDelete: Cascade`), `columns BoardColumn[]`, `cards Card[]`.
 
-A deactivated department keeps its board; the read path renders it read-only (FR-031).
+**Hand-written constraint, and this one is genuinely necessary** — correcting the prediction made below that this feature needed none:
+
+```sql
+ALTER TABLE "Board" ADD CONSTRAINT "Board_owner_exactly_one"
+  CHECK (("departmentId" IS NULL) <> ("divisionId" IS NULL));
+```
+
+Prisma cannot express "exactly one of these two columns is set". Without it the schema permits a board owned by nothing — invisible, belonging to no one — or by both, with two owners disagreeing about who may write. Neither is a state application code would create deliberately or check for, which is what makes it belong in the database. Verified by attempting both invalid inserts; both are rejected.
+
+A deactivated owner keeps its board; the read path renders it read-only (FR-031).
 
 ### `BoardColumn`
 

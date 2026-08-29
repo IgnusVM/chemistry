@@ -148,6 +148,14 @@ An org admin adjusts a board's columns and colour coding. Defaults work untouche
 - **FR-005b**: A division lead MUST see the boards of every department in their division in the roll-up.
 - **FR-005c**: An org admin MUST be able to assign and change a division's lead through the administration interface.
 
+**Division boards**
+
+- **FR-005d**: Each division MUST have its own board, created without setup, in addition to its departments' boards.
+- **FR-005e**: A division board MUST be visible only to that division's lead and to org admins. **Not** to leads of departments within it, and not to members. This is a restricted read and MUST be enforced at the data layer, not by omitting a link.
+- **FR-005f**: A request for a division board by someone not entitled to see it MUST behave as though it does not exist, rather than confirming its existence with a refusal.
+- **FR-005g**: A division board MUST NOT auto-create cards from work orders. A work order appears on one only when a user attaches it to a card deliberately.
+- **FR-005h**: Writing to a division board MUST require the same entitlement as reading it — there is no one who may see a division board but not change it.
+
 **Columns**
 
 - **FR-006**: Every board MUST have working default columns on creation: Ideas/Backlog, Ready/Next Up, In Progress, Blocked, Done/Archived.
@@ -222,6 +230,8 @@ An org admin adjusts a board's columns and colour coding. Defaults work untouche
 
 ## Assumptions
 
+- **Division boards are a restricted read** (confirmed 2026-08-29), the application's first. Every other read is org-wide. The constitution was amended to 1.1.0 to name the exception rather than let Principle II quietly become untrue.
+- **Tickets reach a division board only by hand.** Department boards auto-create a card per work order; division boards do not. A division board is for coordination between departments, and auto-rolling every ticket into it would bury its own cards under ticket volume.
 - **A division-lead concept is being added** (confirmed 2026-08-28). `Department` carries `leadUserId` but `Division` had no equivalent, so "the Ops lead sees all Ops departments" was inexpressible. A `leadUserId` on `Division` mirrors the department pattern exactly.
 - **Setting a lead needs interface that does not exist yet.** `Department.leadUserId` is in the schema but is written only by the seed — no administration screen assigns it. Division lead therefore requires both the column and the means to set it (FR-005c), or the feature is inert. Whether to add the same control for department lead is a separate decision, deliberately not bundled here.
 - **Cards are per-department and not per-team.** Teams are not modelled in the application; tags carry team identity instead, which is why tags exist in this feature rather than being deferred.

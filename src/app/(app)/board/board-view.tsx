@@ -1,6 +1,6 @@
 import { Lock } from "lucide-react";
 import type { BoardView } from "@/lib/board";
-import { BoardCardView } from "../card";
+import { BoardCardView } from "./card";
 
 /**
  * Column accent colours, resolved as Tailwind classes rather than raw hex so
@@ -27,10 +27,10 @@ const ACCENT: Record<string, string> = {
 export function BoardViewGrid({ board, canWrite }: { board: BoardView; canWrite: boolean }) {
   return (
     <div className="space-y-3">
-      {!board.department.active ? (
+      {!board.owner.active ? (
         <p className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-xs text-neutral-600">
           <Lock className="h-3.5 w-3.5" aria-hidden />
-          {board.department.name} is deactivated — this board is read-only.
+          {board.owner.name} is deactivated — this board is read-only.
         </p>
       ) : null}
 
@@ -66,9 +66,11 @@ export function BoardViewGrid({ board, canWrite }: { board: BoardView; canWrite:
         ))}
       </div>
 
-      {!canWrite && board.department.active ? (
+      {!canWrite && board.owner.active ? (
         <p className="text-xs text-neutral-500">
-          You can read this board. Adding and moving cards needs membership of {board.department.name}.
+          {board.owner.kind === "division"
+            ? `You can read this board. Adding and moving cards is for the ${board.owner.name} lead.`
+            : `You can read this board. Adding and moving cards needs membership of ${board.owner.name}.`}
         </p>
       ) : null}
     </div>

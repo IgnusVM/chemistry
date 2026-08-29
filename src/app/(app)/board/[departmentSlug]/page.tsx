@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
-import { getBoardView } from "@/lib/board";
-import { BoardViewGrid } from "./board-view";
+import { getDepartmentBoard } from "@/lib/board";
+import { BoardViewGrid } from "../board-view";
 
 export default async function DepartmentBoardPage({
   params,
@@ -15,10 +15,10 @@ export default async function DepartmentBoardPage({
 
   // Reads are org-wide (FR-002) -- no department filter here. Write access is
   // resolved separately, purely to decide what the interface offers.
-  const board = await getBoardView(departmentSlug);
+  const board = await getDepartmentBoard(departmentSlug);
   if (!board) notFound();
 
-  const canWrite = board.department.active && (await hasDepartmentAccess(board.department.id, "MEMBER"));
+  const canWrite = board.owner.active && (await hasDepartmentAccess(board.owner.id, "MEMBER"));
 
   return (
     <div className="space-y-4">
@@ -30,7 +30,7 @@ export default async function DepartmentBoardPage({
           <ChevronLeft className="h-3 w-3" aria-hidden />
           All boards
         </Link>
-        <h1 className="mt-1 text-lg font-semibold text-neutral-900">{board.department.name}</h1>
+        <h1 className="mt-1 text-lg font-semibold text-neutral-900">{board.owner.name}</h1>
         <p className="text-sm text-neutral-500">What&rsquo;s happening, who&rsquo;s got it, and what&rsquo;s stuck.</p>
       </div>
 

@@ -28,6 +28,21 @@ Templates requiring updates:
                                              enforces; no conflict introduced
 
 Deferred TODOs: none.
+
+---
+
+AMENDMENT 1.0.0 -> 1.1.0 (2026-08-29)
+Bump rationale: MINOR. Principle II materially expanded -- restricted reads are now
+permitted where previously reads were stated as universally org-wide. No principle removed
+or redefined in a way that invalidates existing work.
+
+Driver: division boards are visible only to the division lead and org admins, which is the
+first restricted read in the application. Rather than let a principle quietly become untrue,
+the exception is named and the bar for adding another is stated: one named function, data
+layer, never interface-only.
+
+Templates requiring updates: none. The Constitution Check gate in plan-template.md is
+generic and continues to apply as written.
 -->
 
 # Chemistry Constitution
@@ -66,14 +81,25 @@ record they touch, never trusting the query that selected them.
 The proxy and middleware layers are defence in depth. They MUST NOT be the authorization
 boundary, and no action may rely on having been reached through them.
 
-The read and write models are deliberately asymmetric and MUST stay that way:
+The read and write models are deliberately asymmetric:
 
-- **Reads are org-wide.** Any signed-in user may view any asset or work order.
+- **Reads are org-wide by default.** Any signed-in user may view any asset, work order, or
+  department board.
 - **Writes are department-gated.** Mutation requires membership of the owning department at
   the required role, or org-admin.
 
+**Restricted reads are permitted but must be rare, deliberate, and enforced at the data
+layer.** Where a read is restricted, the rule MUST live in one named function rather than
+being spread across queries, and the restriction MUST NOT rely on the interface declining to
+render a link. The current exception, and at the time of writing the only one:
+
+- **Division boards** are visible to that division's lead and to org admins. Not to
+  department leads, and not to members.
+
 *Rationale*: An earlier version scoped reads with a query parameter that a caller could
-supply, which silently widened access instead of narrowing it. The fix was to make the read
+supply, which silently widened access instead of narrowing it. That is also why restricted
+reads are held to a higher bar than open ones: a boundary that exists in one place can be
+audited, and a boundary spread across call sites cannot. The fix was to make the read
 model uniformly open and honest rather than to maintain a boundary that was never enforced
 end to end. Write authorization was verified per record before that change shipped, precisely
 because select-all feeds the bulk paths.
@@ -206,4 +232,4 @@ corrected rather than merged with a note to fix later.
 Principle V. Complexity that a volunteer has to learn is a cost paid by every user, every year,
 against a body that turns over.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-28 | **Last Amended**: 2026-08-28
+**Version**: 1.1.0 | **Ratified**: 2026-08-28 | **Last Amended**: 2026-08-29
