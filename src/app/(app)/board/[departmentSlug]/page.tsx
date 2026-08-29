@@ -2,20 +2,26 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
-import { getDepartmentBoard } from "@/lib/board";
+import { getDepartmentBoard, listTags } from "@/lib/board";
 import { BoardViewGrid } from "../board-view";
 
 export default async function DepartmentBoardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ departmentSlug: string }>;
+  searchParams: Promise<{ tag?: string; done?: string }>;
 }) {
   await requireCurrentUser();
   const { departmentSlug } = await params;
+  const { tag, done } = await searchParams;
 
   // Reads are org-wide (FR-002) -- no department filter here. Write access is
   // resolved separately, purely to decide what the interface offers.
-  const board = await getDepartmentBoard(departmentSlug);
+  const [board, tags] = await Promise.all([
+    getDepartmentBoard(departmentSlug, { tagId: tag, showAllDone: done === "all" }),
+    listTags(),
+  ]);
   if (!board) notFound();
 
   const canWrite = board.owner.active && (await hasDepartmentAccess(board.owner.id, "MEMBER"));
@@ -34,7 +40,7 @@ export default async function DepartmentBoardPage({
         <p className="text-sm text-neutral-500">What&rsquo;s happening, who&rsquo;s got it, and what&rsquo;s stuck.</p>
       </div>
 
-      <BoardViewGrid board={board} canWrite={canWrite} />
+      <BoardViewGrid board={board} canWrite={canWrite} tags={tags} activeTagId={tag} showAllDone={done === "all"} />
     </div>
   );
 }

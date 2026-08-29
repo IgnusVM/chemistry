@@ -3,8 +3,9 @@
 import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { X, ArrowRight, ClipboardList, AlertTriangle } from "lucide-react";
-import type { BoardCard } from "@/lib/board";
-import { moveCard } from "./actions";
+import type { BoardCard, CardTagView } from "@/lib/board";
+import { moveCard, setCardTags } from "./actions";
+import { TagChip } from "./tag-chip";
 
 type ColumnChoice = { id: string; name: string; acceptsWorkOrderCards: boolean };
 
@@ -28,15 +29,18 @@ export function CardSheet({
   columns,
   currentColumnId,
   canWrite,
+  allTags,
   onClose,
 }: {
   card: BoardCard;
   columns: ColumnChoice[];
   currentColumnId: string | null;
   canWrite: boolean;
+  allTags: CardTagView[];
   onClose: () => void;
 }) {
   const [pendingColumnId, setPendingColumnId] = useState<string | null>(null);
+  const [tagIds, setTagIds] = useState<string[]>(card.tags.map((t) => t.id));
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -48,6 +52,23 @@ export function CardSheet({
       document.body.style.overflow = previous;
     };
   }, []);
+
+  function toggleTag(tagId: string) {
+    const next = tagIds.includes(tagId) ? tagIds.filter((t) => t !== tagId) : [...tagIds, tagId];
+    setTagIds(next);
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("cardId", card.id);
+      for (const t of next) fd.append("tagIds", t);
+      const result = await setCardTags(undefined, fd);
+      // Same honesty rule as moving: revert and say why, rather than leaving a
+      // tag on screen that never reached the database.
+      if (result?.error) {
+        setTagIds(card.tags.map((t) => t.id));
+        setError(result.error);
+      }
+    });
+  }
 
   function move(toColumnId: string) {
     setError(null);
@@ -120,6 +141,33 @@ export function CardSheet({
           <p className="border-b border-neutral-200 px-4 py-3 text-sm whitespace-pre-wrap text-neutral-700">
             {card.statusNotes}
           </p>
+        ) : null}
+
+        {canWrite && allTags.length > 0 ? (
+          <div className="border-b border-neutral-200 p-3">
+            <p className="pb-2 text-xs font-medium text-neutral-500">Tags</p>
+            <div className="flex flex-wrap gap-1.5">
+              {allTags.map((t) => {
+                const on = tagIds.includes(t.id);
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => toggleTag(t.id)}
+                    aria-pressed={on}
+                    className={
+                      on
+                        ? "rounded ring-2 ring-neutral-900 ring-offset-1 disabled:opacity-50"
+                        : "rounded opacity-45 hover:opacity-80 disabled:opacity-30"
+                    }
+                  >
+                    <TagChip tag={t} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         ) : null}
 
         {canWrite ? (

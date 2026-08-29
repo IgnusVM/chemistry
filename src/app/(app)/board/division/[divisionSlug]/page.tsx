@@ -2,19 +2,25 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, Lock } from "lucide-react";
 import { requireCurrentUser } from "@/lib/dal";
-import { getDivisionBoard } from "@/lib/board";
+import { getDivisionBoard, listTags } from "@/lib/board";
 import { canViewDivisionBoard } from "@/lib/board-auth";
 import { BoardViewGrid } from "../../board-view";
 
 export default async function DivisionBoardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ divisionSlug: string }>;
+  searchParams: Promise<{ tag?: string; done?: string }>;
 }) {
   await requireCurrentUser();
   const { divisionSlug } = await params;
+  const { tag, done } = await searchParams;
 
-  const board = await getDivisionBoard(divisionSlug);
+  const [board, tags] = await Promise.all([
+    getDivisionBoard(divisionSlug, { tagId: tag, showAllDone: done === "all" }),
+    listTags(),
+  ]);
   if (!board) notFound();
 
   // Restricted read -- the app's only one. 404 rather than 403 so the
@@ -44,7 +50,7 @@ export default async function DivisionBoardPage({
         </p>
       </div>
 
-      <BoardViewGrid board={board} canWrite={board.owner.active} />
+      <BoardViewGrid board={board} canWrite={board.owner.active} tags={tags} activeTagId={tag} showAllDone={done === "all"} />
     </div>
   );
 }

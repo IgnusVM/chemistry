@@ -103,9 +103,12 @@ export function unmappedColumnMessage(column: ColumnMapping): string {
 // Reading a board
 // ---------------------------------------------------------------------------
 
+export type CardTagView = { id: string; name: string; color: string | null };
+
 export type BoardCard = {
   id: string;
   title: string;
+  tags: CardTagView[];
   nextAction: string | null;
   dueDate: Date | null;
   statusNotes: string | null;
@@ -144,7 +147,12 @@ const CARD_SELECT = {
   archivedAt: true,
   updatedAt: true,
   owner: { select: { id: true, displayName: true } },
+  tags: { select: { tag: { select: { id: true, name: true, color: true } } } },
 } as const;
+
+/** Flatten the join rows the board actually renders. */
+type WithTagRows = { tags: { tag: CardTagView }[] };
+const flattenTags = <T extends WithTagRows>(c: T) => ({ ...c, tags: c.tags.map((t) => t.tag) });
 
 /**
  * How far back a terminal work order stays on the active board.
@@ -159,7 +167,7 @@ export const DONE_WINDOW_DAYS = 30;
 async function loadBoard(
   boardId: string,
   owner: BoardOwner,
-  opts: { showAllDone?: boolean } = {},
+  opts: { showAllDone?: boolean; tagId?: string } = {},
 ): Promise<BoardView> {
   const columns = await prisma.boardColumn.findMany({
     where: { boardId },
@@ -183,21 +191,23 @@ async function loadBoard(
     byColumn.set(columnId, [...(byColumn.get(columnId) ?? []), card]);
 
   // 1. Standalone cards, placed by their stored columnId.
+  const tagFilter = opts.tagId ? { tags: { some: { tagId: opts.tagId } } } : {};
+
   const standalone = await prisma.card.findMany({
-    where: { boardId, archivedAt: null, workOrderId: null },
+    where: { boardId, archivedAt: null, workOrderId: null, ...tagFilter },
     orderBy: [{ position: "asc" }, { id: "asc" }],
     select: CARD_SELECT,
   });
   for (const c of standalone) {
     if (!c.columnId) continue;
-    push(c.columnId, { ...c, workOrder: null });
+    push(c.columnId, { ...flattenTags(c), workOrder: null });
   }
 
   // 2. Work-order-backed cards, placed by DERIVING the column from the work
   //    order's status. Nothing here reads a stored columnId, which is what
   //    makes card position and status incapable of disagreeing (D1).
   const woCards = await prisma.card.findMany({
-    where: { boardId, workOrderId: { not: null } },
+    where: { boardId, workOrderId: { not: null }, ...tagFilter },
     orderBy: [{ workOrder: { priority: "desc" } }, { workOrder: { reportedAt: "asc" } }],
     select: {
       ...CARD_SELECT,
@@ -221,7 +231,7 @@ async function loadBoard(
     }
 
     push(column.id, {
-      ...c,
+      ...flattenTags(c),
       workOrder: { id: c.workOrder.id, code: c.workOrder.code, status: c.workOrder.status },
     });
   }
@@ -247,7 +257,7 @@ const TERMINAL_LIKE: WorkOrderStatus[] = ["COMPLETE", "CLOSED", "CANCELLED"];
  */
 export async function getDepartmentBoard(
   slug: string,
-  opts: { showAllDone?: boolean } = {},
+  opts: { showAllDone?: boolean; tagId?: string } = {},
 ): Promise<BoardView | null> {
   const department = await prisma.department.findUnique({
     where: { slug },
@@ -277,7 +287,7 @@ export async function getDepartmentBoard(
  */
 export async function getDivisionBoard(
   slug: string,
-  opts: { showAllDone?: boolean } = {},
+  opts: { showAllDone?: boolean; tagId?: string } = {},
 ): Promise<BoardView | null> {
   const division = await prisma.division.findUnique({
     where: { slug },
@@ -335,4 +345,9 @@ export async function listBoardsForUser(
     mine: departments.filter((d) => mine.has(d.id)),
     others: departments.filter((d) => !mine.has(d.id)),
   };
+}
+
+/** Every tag, for the filter control and the card editor. */
+export async function listTags(): Promise<CardTagView[]> {
+  return prisma.tag.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, color: true } });
 }

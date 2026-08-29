@@ -273,3 +273,38 @@ export async function deleteCard(cardId: string): Promise<BoardActionState> {
   await revalidateBoard(card.boardId);
   return { ok: true };
 }
+
+/** Assign the exact set of tags on a card. Replaces, rather than adds. */
+export async function setCardTags(
+  _prev: BoardActionState,
+  formData: FormData,
+): Promise<BoardActionState> {
+  const user = await requireCurrentUser();
+  const cardId = String(formData.get("cardId") ?? "");
+  const tagIds = formData.getAll("tagIds").map(String).filter(Boolean);
+  if (!cardId) return { error: "Invalid input" };
+
+  let card;
+  try {
+    card = await requireCardAccess(cardId);
+  } catch (err) {
+    return toState(err);
+  }
+
+  // Replace wholesale inside a transaction so a card is never briefly
+  // untagged, which would flicker on any board someone has open.
+  await prisma.$transaction([
+    prisma.cardTag.deleteMany({ where: { cardId } }),
+    prisma.cardTag.createMany({ data: tagIds.map((tagId) => ({ cardId, tagId })), skipDuplicates: true }),
+  ]);
+
+  await recordAudit({
+    entityType: "Card",
+    entityId: cardId,
+    action: "tags set",
+    userId: user.id,
+    changes: { tagIds },
+  });
+  await revalidateBoard(card.boardId);
+  return { ok: true };
+}

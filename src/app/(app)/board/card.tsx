@@ -1,5 +1,6 @@
 import { ClipboardList, UserRound, CalendarClock, ArrowRight } from "lucide-react";
 import type { BoardCard } from "@/lib/board";
+import { TagChip } from "./tag-chip";
 
 function dueLabel(due: Date) {
   const days = Math.ceil((new Date(due).getTime() - Date.now()) / 86_400_000);
@@ -38,6 +39,14 @@ export function BoardCardView({ card }: { card: BoardCard }) {
       ) : null}
 
       <h3 className="text-sm leading-snug font-medium text-neutral-900">{card.title}</h3>
+
+      {card.tags.length > 0 ? (
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {card.tags.map((t) => (
+            <TagChip key={t.id} tag={t} />
+          ))}
+        </div>
+      ) : null}
 
       {card.nextAction ? (
         <p className="mt-1.5 flex items-start gap-1 text-xs text-neutral-600">

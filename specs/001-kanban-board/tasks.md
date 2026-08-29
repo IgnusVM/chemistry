@@ -117,12 +117,12 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 **Independent Test**: Tag cards across two teams, confirm legibility at phone width, and confirm filtering hides the rest.
 
-- [ ] T037 [P] [US4] Implement `createTag`, `updateTag`, and `deleteTag` in `src/app/(app)/admin/tags/actions.ts`, org-admin only, with `deleteTag` removing assignments while leaving cards intact
-- [ ] T038 [P] [US4] Implement `setCardTags` in `src/app/(app)/board/actions.ts` under department write access
-- [ ] T039 [P] [US4] Create `src/app/(app)/admin/tags/page.tsx` for org admins to manage the tag vocabulary and colours
-- [ ] T040 [US4] Display tags on the card in `src/app/(app)/board/card.tsx`, **distinguishable without relying on colour** so they work for colour-blind readers and in bright sun (FR-027)
-- [ ] T041 [US4] Add tag filtering to `src/app/(app)/board/[departmentSlug]/board-view.tsx` with an obvious active-filter indicator, and ensure the filter does **not** persist invisibly across sessions (FR-028, FR-029)
-- [ ] T042 [US4] Verify per quickstart.md: tags legible at 360px, filter state obvious, and a returning user is not silently still filtered
+- [X] T037 [P] [US4] Implement `createTag`, `updateTag`, and `deleteTag` in `src/app/(app)/admin/tags/actions.ts`, org-admin only, with `deleteTag` removing assignments while leaving cards intact
+- [X] T038 [P] [US4] Implement `setCardTags` in `src/app/(app)/board/actions.ts` under department write access
+- [X] T039 [P] [US4] Create `src/app/(app)/admin/tags/page.tsx` for org admins to manage the tag vocabulary and colours
+- [X] T040 [US4] Display tags on the card in `src/app/(app)/board/card.tsx`, **distinguishable without relying on colour** so they work for colour-blind readers and in bright sun (FR-027)
+- [X] T041 [US4] Add tag filtering to `src/app/(app)/board/[departmentSlug]/board-view.tsx` with an obvious active-filter indicator, and ensure the filter does **not** persist invisibly across sessions (FR-028, FR-029)
+- [X] T042 [US4] Verify per quickstart.md: tags legible at 360px, filter state obvious, and a returning user is not silently still filtered
 
 ---
 

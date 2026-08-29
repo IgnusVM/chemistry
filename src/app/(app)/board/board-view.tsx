@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { Lock } from "lucide-react";
-import type { BoardView, BoardCard } from "@/lib/board";
+import Link from "next/link";
+import type { BoardView, BoardCard, CardTagView } from "@/lib/board";
 import { BoardCardView } from "./card";
 import { NewCardForm } from "./new-card-form";
 import { CardSheet } from "./card-sheet";
+import { TagFilter } from "./tag-filter";
 
 /**
  * Column accent colours, resolved as Tailwind classes rather than raw hex so
@@ -32,7 +34,19 @@ const ACCENT: Record<string, string> = {
  * Tapping a card opens the sheet, which is also where moving happens — two
  * taps, no drag (research.md D3).
  */
-export function BoardViewGrid({ board, canWrite }: { board: BoardView; canWrite: boolean }) {
+export function BoardViewGrid({
+  board,
+  canWrite,
+  tags,
+  activeTagId,
+  showAllDone,
+}: {
+  board: BoardView;
+  canWrite: boolean;
+  tags: CardTagView[];
+  activeTagId?: string;
+  showAllDone?: boolean;
+}) {
   const [selected, setSelected] = useState<{ card: BoardCard; columnId: string } | null>(null);
 
   const columnChoices = board.columns.map((c) => ({
@@ -43,6 +57,16 @@ export function BoardViewGrid({ board, canWrite }: { board: BoardView; canWrite:
 
   return (
     <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <TagFilter tags={tags} activeTagId={activeTagId} />
+        <Link
+          href={showAllDone ? "?" : "?done=all"}
+          className="text-xs text-neutral-500 underline-offset-2 hover:text-neutral-900 hover:underline"
+        >
+          {showAllDone ? "Hide older done" : "Show all done"}
+        </Link>
+      </div>
+
       {!board.owner.active ? (
         <p className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-xs text-neutral-600">
           <Lock className="h-3.5 w-3.5" aria-hidden />
@@ -109,6 +133,7 @@ export function BoardViewGrid({ board, canWrite }: { board: BoardView; canWrite:
           columns={columnChoices}
           currentColumnId={selected.columnId}
           canWrite={canWrite}
+          allTags={tags}
           onClose={() => setSelected(null)}
         />
       ) : null}
