@@ -2,7 +2,8 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
-import { saveColumn, deleteColumn, reorderColumn, COLORS, type ColumnFormState } from "./actions";
+import { saveColumn, deleteColumn, reorderColumn, type ColumnFormState } from "./actions";
+import { BOARD_COLORS } from "@/lib/board-colors";
 import { Button } from "@/components/button";
 import { WO_STATUSES } from "@/lib/constants";
 
@@ -71,7 +72,7 @@ export function BoardColumnEditor({
                   <div>
                     <label className="block text-xs font-medium text-neutral-600">Colour</label>
                     <select name="color" defaultValue={col.color ?? "slate"} className={`mt-1 ${inputClass}`}>
-                      {COLORS.map((c) => (
+                      {BOARD_COLORS.map((c) => (
                         <option key={c} value={c}>{c}</option>
                       ))}
                     </select>

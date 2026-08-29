@@ -7,6 +7,7 @@ import { requireOrgAdmin } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { assertBoardInvariant, BoardInvariantError, type ColumnMapping } from "@/lib/board";
 import { WO_STATUSES } from "@/lib/constants";
+import { BOARD_COLORS } from "@/lib/board-colors";
 
 /**
  * Column configuration, org-admin only (FR-007).
@@ -20,13 +21,11 @@ import { WO_STATUSES } from "@/lib/constants";
 
 export type ColumnFormState = { error?: string } | undefined;
 
-const COLORS = ["slate", "sky", "amber", "rose", "emerald", "violet", "teal", "orange"] as const;
-
 const columnSchema = z.object({
   boardId: z.string().min(1),
   columnId: z.string().optional(),
   name: z.string().trim().min(1, "Give the column a name.").max(40),
-  color: z.enum(COLORS).optional(),
+  color: z.enum(BOARD_COLORS).optional(),
   woStatusOnMove: z.string().optional(),
   woStatusesShown: z.array(z.string()).default([]),
 });
@@ -173,5 +172,3 @@ export async function deleteColumn(_prev: ColumnFormState, formData: FormData): 
   revalidatePath("/admin/board-columns");
   revalidatePath("/board");
 }
-
-export { COLORS };

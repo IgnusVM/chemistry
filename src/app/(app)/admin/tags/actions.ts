@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireOrgAdmin } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
+import { BOARD_COLORS } from "@/lib/board-colors";
 
 /**
  * Tags are organization-wide, so their vocabulary is org-admin's to set.
@@ -14,11 +15,9 @@ import { recordAudit } from "@/lib/audit";
  * department members.
  */
 
-const TAG_COLORS = ["slate", "sky", "amber", "rose", "emerald", "violet", "teal", "orange"] as const;
-
 const tagSchema = z.object({
   name: z.string().trim().min(1, "Give the tag a name.").max(24, "Keep tag names short."),
-  color: z.enum(TAG_COLORS).optional(),
+  color: z.enum(BOARD_COLORS).optional(),
 });
 
 export type TagFormState = { error?: string } | undefined;
@@ -49,5 +48,3 @@ export async function deleteTag(tagId: string): Promise<void> {
   revalidatePath("/admin/tags");
   revalidatePath("/board");
 }
-
-export { TAG_COLORS };

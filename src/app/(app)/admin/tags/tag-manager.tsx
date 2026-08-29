@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useTransition } from "react";
-import { createTag, deleteTag, TAG_COLORS, type TagFormState } from "./actions";
+import { createTag, deleteTag, type TagFormState } from "./actions";
+import { BOARD_COLORS } from "@/lib/board-colors";
 import { Button } from "@/components/button";
 import { TagChip } from "@/app/(app)/board/tag-chip";
 
@@ -23,7 +24,7 @@ export function TagManager({
         <div>
           <label className="block text-xs font-medium text-neutral-600">Colour</label>
           <select name="color" defaultValue="slate" className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
-            {TAG_COLORS.map((c) => (
+            {BOARD_COLORS.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
