@@ -12,6 +12,7 @@ import {
   X,
   Layers,
   PackageOpen,
+  LayoutGrid,
   MapPin,
   Settings,
   HelpCircle,
@@ -30,6 +31,7 @@ const TABS: Item[] = [
 ];
 
 const MORE_LINKS: Item[] = [
+  { href: "/board", label: "Board", Icon: LayoutGrid },
   { href: "/loans", label: "Checked out", Icon: PackageOpen },
   { href: "/asset-groups", label: "Asset Groups", Icon: Layers },
   { href: "/locations", label: "Locations", Icon: MapPin },

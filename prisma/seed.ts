@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import type { CustomFieldDef } from "../src/lib/custom-fields";
+import type { WorkOrderStatus } from "../src/generated/prisma/client";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -148,8 +149,51 @@ async function main() {
     });
   }
 
+  // Task board: one per department, created here rather than by any user
+  // action so nobody ever meets the concept of "making a board" — they just
+  // find their department's board already there. Idempotent, because this
+  // seed runs on every container start.
+  //
+  // The status mapping is the load-bearing part. Every WorkOrderStatus must
+  // appear in exactly one column's woStatusesShown, or a work-order card is
+  // either invisible or duplicated. woStatusOnMove is a different question:
+  // what a move INTO this column sets. Done shows three terminal statuses but
+  // a move into it picks one.
+  const DEFAULT_COLUMNS: {
+    name: string;
+    position: number;
+    color: string;
+    woStatusOnMove: WorkOrderStatus | null;
+    woStatusesShown: WorkOrderStatus[];
+  }[] = [
+    { name: "Ideas / Backlog", position: 0, color: "slate", woStatusOnMove: null, woStatusesShown: [] },
+    { name: "Ready / Next Up", position: 1, color: "sky", woStatusOnMove: "OPEN", woStatusesShown: ["OPEN"] },
+    { name: "In Progress", position: 2, color: "amber", woStatusOnMove: "IN_PROGRESS", woStatusesShown: ["IN_PROGRESS"] },
+    { name: "Blocked", position: 3, color: "rose", woStatusOnMove: "WAITING_PARTS", woStatusesShown: ["WAITING_PARTS"] },
+    { name: "Done / Archived", position: 4, color: "emerald", woStatusOnMove: "COMPLETE", woStatusesShown: ["COMPLETE", "CLOSED", "CANCELLED"] },
+  ];
+
+  const allDepartments = await prisma.department.findMany({ select: { id: true } });
+  for (const dept of allDepartments) {
+    const board = await prisma.board.upsert({
+      where: { departmentId: dept.id },
+      update: {},
+      create: { departmentId: dept.id },
+    });
+    // Columns are matched on (boardId, position) rather than deleted and
+    // recreated: recreating would orphan every card on the board every time
+    // the seed ran, which is once per deploy.
+    for (const col of DEFAULT_COLUMNS) {
+      const existing = await prisma.boardColumn.findFirst({
+        where: { boardId: board.id, position: col.position },
+      });
+      if (existing) continue;
+      await prisma.boardColumn.create({ data: { ...col, boardId: board.id } });
+    }
+  }
+
   console.log(
-    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, ${admin ? `org admin ${admin.email}, ` : "no org admin, "}Lamplighter asset type, ${storage.name}, and ${RESOLUTION_CODES.length} resolution codes.`,
+    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, ${admin ? `org admin ${admin.email}, ` : "no org admin, "}Lamplighter asset type, ${storage.name}, and ${RESOLUTION_CODES.length} resolution codes. Task boards: ${allDepartments.length}.`,
   );
 }
 

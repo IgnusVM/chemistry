@@ -30,13 +30,13 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 **Purpose**: Get the data model in place, additively, before anything reads or writes it.
 
-- [ ] T001 Add `Board`, `BoardColumn`, `Card`, `Tag`, and `CardTag` models to `prisma/schema.prisma` per data-model.md, including all indexes and the `onDelete` behaviours (`Restrict` on `Card.column`, `Cascade` on `Card.workOrder`)
-- [ ] T002 Add `leadUserId String?` plus the named `DivisionLead` relation to the `Division` model in `prisma/schema.prisma`, mirroring `Department.leadUserId` exactly, and add the matching back-relation on `User`
-- [ ] T003 Generate the migration SQL: `npx prisma migrate diff --from-config-datasource --to-schema ./prisma/schema.prisma --script`, writing it to a hand-created folder under `prisma/migrations/` named with `date -u +%Y%m%d%H%M%S`_task_board
-- [ ] T004 Read the generated SQL in `prisma/migrations/<timestamp>_task_board/migration.sql` and confirm it is purely additive — `CREATE TABLE` and one `ADD COLUMN`, with no `ALTER ... DROP`, no `ALTER ... TYPE`, and no `UPDATE` against an existing table (Constitution Principle III)
-- [ ] T005 Apply `prisma/migrations/<timestamp>_task_board/migration.sql` with `npx prisma migrate deploy`, run `npx prisma generate`, and **restart the dev server** — it caches the generated client
-- [ ] T006 Extend `prisma/seed.ts` to upsert one `Board` per department with the five default columns and their `woStatusOnMove` / `woStatusesShown` values from research.md D2
-- [ ] T007 Run `npx tsx prisma/seed.ts` twice and confirm exactly one board per department with no duplicated columns — idempotence is a requirement, not a nicety (D5)
+- [X] T001 Add `Board`, `BoardColumn`, `Card`, `Tag`, and `CardTag` models to `prisma/schema.prisma` per data-model.md, including all indexes and the `onDelete` behaviours (`Restrict` on `Card.column`, `Cascade` on `Card.workOrder`)
+- [X] T002 Add `leadUserId String?` plus the named `DivisionLead` relation to the `Division` model in `prisma/schema.prisma`, mirroring `Department.leadUserId` exactly, and add the matching back-relation on `User`
+- [X] T003 Generate the migration SQL: `npx prisma migrate diff --from-config-datasource --to-schema ./prisma/schema.prisma --script`, writing it to a hand-created folder under `prisma/migrations/` named with `date -u +%Y%m%d%H%M%S`_task_board
+- [X] T004 Read the generated SQL in `prisma/migrations/<timestamp>_task_board/migration.sql` and confirm it is purely additive — `CREATE TABLE` and one `ADD COLUMN`, with no `ALTER ... DROP`, no `ALTER ... TYPE`, and no `UPDATE` against an existing table (Constitution Principle III)
+- [X] T005 Apply `prisma/migrations/<timestamp>_task_board/migration.sql` with `npx prisma migrate deploy`, run `npx prisma generate`, and **restart the dev server** — it caches the generated client
+- [X] T006 Extend `prisma/seed.ts` to upsert one `Board` per department with the five default columns and their `woStatusOnMove` / `woStatusesShown` values from research.md D2
+- [X] T007 Run `npx tsx prisma/seed.ts` twice and confirm exactly one board per department with no duplicated columns — idempotence is a requirement, not a nicety (D5)
 
 ---
 
@@ -44,9 +44,9 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 **⚠️ CRITICAL**: T008 blocks everything. Principle I is not advisory, and D3's honesty guarantee depends on getting the optimistic-update mechanics right for *this* React version rather than a remembered one.
 
-- [ ] T008 Read `node_modules/next/dist/docs/` on server actions, `revalidatePath` vs `revalidateTag`, and React 19 `useOptimistic`, then record the findings in the D8 section of `specs/001-kanban-board/research.md` before any code is written
-- [ ] T009 Create `src/lib/board.ts` with the status-to-column mapping helpers and the board invariant validator (every `WorkOrderStatus` in exactly one column's `woStatusesShown`, FR-022) — this is the single home for the mapping, and duplicating it elsewhere is how the two copies drift apart
-- [ ] T010 Add `requireBoardAccess(boardIdOrCardId, minRole)` to `src/app/(app)/board/actions.ts`, resolving the department **from the stored record** and mirroring `requireWorkOrderAccess` in `src/app/(app)/work-orders/actions.ts` — no action may open-code its own check
+- [X] T008 Read `node_modules/next/dist/docs/` on server actions, `revalidatePath` vs `revalidateTag`, and React 19 `useOptimistic`, then record the findings in the D8 section of `specs/001-kanban-board/research.md` before any code is written
+- [X] T009 Create `src/lib/board.ts` with the status-to-column mapping helpers and the board invariant validator (every `WorkOrderStatus` in exactly one column's `woStatusesShown`, FR-022) — this is the single home for the mapping, and duplicating it elsewhere is how the two copies drift apart
+- [X] T010 Add `requireBoardAccess` / `requireCardAccess` to `src/lib/board-auth.ts`, resolving the department **from the stored record**. *Deviation from plan, deliberate*: originally scoped to `src/app/(app)/board/actions.ts`, but every export from a `"use server"` file is a callable endpoint, so an exported auth helper there would be publicly invokable. Placed in `lib/` instead, matching how `src/lib/dal.ts` already exports its guards
 
 **Checkpoint**: Schema, seed, mapping, and the authorization helper exist. Story work can begin.
 
@@ -58,14 +58,14 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 **Independent Test**: Seed cards across all columns, open at 390px, and confirm a reader can answer those three questions without opening a card.
 
-- [ ] T011 [US1] Implement `getBoardView(departmentSlug, filters)` in `src/lib/board.ts` returning columns with their standalone cards, ordered `(position, id)`, with no department filter on read (FR-002)
-- [ ] T012 [US1] Create `src/app/(app)/board/[departmentSlug]/page.tsx` as a server component calling `getBoardView`, resolving the department by slug and 404ing when absent
-- [ ] T013 [P] [US1] Create `src/app/(app)/board/[departmentSlug]/board-view.tsx` rendering columns with horizontal scroll at phone width, keeping column identity visible while scrolling (SC-001)
-- [ ] T014 [P] [US1] Create `src/app/(app)/board/card.tsx` displaying title, owner, and next action without opening the card, and making an **unowned** card visually distinct rather than blank (FR-012, FR-013)
-- [ ] T015 [P] [US1] Handle the no-department case in `src/app/(app)/board/[departmentSlug]/page.tsx` with an explanation rather than an empty board that looks broken (FR-035, US1 scenario 4)
-- [ ] T016 [US1] Add a Board entry to the primary navigation in `src/app/(app)/layout.tsx`, alongside Assets and Work Orders
-- [ ] T017 [US1] Render a deactivated department's board read-only rather than hiding it, in `src/app/(app)/board/[departmentSlug]/board-view.tsx` (FR-031)
-- [ ] T018 [US1] Verify per quickstart.md: board readable at 360px and 390px, column identity clear while scrolling, unowned cards obvious, and an owner who no longer exists renders without breaking (FR-016)
+- [X] T011 [US1] Implement `getBoardView(departmentSlug, filters)` in `src/lib/board.ts` returning columns with their standalone cards, ordered `(position, id)`, with no department filter on read (FR-002)
+- [X] T012 [US1] Create `src/app/(app)/board/[departmentSlug]/page.tsx` as a server component calling `getBoardView`, resolving the department by slug and 404ing when absent
+- [X] T013 [P] [US1] Create `src/app/(app)/board/[departmentSlug]/board-view.tsx` rendering columns with horizontal scroll at phone width, keeping column identity visible while scrolling (SC-001)
+- [X] T014 [P] [US1] Create `src/app/(app)/board/card.tsx` displaying title, owner, and next action without opening the card, and making an **unowned** card visually distinct rather than blank (FR-012, FR-013)
+- [X] T015 [P] [US1] Handle the no-department case in `src/app/(app)/board/[departmentSlug]/page.tsx` with an explanation rather than an empty board that looks broken (FR-035, US1 scenario 4)
+- [X] T016 [US1] Add a Board entry to the primary navigation in `src/app/(app)/layout.tsx`, alongside Assets and Work Orders
+- [X] T017 [US1] Render a deactivated department's board read-only rather than hiding it, in `src/app/(app)/board/[departmentSlug]/board-view.tsx` (FR-031)
+- [X] T018 [US1] Verify per quickstart.md: board readable at 360px and 390px, column identity clear while scrolling, unowned cards obvious, and an owner who no longer exists renders without breaking (FR-016)
 
 **Checkpoint**: The board answers its central question. Useful on its own even with no other story built.
 

@@ -161,7 +161,21 @@ Per Constitution Principle I, these must be read in `node_modules/next/dist/docs
 - **Optimistic updates in React 19** — whether `useOptimistic` is the right vehicle for D3's revert-on-failure, and what the installed version's guidance says about pairing it with server actions.
 - **Route handlers versus server actions** for the board read, given it merges two queries.
 
-> Recorded as an open item, not an assumption. This codebase's Next version has breaking changes relative to training data, and D3's honesty guarantee depends on getting the optimistic-update mechanics right.
+**Resolved 2026-08-29** by reading `node_modules/next/dist/docs/`:
+
+- **Revalidation**: `01-getting-started/07-mutating-data.md` confirms calling `revalidatePath` from within a Server Function after a mutation. This matches what the existing actions in this codebase already do, so the board actions follow the same pattern with no change.
+
+- **Optimistic updates**: `02-guides/forms.md` documents React's `useOptimistic`, applied *inside* the async form action — the optimistic value is set first, then the server function is awaited. This is the sanctioned vehicle for D3.
+
+  The mechanic that matters for FR-034: **React discards the optimistic value automatically when the transition settles**, falling back to the real state. So a failed move reverts on its own — the revert half of "revert visibly and report" is free.
+
+  The *reporting* half is not. `useOptimistic` conveys no error; it simply stops showing the optimistic value. So the card silently snaps back with no explanation, which is a worse failure than not moving at all — the user concludes the app is flaky rather than that the network dropped.
+
+  > **Inferred —** The two must be paired: `useOptimistic` for the immediate move and revert, and `useActionState` (documented in the same file for pending state) to carry the failure message back. The reasoning: the docs describe each hook solving one half, and FR-034 explicitly requires both halves. Nothing in the installed docs pairs them, so this combination is a design decision, not documented practice.
+
+- **`revalidateTag` and `updateTag`**: present in this version, with `router.refresh()` explicitly noted as *not* revalidating tagged data. Not needed here — the board is path-addressed, so `revalidatePath` is sufficient and introduces no new caching concept.
+
+- **Route handlers vs server actions for the board read**: not applicable. The board read is a server component calling `getBoardView` directly, so no HTTP surface is introduced at all.
 
 ---
 

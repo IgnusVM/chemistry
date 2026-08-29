@@ -71,10 +71,12 @@ model Division {
   name        String
   slug        String   @unique
   description String?
+  leadUserId  String?
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  lead        User?        @relation("DivisionLead", fields: [leadUserId], references: [id])
   departments Department[]
 }
 
@@ -96,6 +98,7 @@ model Department {
   assets      Asset[]
   workOrders  WorkOrder[]
   loanPrivileges AssetLoanPrivilege[]
+  board          Board?
 }
 
 /// Grants one user the right to check assets in and out for one department.
@@ -165,6 +168,9 @@ model User {
 
   memberships       DepartmentMembership[]
   ledDepartments    Department[]            @relation("DepartmentLead")
+  ledDivisions      Division[]              @relation("DivisionLead")
+  ownedCards        Card[]                  @relation("CardOwner")
+  createdCards      Card[]                  @relation("CardCreatedBy")
   createdAssets     Asset[]                 @relation("AssetCreatedBy")
   locationMoves     AssetLocationHistory[]
   magicLinkTokens   MagicLinkToken[]
@@ -478,6 +484,7 @@ model WorkOrder {
   notes          WorkOrderNote[]
   attachments    WorkOrderAttachment[]
   partsUsed      WorkOrderPart[]
+  card           Card?
   codeFileVersions AssetCodeFileVersion[]
 
   @@index([departmentId])
@@ -601,4 +608,110 @@ model BulkSelection {
   createdBy User @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
 
   @@index([createdByUserId])
+}
+
+// ---------------------------------------------------------------------------
+// Task board
+//
+// One board per department, created implicitly by the seed so nobody ever has
+// to meet the concept of "making a board".
+//
+// The load-bearing decision: a work-order-backed card does NOT store its
+// column. Card.columnId is NULL for those, and the column is derived from
+// workOrder.status at read time via BoardColumn.woStatusesShown. Card position
+// and work order status therefore cannot disagree, because there is only one
+// piece of state rather than two kept in step.
+// See specs/001-kanban-board/research.md D1.
+// ---------------------------------------------------------------------------
+
+model Board {
+  id           String   @id @default(cuid())
+  departmentId String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  columns    BoardColumn[]
+  cards      Card[]
+}
+
+model BoardColumn {
+  id       String  @id @default(cuid())
+  boardId  String
+  name     String
+  position Int
+  color    String?
+
+  // Moving a work-order-backed card here sets this status. NULL means the
+  // column refuses work-order cards at all (Ideas/Backlog, by default).
+  woStatusOnMove  WorkOrderStatus?
+  // Which work order statuses render in this column. Board invariant, enforced
+  // in src/lib/board.ts: every status appears in exactly one column, so a card
+  // can be neither invisible nor duplicated.
+  woStatusesShown WorkOrderStatus[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards Card[]
+
+  @@index([boardId, position])
+}
+
+model Card {
+  id       String  @id @default(cuid())
+  boardId  String
+  // NULL for work-order-backed cards -- their column is derived, not stored.
+  columnId String?
+
+  title       String
+  ownerUserId String?
+  nextAction  String?
+  dueDate     DateTime?
+  statusNotes String?
+  position    Int       @default(0)
+
+  // Nullable unique: Postgres permits many NULLs in a unique index, so this
+  // means "at most one card per work order, unlimited standalone cards".
+  // No partial index required.
+  workOrderId String? @unique
+
+  archivedAt      DateTime?
+  createdByUserId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  board     Board        @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  // Restrict is what makes "deleting a column requires saying where its cards
+  // go" enforceable at the database, rather than by hoping the action did it.
+  column    BoardColumn? @relation(fields: [columnId], references: [id], onDelete: Restrict)
+  owner     User?        @relation("CardOwner", fields: [ownerUserId], references: [id])
+  createdBy User?        @relation("CardCreatedBy", fields: [createdByUserId], references: [id])
+  workOrder WorkOrder?   @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  tags      CardTag[]
+
+  @@index([boardId, columnId, position])
+  @@index([ownerUserId])
+}
+
+// Organization-wide, so a team tag means the same thing on every board.
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String?
+  createdAt DateTime @default(now())
+
+  cards CardTag[]
+}
+
+model CardTag {
+  cardId String
+  tagId  String
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, tagId])
+  @@index([tagId])
 }
