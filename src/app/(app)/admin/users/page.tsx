@@ -5,6 +5,7 @@ import { UserCard } from "./user-card";
 import { InviteGenerator } from "./invite-generator";
 import { RevokeInviteButton } from "./revoke-invite-button";
 import { resolveBadges } from "@/lib/user-badge-data";
+import { HelpLink } from "@/components/help-link";
 
 export default async function UsersAdminPage() {
   await requireOrgAdminPage();
@@ -25,16 +26,18 @@ export default async function UsersAdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Users</h1>
-        <p className="text-sm text-neutral-500">
-          New accounts can only be created with an invite link. Generate one below, or add someone
-          directly. Sign-in is by magic link — no passwords.
-        </p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Users</h1>
+          <HelpLink topic="Users" article="admin-setup/departments-and-roles" />
+        </div>
       </div>
 
       <div className="rounded-md border border-neutral-200 bg-white p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-neutral-900">Invite links</h2>
+          <div className="flex items-center gap-1">
+            <h2 className="text-sm font-semibold text-neutral-900">Invite links</h2>
+            <HelpLink topic="Invites, departments and roles" article="admin-setup/departments-and-roles" />
+          </div>
           <InviteGenerator />
         </div>
         {invites.length > 0 ? (

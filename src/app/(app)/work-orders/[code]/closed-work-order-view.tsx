@@ -7,6 +7,7 @@ import { renderNoteHtml } from "@/lib/notes";
 import type { ResolvedBadge } from "@/lib/user-badge-data";
 import { UserBadge, UserBadgeLabel } from "@/components/user-badge";
 import type { Prisma } from "@/generated/prisma/client";
+import { HelpLink } from "@/components/help-link";
 
 type ClosedWorkOrder = Prisma.WorkOrderGetPayload<{
   include: {
@@ -84,7 +85,10 @@ export function ClosedWorkOrderView({
         </div>
 
         <div className="rounded-md border border-neutral-200 bg-white p-4">
-          <h2 className="text-sm font-semibold text-neutral-900">Resolution</h2>
+          <div className="flex items-center gap-1">
+            <h2 className="text-sm font-semibold text-neutral-900">Resolution</h2>
+            <HelpLink topic="Resolution codes" article="work-orders/resolution-codes-explained" />
+          </div>
           <dl className="mt-2 space-y-2 text-sm">
             <div>
               <dt className="text-xs text-neutral-500">Code</dt>
@@ -104,24 +108,26 @@ export function ClosedWorkOrderView({
         <div className="rounded-md border border-neutral-200 bg-white p-4">
           <h2 className="text-sm font-semibold text-neutral-900">Parts used</h2>
           {workOrder.partsUsed.length > 0 ? (
-            <table className="mt-2 w-full text-sm">
-              <thead className="text-left text-xs uppercase text-neutral-500">
-                <tr>
-                  <th className="py-1 pr-2">Part #</th>
-                  <th className="py-1 pr-2">Description</th>
-                  <th className="py-1 pr-2">Qty</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100">
-                {workOrder.partsUsed.map((use) => (
-                  <tr key={use.id}>
-                    <td className="py-2 pr-2 font-medium text-neutral-900">{use.part.partNumber}</td>
-                    <td className="py-2 pr-2 text-neutral-600">{use.part.description}</td>
-                    <td className="py-2 pr-2 text-neutral-500">{use.quantity}</td>
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs uppercase text-neutral-500">
+                  <tr>
+                    <th className="py-1 pr-2">Part #</th>
+                    <th className="py-1 pr-2">Description</th>
+                    <th className="py-1 pr-2">Qty</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {workOrder.partsUsed.map((use) => (
+                    <tr key={use.id}>
+                      <td className="py-2 pr-2 font-medium text-neutral-900">{use.part.partNumber}</td>
+                      <td className="py-2 pr-2 text-neutral-600">{use.part.description}</td>
+                      <td className="py-2 pr-2 text-neutral-500">{use.quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <p className="mt-1 text-sm text-neutral-500">No parts logged.</p>
           )}

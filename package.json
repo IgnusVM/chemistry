@@ -1,10 +1,10 @@
 {
   "name": "chemistry",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
     "dev": "node scripts/copy-zxing-wasm.mjs && next dev",
-    "prebuild": "node scripts/copy-zxing-wasm.mjs",
+    "prebuild": "node scripts/copy-zxing-wasm.mjs && node scripts/check-palette.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

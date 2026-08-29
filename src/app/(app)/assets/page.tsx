@@ -13,6 +13,7 @@ import { ASSET_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
 import { ExportDialog } from "@/components/export-dialog";
 import { ASSET_COLUMNS, assetCustomFieldColumns, DEFAULT_ASSET_COLUMNS } from "@/lib/export/columns";
 import type { CustomFieldDef } from "@/lib/custom-fields";
+import { HelpLink } from "@/components/help-link";
 
 export default async function AssetsPage({
   searchParams,
@@ -55,7 +56,10 @@ export default async function AssetsPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">Assets</h1>
+          <div className="flex items-center gap-1">
+            <h1 className="text-lg font-semibold text-neutral-900">Assets</h1>
+            <HelpLink topic="Assets" article="assets/creating-an-asset" />
+          </div>
           <p className="text-sm text-neutral-500">{total} total</p>
         </div>
         <div className="flex flex-wrap gap-2">

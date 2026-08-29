@@ -66,57 +66,59 @@ export default async function AssetGroupDetailPage({
           <RemoveSelectedButton assetGroupId={group.id} />
         </div>
 
-        <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
-          <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
-            <tr>
-              <th className="w-8 px-2 py-2 sm:px-4">
-                <SelectAllHeaderCheckbox />
-              </th>
-              <th className="px-2 py-2 sm:px-4">Tag</th>
-              <th className="px-2 py-2 sm:px-4">Name</th>
-              <th className="hidden px-2 py-2 sm:px-4 md:table-cell">Department</th>
-              <th className="hidden px-2 py-2 sm:px-4 md:table-cell">Location</th>
-              <th className="px-2 py-2 sm:px-4">Status</th>
-              <th className="px-2 py-2 sm:px-4" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-200">
-            {group.members.map((member) => (
-              <tr key={member.assetId} className="hover:bg-neutral-50">
-                <td className="px-2 py-2 sm:px-4">
-                  <RowCheckbox id={member.assetId} label={`Select ${member.asset.assetTag}`} />
-                </td>
-                <td className="px-2 py-2 sm:px-4">
-                  <Link href={`/assets/${member.asset.assetTag}`} className="font-medium text-neutral-900 hover:underline">
-                    {member.asset.assetTag}
-                  </Link>
-                </td>
-                <td className="px-2 py-2 sm:px-4">{member.asset.name}</td>
-                <td className="hidden px-2 py-2 text-neutral-500 sm:px-4 md:table-cell">
-                  {member.asset.owningDepartment.name}
-                </td>
-                <td className="hidden px-2 py-2 text-neutral-500 sm:px-4 md:table-cell">
-                  {member.asset.currentLocation?.name ?? "—"}
-                </td>
-                <td className="px-2 py-2 sm:px-4">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${ASSET_STATUS_STYLES[member.asset.status]}`}>
-                    {member.asset.status.replace("_", " ")}
-                  </span>
-                </td>
-                <td className="px-2 py-2 sm:px-4 text-right">
-                  <RemoveMemberButton assetGroupId={group.id} assetId={member.assetId} />
-                </td>
-              </tr>
-            ))}
-            {group.members.length === 0 && (
+        <div className="overflow-x-auto rounded-md border border-neutral-200 bg-white">
+          <table className="w-full text-sm">
+            <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-neutral-500">
-                  No assets in this group yet.
-                </td>
+                <th className="w-8 px-2 py-2 sm:px-4">
+                  <SelectAllHeaderCheckbox />
+                </th>
+                <th className="px-2 py-2 sm:px-4">Tag</th>
+                <th className="px-2 py-2 sm:px-4">Name</th>
+                <th className="hidden px-2 py-2 sm:px-4 md:table-cell">Department</th>
+                <th className="hidden px-2 py-2 sm:px-4 md:table-cell">Location</th>
+                <th className="px-2 py-2 sm:px-4">Status</th>
+                <th className="px-2 py-2 sm:px-4" />
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-neutral-200">
+              {group.members.map((member) => (
+                <tr key={member.assetId} className="hover:bg-neutral-50">
+                  <td className="px-2 py-2 sm:px-4">
+                    <RowCheckbox id={member.assetId} label={`Select ${member.asset.assetTag}`} />
+                  </td>
+                  <td className="px-2 py-2 sm:px-4">
+                    <Link href={`/assets/${member.asset.assetTag}`} className="font-medium text-neutral-900 hover:underline">
+                      {member.asset.assetTag}
+                    </Link>
+                  </td>
+                  <td className="px-2 py-2 sm:px-4">{member.asset.name}</td>
+                  <td className="hidden px-2 py-2 text-neutral-500 sm:px-4 md:table-cell">
+                    {member.asset.owningDepartment.name}
+                  </td>
+                  <td className="hidden px-2 py-2 text-neutral-500 sm:px-4 md:table-cell">
+                    {member.asset.currentLocation?.name ?? "—"}
+                  </td>
+                  <td className="px-2 py-2 sm:px-4">
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${ASSET_STATUS_STYLES[member.asset.status]}`}>
+                      {member.asset.status.replace("_", " ")}
+                    </span>
+                  </td>
+                  <td className="px-2 py-2 sm:px-4 text-right">
+                    <RemoveMemberButton assetGroupId={group.id} assetId={member.assetId} />
+                  </td>
+                </tr>
+              ))}
+              {group.members.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-6 text-center text-neutral-500">
+                    No assets in this group yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </SelectionProvider>
     </div>
   );

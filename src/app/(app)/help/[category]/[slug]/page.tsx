@@ -31,7 +31,7 @@ export default async function HelpArticlePage({
       <div className="space-y-4 lg:col-span-3">
         <div className="flex items-start justify-between">
           <div>
-            <Link href={`/help/${category}`} className="text-xs text-neutral-500 hover:underline">
+            <Link href={`/help/${category}`} className="-my-2 inline-block py-2 text-xs text-neutral-500 hover:underline">
               ← {categoryLabel(category)}
             </Link>
             <h1 className="text-xl font-semibold text-neutral-900">{article.title}</h1>

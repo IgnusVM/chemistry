@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { BulkAssetForm } from "./bulk-asset-form";
 import type { CustomFieldDef } from "@/lib/custom-fields";
+import { HelpLink } from "@/components/help-link";
 
 export default async function BulkNewAssetPage() {
   await requireCurrentUser();
@@ -22,11 +23,10 @@ export default async function BulkNewAssetPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Bulk create assets</h1>
-        <p className="text-sm text-neutral-500">
-          Register many near-identical assets at once — up to 500 per batch. They&apos;ll be grouped
-          together so you can bulk-update or print QR labels for the whole set later.
-        </p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Bulk create assets</h1>
+          <HelpLink topic="Bulk-creating assets" article="assets/bulk-creating-assets" />
+        </div>
       </div>
       <BulkAssetForm assetTypes={typesForForm} departments={departments} locations={locations} />
     </div>

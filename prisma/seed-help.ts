@@ -571,6 +571,138 @@ It's a separate page rather than printing the ticket screen directly, because th
 
 **Still stuck?** Search this guide from the box at the top of the **Help** tab, or ask an org admin directly — their contact info is on their profile the same way yours is (see [Your contact profile](/help/accounts/your-contact-profile)).`,
   },
+  {
+    slug: "what-the-board-is",
+    title: "What the board is for",
+    category: "board",
+    order: 0,
+    summary: "A shared picture of what's happening, who's got it, and what's stuck.",
+    body: `The board answers four questions without anyone having to ask them in a group chat: **what's happening, who's got it, what's stuck, and what do I do next.**
+
+It is not a project management system and it is not where work gets assigned. It is a shared picture that anyone can glance at.
+
+**Every department has one.** Open **Board** in the nav to see the list, plus a roll-up across the top showing anything stuck and anything in flight right now. If you lead a division, you also see that division's board — see [Division boards](/help/board/division-boards).
+
+**A card is one piece of work.** It has a title, an owner, a next action, and somewhere to note what's going on. The next action is the useful field: "waiting on Dave to confirm the trailer" tells the next person more than a status ever will.
+
+**Columns are stages.** Out of the box: Ideas / Backlog, Ready / Next Up, In Progress, Blocked, and Done / Archived. An admin can change them — see [Changing board columns](/help/board/board-columns-admin).
+
+**Done cards clear themselves.** Anything finished more than about a month ago drops off, so the board stays a picture of now rather than an archive. The work order behind a card, if there is one, keeps its full history regardless.
+
+**Some cards are work orders.** A ticket filed against your department shows up on the board automatically, and moving it moves the ticket. That is worth understanding before you move things around — see [Cards and work orders](/help/board/cards-and-work-orders).
+
+**Tags group cards across boards.** Usually by team. See [Tagging cards](/help/board/board-tags).
+
+To move something, tap the card and tap where it goes — see [Moving a card](/help/board/moving-a-card).`,
+  },
+  {
+    slug: "moving-a-card",
+    title: "Moving a card",
+    category: "board",
+    order: 1,
+    summary: "Two taps. There is no dragging, and that is deliberate.",
+    body: `**Tap the card. Tap the column you want.** That's the whole thing.
+
+Tapping a card opens it. Near the bottom is a **Move to** list with every column on the board. Tap one and the card moves.
+
+**There is no drag-and-drop, on purpose.** Dragging is what most people expect from a board like this, so its absence is a decision rather than a missing feature.
+
+Chemistry is used on a phone, outdoors, often in dust and often wearing gloves. Drag-and-drop is awkward on a touchscreen at the best of times: you have to press, wait for the drag to engage, keep your finger down while the page scrolls, and release in exactly the right place. In a dust storm with cold hands it is close to unusable, and a mis-drop puts work in the wrong column without telling you. Two taps work every time, work one-handed, and are easy to undo.
+
+**If a column is greyed out**, the card is a work order and that column has no matching status. That is not a bug — see [Cards and work orders](/help/board/cards-and-work-orders).
+
+**If a card springs back after you move it**, the move failed and a message will say why. The usual cause is that someone else changed the same card first, or you don't have permission to change work in that department. The card returning to where it was means nothing was saved — it is safe to try again.
+
+**Who can move cards.** You need to be a member of the department that owns the board. Anyone signed in can read any department's board; changing one is limited to its own people and org admins.`,
+  },
+  {
+    slug: "cards-and-work-orders",
+    title: "Cards and work orders",
+    category: "board",
+    order: 2,
+    summary: "Some cards are tickets, some point at tickets, and some are neither.",
+    body: `A card and a work order can be related in three different ways. They look similar on the board and behave differently, so it is worth knowing which one you are looking at.
+
+**The card is the work order.** When a ticket is filed against a department, a card for it appears on that department's board automatically. It shows the ticket number. You do not create these and you cannot delete them — close the ticket and the card goes with it.
+
+The important part: **that card does not have a column of its own.** Where it sits is worked out from the ticket's status every time the board loads. So moving the card is not really moving a card — it changes the ticket's status, and it needs the same permission that editing the ticket would.
+
+This is also why a column can be greyed out. If no work order status corresponds to that column, there is nothing for the move to set, so the move is refused rather than silently doing nothing. An admin decides which statuses map to which columns — see [Changing board columns](/help/board/board-columns-admin).
+
+**The card points at work orders.** Any card can have tickets attached to it as context — a planning card that references the three repairs it depends on. Attached tickets show on the card. The card keeps its own column, moves freely, and detaching a ticket leaves both the card and the ticket alone.
+
+**The card is just a card.** Most of them. A piece of work with no ticket behind it. It lives entirely on the board.
+
+**Why it works this way.** A card that stored its own column *and* mirrored a ticket's status would be two records that have to agree. Sooner or later they wouldn't, and the board would show something the ticket didn't. Working the column out from the ticket each time means they cannot disagree.`,
+  },
+  {
+    slug: "board-tags",
+    title: "Tagging cards",
+    category: "board",
+    order: 3,
+    summary: "Shared labels — usually a team — that mean the same thing on every board.",
+    body: `Tags are labels you put on cards, most often to say which team or crew a piece of work belongs to.
+
+**Add or remove one** by opening the card and tapping a tag. Tapping again takes it off. Changes save straight away.
+
+**Filter by tag** from the top of a board to show only the cards carrying it. Useful when a board has more on it than you care about right now.
+
+**Tags are shared across the whole organization.** There is one list, and it is the same on every board. A tag means the same thing everywhere, which is the point — a "Build" tag on the Lamplighters board and a "Build" tag on the Gate board are the same tag, so filtering is meaningful across the org.
+
+The trade-off is that tags are not yours to reshape for one board. If a tag would only ever make sense on a single board, it is usually better as part of the card's title or next action.
+
+**Deleting a tag leaves its cards alone.** They lose the label and nothing else. Nothing is archived and no work is lost, so removing a tag that turned out to be a bad idea is safe.
+
+**Org admins manage the list** under **Admin → Tags**, where they can be created, renamed, recoloured, and removed.
+
+**Colour is never the only signal.** Every tag shows its name as well, so the board still reads correctly if you cannot easily tell two colours apart, or in bright sun where colours wash out.`,
+  },
+  {
+    slug: "division-boards",
+    title: "Division boards",
+    category: "board",
+    order: 4,
+    summary: "The one place in Chemistry where something is deliberately not visible to everyone.",
+    body: `A division is a grouping above departments — Ops, for example, sitting above Lamplighters, Gate, and the rest. Divisions get their own board, for work that belongs to the division as a whole rather than to any one department under it.
+
+**Who can see one: the division's lead, and org admins. Nobody else.**
+
+That is worth stating plainly, because it is unlike everything else in Chemistry. Everywhere else, anything you can read, everyone signed in can read — every asset, every ticket, every department board is open to the whole organization, and only *changing* things is restricted. Division boards are the single exception.
+
+**Not even department leads** can see the board of the division their department belongs to. Leading Lamplighters does not give you the Ops board.
+
+**Why the exception exists.** Division-level work is often about departments rather than within them — reorganising who owns what, planning around a department that is struggling, budget decisions that aren't settled. Putting that in front of everyone would either expose half-formed decisions or, more likely, stop it being written down at all.
+
+**How to find yours.** If you lead a division, it appears on the main **Board** page under a Divisions heading, marked as restricted. If you don't lead one, you will not see the heading — there is nothing to miss.
+
+**Division boards don't absorb work orders.** Tickets belong to departments, so a division board has no automatic cards. You can still attach tickets to a card as context — see [Cards and work orders](/help/board/cards-and-work-orders).
+
+**Setting the lead** is an org admin job, under **Admin → Divisions**. A division with no lead is visible only to org admins.`,
+  },
+  {
+    slug: "board-columns-admin",
+    title: "Changing board columns",
+    category: "board",
+    order: 5,
+    summary: "Admin only. Every board ships with working defaults, so you may never need this.",
+    body: `Every board is created with columns that already work — Ideas / Backlog, Ready / Next Up, In Progress, Blocked, Done / Archived. This page exists for when those aren't the right names or the right stages for how a department actually works. Most departments never touch it.
+
+Org admins only, under **Admin → Board columns**.
+
+**Each column has two separate settings about work orders, and they answer different questions.**
+
+**Shows work orders in** — which ticket statuses appear in this column. A ticket's card is placed by its status, so this decides where it shows up.
+
+**Moving here sets** — what status a ticket gets when someone drags its card into this column. If you leave it blank, the column refuses work order cards altogether, which is right for a column like Ideas where a real ticket has no business.
+
+These differ because one is about display and the other about intent. Done can *show* Complete, Closed, and Cancelled together, while a move into Done has to pick exactly one of them.
+
+**Every status must appear in exactly one column.** If a status appeared in none, its tickets would vanish from the board. If it appeared in two, the same card would show up twice. Chemistry refuses a configuration that would do either, and tells you which status is the problem. This is the rule most likely to trip you up when adding a column: you have to take a status away from somewhere else to give it to the new one.
+
+**Deleting a column** asks where its cards should go first — nothing is discarded.
+
+**A note on editing help articles.** The articles in this guide that ship with Chemistry are rewritten from the source files each time the application starts. If you edit one of those through **Manage articles**, your changes will be replaced on the next update. Articles *you* create are never touched — only the ones that came with the app. If you need a permanent change to a shipped article, ask whoever maintains the installation to change it at the source.`,
+  },
 ];
 
 // Slugs that used to ship in this file and have since been renamed or dropped.

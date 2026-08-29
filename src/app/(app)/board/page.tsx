@@ -3,6 +3,7 @@ import { LayoutGrid, Lock, AlertTriangle, Activity, UserRound } from "lucide-rea
 import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
 import { listBoardsForUser, getRollup, type RollupCard } from "@/lib/board";
 import { visibleDivisionIds } from "@/lib/board-auth";
+import { HelpLink } from "@/components/help-link";
 
 /**
  * Board index.
@@ -21,8 +22,10 @@ export default async function BoardIndexPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Boards</h1>
-        <p className="text-sm text-neutral-500">One per department, plus divisions you lead.</p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Boards</h1>
+          <HelpLink topic="The board" article="board/what-the-board-is" />
+        </div>
       </div>
 
       {rollup.blocked.length > 0 ? (
@@ -58,7 +61,10 @@ export default async function BoardIndexPage() {
           <h2 className="text-xs font-semibold tracking-wide text-neutral-500 uppercase">
             Divisions
           </h2>
-          <ul className="grid gap-2 sm:grid-cols-2">
+          {/* A lone division in a two-column grid renders as a half-width card
+              with dead space beside it, which reads as a layout that failed
+              rather than one item. Give a single item the full width. */}
+          <ul className={divisions.length === 1 ? "grid gap-2" : "grid gap-2 sm:grid-cols-2"}>
             {divisions.map((v) => (
               <li key={v.id}>
                 <Link
@@ -163,12 +169,17 @@ function RollupRow({ card, tone }: { card: RollupCard; tone: "blocked" | "normal
             : "block rounded-lg border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50"
         }
       >
-        {/* Title gets its own line. Competing with four badges for width on a
-            390px screen truncated it to "TEST- In...", which tells the reader
-            nothing -- and the whole point of the roll-up is reading it at a
-            glance. */}
-        <span className="block text-sm leading-snug font-medium text-neutral-900">{card.title}</span>
-        <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+        {/* Title gets its own line on a phone. Competing with four badges for
+            width on a 390px screen truncated it to "TEST- In...", which tells
+            the reader nothing -- and the whole point of the roll-up is reading
+            it at a glance.
+
+            From sm up there is width to spare, so the row composes across it
+            instead: title left, badges right. Stacked at every width left a
+            near-empty band on a desktop with everything huddled at one end. */}
+        <span className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <span className="text-sm leading-snug font-medium text-neutral-900 sm:min-w-0 sm:truncate">{card.title}</span>
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:shrink-0">
           <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-[11px] font-medium text-neutral-600">
             {card.boardName}
           </span>
@@ -183,6 +194,7 @@ function RollupRow({ card, tone }: { card: RollupCard; tone: "blocked" | "normal
             <UserRound className="h-3 w-3" aria-hidden />
             {card.ownerLabel}
           </span>
+        </span>
         </span>
       </Link>
     </li>

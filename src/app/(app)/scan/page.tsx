@@ -1,5 +1,6 @@
 import { requireCurrentUser } from "@/lib/dal";
 import { QrScanner } from "./qr-scanner";
+import { HelpLink } from "@/components/help-link";
 
 export const metadata = { title: "Scan — Chemistry" };
 
@@ -9,10 +10,10 @@ export default async function ScanPage() {
   return (
     <div className="mx-auto max-w-md space-y-4">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Scan</h1>
-        <p className="text-sm text-neutral-500">
-          Scan an asset&rsquo;s QR sticker to jump straight to it.
-        </p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Scan</h1>
+          <HelpLink topic="Scanning" article="qr-codes/qr-codes-and-scanning" />
+        </div>
       </div>
       {/* QrScanner is a client component; the camera and the ~1MB wasm decoder
           are both pulled in from inside its effect, so nothing browser-only is

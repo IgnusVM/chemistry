@@ -19,7 +19,6 @@ export default async function HelpLandingPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-lg font-semibold text-neutral-900">Help &amp; Guide</h1>
-          <p className="text-sm text-neutral-500">Everything you need to know about using Chemistry.</p>
         </div>
         {user.isOrgAdmin && (
           <Link href="/help/admin" className={buttonClass("secondary")}>

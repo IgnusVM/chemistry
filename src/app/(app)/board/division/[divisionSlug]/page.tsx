@@ -7,6 +7,7 @@ import { getDivisionBoard, listTags } from "@/lib/board";
 import { canViewDivisionBoard } from "@/lib/board-auth";
 import { DENSITY_COOKIE, parseDensity } from "../../density";
 import { BoardViewGrid } from "../../board-view";
+import { HelpLink } from "@/components/help-link";
 
 export default async function DivisionBoardPage({
   params,
@@ -36,7 +37,7 @@ export default async function DivisionBoardPage({
       <div>
         <Link
           href="/board"
-          className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900"
+          className="-my-2 inline-flex items-center gap-1 py-2 text-xs text-neutral-500 hover:text-neutral-900"
         >
           <ChevronLeft className="h-3 w-3" aria-hidden />
           All boards
@@ -47,10 +48,8 @@ export default async function DivisionBoardPage({
             <Lock className="h-3 w-3" aria-hidden />
             Division &middot; leads only
           </span>
+          <HelpLink topic="Division boards" article="board/division-boards" />
         </div>
-        <p className="text-sm text-neutral-500">
-          Coordination across {board.owner.name}. Only you and org admins can see this.
-        </p>
       </div>
 
       <BoardViewGrid board={board} canWrite={board.owner.active} tags={tags} activeTagId={tag} showAllDone={done === "all"} initialDensity={density} />

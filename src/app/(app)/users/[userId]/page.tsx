@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { resolveBadge } from "@/lib/user-badge-data";
 import { UserBadge } from "@/components/user-badge";
+import { HelpLink } from "@/components/help-link";
 
 export default async function UserContactPage({
   params,
@@ -62,7 +63,10 @@ export default async function UserContactPage({
       </div>
 
       <div className="rounded-md border border-neutral-200 bg-white p-4 text-sm">
-        <h2 className="text-sm font-semibold text-neutral-900">During the burn</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="text-sm font-semibold text-neutral-900">During the burn</h2>
+          <HelpLink topic="Contact during the event" article="accounts/your-contact-profile" />
+        </div>
         {duringBurnMethods.length > 0 ? (
           <p className="mt-1 text-neutral-700">Reachable by: {duringBurnMethods.join(", ")}</p>
         ) : (

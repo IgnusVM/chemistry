@@ -57,7 +57,7 @@ export function Pagination({
               ← Prev
             </Link>
           ) : (
-            <span className="text-neutral-300">← Prev</span>
+            <span className="text-neutral-400">← Prev</span>
           )}
           <span>
             Page {page} of {totalPages}
@@ -67,7 +67,7 @@ export function Pagination({
               Next →
             </Link>
           ) : (
-            <span className="text-neutral-300">Next →</span>
+            <span className="text-neutral-400">Next →</span>
           )}
         </div>
       )}

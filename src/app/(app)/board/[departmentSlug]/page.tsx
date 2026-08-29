@@ -6,6 +6,7 @@ import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
 import { getDepartmentBoard, listTags } from "@/lib/board";
 import { DENSITY_COOKIE, parseDensity } from "../density";
 import { BoardViewGrid } from "../board-view";
+import { HelpLink } from "@/components/help-link";
 
 export default async function DepartmentBoardPage({
   params,
@@ -34,13 +35,15 @@ export default async function DepartmentBoardPage({
       <div>
         <Link
           href="/board"
-          className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900"
+          className="-my-2 inline-flex items-center gap-1 py-2 text-xs text-neutral-500 hover:text-neutral-900"
         >
           <ChevronLeft className="h-3 w-3" aria-hidden />
           All boards
         </Link>
-        <h1 className="mt-1 text-lg font-semibold text-neutral-900">{board.owner.name}</h1>
-        <p className="text-sm text-neutral-500">What&rsquo;s happening, who&rsquo;s got it, and what&rsquo;s stuck.</p>
+        <div className="mt-1 flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">{board.owner.name}</h1>
+          <HelpLink topic="The board" article="board/what-the-board-is" />
+        </div>
       </div>
 
       <BoardViewGrid board={board} canWrite={canWrite} tags={tags} activeTagId={tag} showAllDone={done === "all"} initialDensity={density} />

@@ -3,6 +3,7 @@ import { requireCurrentUser } from "@/lib/dal";
 import { LocationForm } from "./location-form";
 import { LocationTree } from "./location-tree";
 import type { Location } from "@/generated/prisma/client";
+import { HelpLink } from "@/components/help-link";
 
 type LocationWithChildren = Location & { children: LocationWithChildren[] };
 
@@ -29,10 +30,10 @@ export default async function LocationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Locations</h1>
-        <p className="text-sm text-neutral-500">
-          Storage facilities off-season, camps and placements during events.
-        </p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Locations</h1>
+          <HelpLink topic="Locations" article="locations/understanding-locations" />
+        </div>
       </div>
 
       <LocationForm locations={locations} />

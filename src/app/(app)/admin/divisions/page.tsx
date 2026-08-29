@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireOrgAdminPage } from "@/lib/dal";
 import { DivisionForm } from "./division-form";
 import { DivisionRow } from "./division-row";
+import { HelpLink } from "@/components/help-link";
 
 export default async function DivisionsAdminPage() {
   await requireOrgAdminPage();
@@ -16,42 +17,43 @@ export default async function DivisionsAdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Divisions</h1>
-        <p className="text-sm text-neutral-500">
-          Groupings above departments, e.g. Ops. Most orgs will only need a handful. A
-          division&rsquo;s lead is the only person besides org admins who can see its board.
-        </p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Divisions</h1>
+          <HelpLink topic="Divisions" article="admin-setup/departments-and-roles" />
+        </div>
       </div>
 
       <DivisionForm />
 
-      <table className="w-full overflow-hidden rounded-md border border-neutral-200 bg-white text-sm">
-        <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
-          <tr>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Slug</th>
-            <th className="px-4 py-2">Departments</th>
-            <th className="px-4 py-2">Lead</th>
-            <th className="px-4 py-2" />
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-neutral-200">
-          {divisions.map((div) => (
-            <DivisionRow
-              key={div.id}
-              division={{ id: div.id, name: div.name, slug: div.slug, description: div.description, departmentCount: div._count.departments, lead: div.lead }}
-              users={users}
-            />
-          ))}
-          {divisions.length === 0 && (
+      <div className="overflow-x-auto rounded-md border border-neutral-200 bg-white">
+        <table className="w-full text-sm">
+          <thead className="bg-neutral-100 text-left text-xs uppercase text-neutral-500">
             <tr>
-              <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
-                No divisions yet.
-              </td>
+              <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Slug</th>
+              <th className="px-4 py-2">Departments</th>
+              <th className="px-4 py-2">Lead</th>
+              <th className="px-4 py-2" />
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {divisions.map((div) => (
+              <DivisionRow
+                key={div.id}
+                division={{ id: div.id, name: div.name, slug: div.slug, description: div.description, departmentCount: div._count.departments, lead: div.lead }}
+                users={users}
+              />
+            ))}
+            {divisions.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
+                  No divisions yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

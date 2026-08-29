@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import { saveColumn, deleteColumn, reorderColumn, type ColumnFormState } from "./actions";
 import { BOARD_COLORS } from "@/lib/board-colors";
 import { Button } from "@/components/button";
-import { WO_STATUSES } from "@/lib/constants";
+import { WO_STATUSES, statusLabel } from "@/lib/constants";
 
 type Column = {
   id: string;
@@ -82,7 +82,7 @@ export function BoardColumnEditor({
                     <select name="woStatusOnMove" defaultValue={col.woStatusOnMove ?? ""} className={`mt-1 ${inputClass}`}>
                       <option value="">Refuses work order cards</option>
                       {WO_STATUSES.map((s) => (
-                        <option key={s} value={s}>{s}</option>
+                        <option key={s} value={s}>{statusLabel(s)}</option>
                       ))}
                     </select>
                   </div>
@@ -98,7 +98,7 @@ export function BoardColumnEditor({
                           value={s}
                           defaultChecked={col.woStatusesShown.includes(s)}
                         />
-                        {s}
+                        {statusLabel(s)}
                       </label>
                     ))}
                   </div>
@@ -137,7 +137,7 @@ export function BoardColumnEditor({
                 <span className="text-sm font-medium text-neutral-900">{col.name}</span>
                 <span className="text-xs text-neutral-400">{col._count.cards} cards</span>
                 <span className="text-[11px] text-neutral-500">
-                  {col.woStatusesShown.length ? col.woStatusesShown.join(", ") : "no work orders"}
+                  {col.woStatusesShown.length ? col.woStatusesShown.map(statusLabel).join(", ") : "no work orders"}
                 </span>
                 <span className="ml-auto flex items-center gap-1">
                   <button
@@ -145,7 +145,7 @@ export function BoardColumnEditor({
                     disabled={i === 0 || moving}
                     onClick={() => startMove(() => void reorderColumn(col.id, "left"))}
                     aria-label={`Move ${col.name} left`}
-                    className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 disabled:opacity-30"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 disabled:opacity-30"
                   >
                     <ChevronLeft className="h-4 w-4" aria-hidden />
                   </button>
@@ -154,14 +154,22 @@ export function BoardColumnEditor({
                     disabled={i === columns.length - 1 || moving}
                     onClick={() => startMove(() => void reorderColumn(col.id, "right"))}
                     aria-label={`Move ${col.name} right`}
-                    className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 disabled:opacity-30"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 disabled:opacity-30"
                   >
                     <ChevronRight className="h-4 w-4" aria-hidden />
                   </button>
-                  <button type="button" onClick={() => setEditing(col.id)} className="text-xs text-neutral-400 hover:text-neutral-700">
+                  <button
+                    type="button"
+                    onClick={() => setEditing(col.id)}
+                    className="inline-flex h-11 items-center rounded px-2 text-xs text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                  >
                     Edit
                   </button>
-                  <button type="button" onClick={() => setDeleting(col.id)} className="text-xs text-neutral-400 hover:text-rose-600">
+                  <button
+                    type="button"
+                    onClick={() => setDeleting(col.id)}
+                    className="inline-flex h-11 items-center rounded px-2 text-xs text-neutral-600 hover:bg-neutral-100 hover:text-rose-600"
+                  >
                     Delete
                   </button>
                 </span>

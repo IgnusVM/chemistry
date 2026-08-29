@@ -1,6 +1,7 @@
 import { requireOrgAdminPage } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { TagManager } from "./tag-manager";
+import { HelpLink } from "@/components/help-link";
 
 export default async function TagsAdminPage() {
   await requireOrgAdminPage();
@@ -12,11 +13,10 @@ export default async function TagsAdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Tags</h1>
-        <p className="text-sm text-neutral-500">
-          Labels for board cards — usually a team. Shared across every board, so a tag means the
-          same thing everywhere. Deleting one leaves its cards alone.
-        </p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Tags</h1>
+          <HelpLink topic="Tags" article="board/board-tags" />
+        </div>
       </div>
       <TagManager tags={tags} />
     </div>

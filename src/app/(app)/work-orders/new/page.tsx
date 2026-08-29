@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getAccessibleDepartmentIds } from "@/lib/dal";
 import { WorkOrderForm } from "./work-order-form";
+import { HelpLink } from "@/components/help-link";
 
 export default async function NewWorkOrderPage({
   searchParams,
@@ -20,8 +21,10 @@ export default async function NewWorkOrderPage({
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">New work order</h1>
-        <p className="text-sm text-neutral-500">Report a failure, request maintenance, or log other work.</p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">New work order</h1>
+          <HelpLink topic="Creating a work order" article="work-orders/creating-a-work-order" />
+        </div>
       </div>
       <WorkOrderForm departments={departments} prefillAsset={prefillAsset} />
     </div>

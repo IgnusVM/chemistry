@@ -3,6 +3,7 @@ import { requireCurrentUser } from "@/lib/dal";
 import { assetQrDataUrl } from "@/lib/qr";
 import { readBulkSelection } from "@/lib/bulk-selection";
 import { PrintButton } from "./print-button";
+import { HelpLink } from "@/components/help-link";
 
 export default async function QrSheetPage({
   searchParams,
@@ -48,8 +49,11 @@ export default async function QrSheetPage({
     <div className="space-y-4">
       <div className="flex items-center justify-between print:hidden">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">QR sheet</h1>
-          <p className="text-sm text-neutral-500">{cards.length} labels. Use your browser&apos;s print dialog.</p>
+          <div className="flex items-center gap-1">
+            <h1 className="text-lg font-semibold text-neutral-900">QR sheet</h1>
+            <HelpLink topic="QR codes and printing labels" article="qr-codes/qr-codes-and-scanning" />
+          </div>
+          <p className="text-sm text-neutral-500">{cards.length} labels</p>
         </div>
         <PrintButton />
       </div>

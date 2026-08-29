@@ -16,6 +16,7 @@ import { UserBadgeLabel } from "@/components/user-badge";
 import { TabbedPageProvider, TabbedPageTabs, JumpToTabButton } from "@/components/tabbed-page";
 import { AddNoteForm } from "@/components/add-note-form";
 import { LoansPanel } from "./loans/loans-panel";
+import { HelpLink } from "@/components/help-link";
 
 export default async function AssetDetailPage({
   params,
@@ -141,7 +142,10 @@ export default async function AssetDetailPage({
         }}
         className="space-y-2 rounded-md border border-neutral-200 bg-white p-4"
       >
-        <h2 className="text-sm font-semibold text-neutral-900">Move</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="text-sm font-semibold text-neutral-900">Move</h2>
+          <HelpLink topic="Locations and moving assets" article="locations/understanding-locations" />
+        </div>
         <LocationField key={asset.updatedAt.toISOString()} name="locationId" locations={locations} />
         <input
           name="notes"
@@ -159,7 +163,10 @@ export default async function AssetDetailPage({
 
   const notesContent = (
     <div id="notes-section" className="rounded-md border border-neutral-200 bg-white p-4">
-      <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
+      <div className="flex items-center gap-1">
+        <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
+        <HelpLink topic="Writing notes" article="getting-started/notes-and-rich-text" />
+      </div>
       <ul className="mt-2 divide-y divide-neutral-200">
         {asset.notes.length === 0 && <li className="py-2 text-sm text-neutral-500">No notes yet.</li>}
         {asset.notes.map((note, i) => (

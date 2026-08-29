@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireOrgAdminPage } from "@/lib/dal";
+import { HelpLink } from "@/components/help-link";
 
 export default async function AdminPage() {
   await requireOrgAdminPage();
@@ -31,8 +32,10 @@ export default async function AdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Admin</h1>
-        <p className="text-sm text-neutral-500">Reference data and org setup — edited rarely, not day-to-day.</p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Admin</h1>
+          <HelpLink topic="Admin" article="admin-setup/what-lives-under-admin" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

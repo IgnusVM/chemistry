@@ -1,6 +1,7 @@
 import { requireOrgAdminPage } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { BoardColumnEditor } from "./column-editor";
+import { HelpLink } from "@/components/help-link";
 
 export default async function BoardColumnsAdminPage() {
   await requireOrgAdminPage();
@@ -32,13 +33,10 @@ export default async function BoardColumnsAdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Board columns</h1>
-        <p className="text-sm text-neutral-500">
-          Each board ships with working defaults, so this is only here if you want to change them.
-          Every work order status has to appear in exactly one column — otherwise a work order&rsquo;s
-          card would be either invisible or in two places at once, so configurations that would do
-          that are refused.
-        </p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Board columns</h1>
+          <HelpLink topic="Board columns" article="board/board-columns-admin" />
+        </div>
       </div>
 
       {named.map((b) => (

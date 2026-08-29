@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/theme";
 import { RevokeDeviceButton } from "./revoke-device-button";
 import { clearPin } from "./actions";
 import { getAttachmentUrl } from "@/lib/s3";
+import { HelpLink } from "@/components/help-link";
 
 export default async function AccountPage() {
   const user = await requireCurrentUser();
@@ -21,7 +22,10 @@ export default async function AccountPage() {
   return (
     <div className="max-w-xl space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Account</h1>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Account</h1>
+          <HelpLink topic="Your account" article="accounts/your-contact-profile" />
+        </div>
         <p className="text-sm text-neutral-500">{user.email}</p>
       </div>
 
@@ -60,7 +64,10 @@ export default async function AccountPage() {
       )}
 
       <div className="rounded-md border border-neutral-200 bg-white p-4">
-        <h2 className="text-sm font-semibold text-neutral-900">Trusted devices</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="text-sm font-semibold text-neutral-900">Trusted devices</h2>
+          <HelpLink topic="Signing in and trusted devices" article="getting-started/signing-in" />
+        </div>
         <p className="text-xs text-neutral-500">
           Devices that completed an email sign-in and can use your PIN.
         </p>
