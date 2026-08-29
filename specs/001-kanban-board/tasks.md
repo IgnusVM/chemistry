@@ -151,11 +151,11 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 **Independent Test**: Confirm a fresh board needs no configuration, then rename, add, and reorder columns and confirm no card is lost.
 
-- [ ] T049 [US6] Implement `createColumn`, `updateColumn`, and `reorderColumns` in `src/app/(app)/admin/board-columns/actions.ts`, org-admin only, each re-validating the board invariant from T009 and refusing configurations that leave a `WorkOrderStatus` in zero or multiple columns (FR-022)
-- [ ] T050 [US6] Implement `deleteColumn` in `src/app/(app)/admin/board-columns/actions.ts` requiring `moveCardsToColumnId`, moving cards in the same transaction before deletion so `onDelete: Restrict` catches any mistake loudly (FR-008)
-- [ ] T051 [US6] Create `src/app/(app)/admin/board-columns/page.tsx` for column naming, ordering, colour, and status mapping, per board
-- [ ] T052 [P] [US6] Ensure column colours resolve as design tokens in both light and dark themes in `src/app/globals.css`, rather than raw hex values that break in one of them
-- [ ] T053 [US6] Verify per quickstart.md: a new department board works untouched, and no card is lost through renaming, reordering, adding, or deleting columns (SC-004, SC-011)
+- [X] T049 [US6] Implement `createColumn`, `updateColumn`, and `reorderColumns` in `src/app/(app)/admin/board-columns/actions.ts`, org-admin only, each re-validating the board invariant from T009 and refusing configurations that leave a `WorkOrderStatus` in zero or multiple columns (FR-022)
+- [X] T050 [US6] Implement `deleteColumn` in `src/app/(app)/admin/board-columns/actions.ts` requiring `moveCardsToColumnId`, moving cards in the same transaction before deletion so `onDelete: Restrict` catches any mistake loudly (FR-008)
+- [X] T051 [US6] Create `src/app/(app)/admin/board-columns/page.tsx` for column naming, ordering, colour, and status mapping, per board
+- [X] T052 [P] [US6] Ensure column colours resolve as design tokens in both light and dark themes in `src/app/globals.css`, rather than raw hex values that break in one of them
+- [X] T053 [US6] Verify per quickstart.md: a new department board works untouched, and no card is lost through renaming, reordering, adding, or deleting columns (SC-004, SC-011)
 
 ---
 
