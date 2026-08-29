@@ -146,8 +146,21 @@ const CARD_SELECT = {
   owner: { select: { id: true, displayName: true } },
 } as const;
 
+/**
+ * How far back a terminal work order stays on the active board.
+ *
+ * Recently finished work is the useful part -- "what did we get done this
+ * week" is a real question -- while an unbounded Done column buries the rest
+ * of the board (FR-030, research.md D7).
+ */
+export const DONE_WINDOW_DAYS = 30;
+
 /** Shared: everything after we know which board we are looking at. */
-async function loadBoard(boardId: string, owner: BoardOwner): Promise<BoardView> {
+async function loadBoard(
+  boardId: string,
+  owner: BoardOwner,
+  opts: { showAllDone?: boolean } = {},
+): Promise<BoardView> {
   const columns = await prisma.boardColumn.findMany({
     where: { boardId },
     orderBy: { position: "asc" },
@@ -165,17 +178,52 @@ async function loadBoard(boardId: string, owner: BoardOwner): Promise<BoardView>
   // silently dropping the cards whose status maps nowhere.
   assertBoardInvariant(columns);
 
-  const cards = await prisma.card.findMany({
+  const byColumn = new Map<string, BoardCard[]>();
+  const push = (columnId: string, card: BoardCard) =>
+    byColumn.set(columnId, [...(byColumn.get(columnId) ?? []), card]);
+
+  // 1. Standalone cards, placed by their stored columnId.
+  const standalone = await prisma.card.findMany({
     where: { boardId, archivedAt: null, workOrderId: null },
     orderBy: [{ position: "asc" }, { id: "asc" }],
     select: CARD_SELECT,
   });
-
-  const byColumn = new Map<string, BoardCard[]>();
-  for (const c of cards) {
+  for (const c of standalone) {
     if (!c.columnId) continue;
-    const view: BoardCard = { ...c, workOrder: null };
-    byColumn.set(c.columnId, [...(byColumn.get(c.columnId) ?? []), view]);
+    push(c.columnId, { ...c, workOrder: null });
+  }
+
+  // 2. Work-order-backed cards, placed by DERIVING the column from the work
+  //    order's status. Nothing here reads a stored columnId, which is what
+  //    makes card position and status incapable of disagreeing (D1).
+  const woCards = await prisma.card.findMany({
+    where: { boardId, workOrderId: { not: null } },
+    orderBy: [{ workOrder: { priority: "desc" } }, { workOrder: { reportedAt: "asc" } }],
+    select: {
+      ...CARD_SELECT,
+      workOrder: {
+        select: { id: true, code: true, status: true, closedAt: true, completedAt: true },
+      },
+    },
+  });
+
+  const cutoff = new Date(Date.now() - DONE_WINDOW_DAYS * 86_400_000);
+  for (const c of woCards) {
+    if (!c.workOrder) continue;
+    const column = columnForStatus(columns, c.workOrder.status);
+    // assertBoardInvariant above guarantees a column exists for every status.
+    if (!column) continue;
+
+    // Terminal work orders age out of the active view but are never deleted.
+    if (!opts.showAllDone && TERMINAL_LIKE.includes(c.workOrder.status)) {
+      const finished = c.workOrder.closedAt ?? c.workOrder.completedAt ?? c.updatedAt;
+      if (finished < cutoff) continue;
+    }
+
+    push(column.id, {
+      ...c,
+      workOrder: { id: c.workOrder.id, code: c.workOrder.code, status: c.workOrder.status },
+    });
   }
 
   return {
@@ -184,6 +232,9 @@ async function loadBoard(boardId: string, owner: BoardOwner): Promise<BoardView>
     columns: columns.map((col) => ({ ...col, cards: byColumn.get(col.id) ?? [] })),
   };
 }
+
+/** Statuses whose cards age out of the active board (D7). */
+const TERMINAL_LIKE: WorkOrderStatus[] = ["COMPLETE", "CLOSED", "CANCELLED"];
 
 /**
  * A department's board.
@@ -194,19 +245,26 @@ async function loadBoard(boardId: string, owner: BoardOwner): Promise<BoardView>
  * Returns null when the slug matches no department, so the caller can 404
  * rather than render an empty board that looks broken.
  */
-export async function getDepartmentBoard(slug: string): Promise<BoardView | null> {
+export async function getDepartmentBoard(
+  slug: string,
+  opts: { showAllDone?: boolean } = {},
+): Promise<BoardView | null> {
   const department = await prisma.department.findUnique({
     where: { slug },
     select: { id: true, name: true, slug: true, active: true, board: { select: { id: true } } },
   });
   if (!department?.board) return null;
-  return loadBoard(department.board.id, {
-    kind: "department",
-    id: department.id,
-    name: department.name,
-    slug: department.slug,
-    active: department.active,
-  });
+  return loadBoard(
+    department.board.id,
+    {
+      kind: "department",
+      id: department.id,
+      name: department.name,
+      slug: department.slug,
+      active: department.active,
+    },
+    opts,
+  );
 }
 
 /**
@@ -217,19 +275,26 @@ export async function getDepartmentBoard(slug: string): Promise<BoardView | null
  * named place the amended Principle II requires rather than being duplicated
  * here and drifting.
  */
-export async function getDivisionBoard(slug: string): Promise<BoardView | null> {
+export async function getDivisionBoard(
+  slug: string,
+  opts: { showAllDone?: boolean } = {},
+): Promise<BoardView | null> {
   const division = await prisma.division.findUnique({
     where: { slug },
     select: { id: true, name: true, slug: true, active: true, board: { select: { id: true } } },
   });
   if (!division?.board) return null;
-  return loadBoard(division.board.id, {
-    kind: "division",
-    id: division.id,
-    name: division.name,
-    slug: division.slug,
-    active: division.active,
-  });
+  return loadBoard(
+    division.board.id,
+    {
+      kind: "division",
+      id: division.id,
+      name: division.name,
+      slug: division.slug,
+      active: division.active,
+    },
+    opts,
+  );
 }
 
 /**

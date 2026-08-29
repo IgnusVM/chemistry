@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
+import Link from "next/link";
 import { X, ArrowRight, ClipboardList, AlertTriangle } from "lucide-react";
 import type { BoardCard } from "@/lib/board";
 import { moveCard } from "./actions";
@@ -85,10 +86,14 @@ export function CardSheet({
         <div className="flex items-start gap-2 border-b border-neutral-200 p-4">
           <div className="min-w-0 flex-1">
             {card.workOrder ? (
-              <span className="mb-1 inline-flex items-center gap-1 rounded border border-sky-200 bg-sky-50 px-1.5 py-0.5 text-[11px] font-medium text-sky-700">
+              <Link
+                href={`/work-orders/${card.workOrder.code}`}
+                className="mb-1 inline-flex items-center gap-1 rounded border border-sky-200 bg-sky-50 px-1.5 py-0.5 text-[11px] font-medium text-sky-700 hover:bg-sky-100"
+              >
                 <ClipboardList className="h-3 w-3" aria-hidden />
                 {card.workOrder.code}
-              </span>
+                <span className="text-sky-500">&rarr;</span>
+              </Link>
             ) : null}
             <h2 className="text-base leading-snug font-semibold text-neutral-900">{card.title}</h2>
             {card.nextAction ? (

@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireCurrentUser } from "@/lib/dal";
+import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { requireBoardAccess, requireCardAccess, BoardAccessError } from "@/lib/board-auth";
+import { unmappedColumnMessage } from "@/lib/board";
 import { createCardSchema, updateCardSchema, moveCardSchema } from "./schemas";
 
 /**
@@ -135,10 +136,14 @@ export async function updateCard(
 /**
  * Move a card between columns.
  *
- * Standalone cards only at this stage. Work-order-backed cards move by having
- * their work order's status changed instead — that path arrives with US3, and
- * until it does they are refused here rather than being written directly,
- * which would decouple the card from its work order (research.md D1).
+ * Two genuinely different operations behind one verb:
+ *
+ *   - **standalone card** — write `columnId` on the card.
+ *   - **work-order-backed card** — write the WORK ORDER's status. The card row
+ *     is never touched, because its column is derived (research.md D1). This
+ *     also means the move is authorized as a work order edit rather than a
+ *     board edit: someone who may write the board but not that work order must
+ *     not be able to change its status by dragging a card.
  */
 export async function moveCard(
   _prev: BoardActionState,
@@ -159,25 +164,57 @@ export async function moveCard(
     return toState(err);
   }
 
+  const target = await prisma.boardColumn.findUnique({
+    where: { id: parsed.data.toColumnId },
+    select: { id: true, boardId: true, name: true, woStatusOnMove: true, woStatusesShown: true, position: true },
+  });
+  // A column from another board would move the card off its own board.
+  if (!target || target.boardId !== card.boardId) return { error: "That column isn't on this board." };
+
+  // --- work-order-backed: change the work order, never the card -------------
   if (card.workOrderId) {
-    return {
-      error: "This card belongs to a work order. Change the work order's status to move it.",
-    };
+    if (!target.woStatusOnMove) {
+      // Refusing is the point. Allowing it would leave the card somewhere its
+      // work order's status does not correspond to, which is exactly the lie
+      // the derived-column design exists to prevent (FR-021).
+      return { error: unmappedColumnMessage(target) };
+    }
+
+    const wo = await prisma.workOrder.findUnique({
+      where: { id: card.workOrderId },
+      select: { id: true, code: true, status: true, departmentId: true },
+    });
+    if (!wo) return { error: "That work order no longer exists." };
+
+    // Authorized as a work order edit, not a board edit.
+    if (!(await hasDepartmentAccess(wo.departmentId, "MEMBER"))) {
+      return { error: "You don't have permission to change that work order." };
+    }
+    if (wo.status === target.woStatusOnMove) return { ok: true };
+
+    await prisma.workOrder.update({
+      where: { id: wo.id },
+      data: { status: target.woStatusOnMove },
+    });
+    await recordAudit({
+      entityType: "WorkOrder",
+      entityId: wo.id,
+      action: "status changed from board",
+      userId: user.id,
+      changes: { from: wo.status, to: target.woStatusOnMove },
+    });
+    await revalidateBoard(card.boardId);
+    revalidatePath(`/work-orders/${wo.code}`);
+    return { ok: true };
   }
 
+  // --- standalone ----------------------------------------------------------
   // Optimistic concurrency: if someone else moved this card since the client
   // last saw it, refuse and say so rather than silently discarding their move
   // (FR-032). Compared at millisecond precision on both sides.
   if (card.updatedAt.toISOString() !== parsed.data.expectedUpdatedAt) {
     return { error: "Somebody else moved this card first. Reloading will show where it is now." };
   }
-
-  const target = await prisma.boardColumn.findUnique({
-    where: { id: parsed.data.toColumnId },
-    select: { id: true, boardId: true },
-  });
-  // A column from another board would move the card off its own board.
-  if (!target || target.boardId !== card.boardId) return { error: "That column isn't on this board." };
 
   const top = await prisma.card.aggregate({
     where: { columnId: target.id, archivedAt: null },

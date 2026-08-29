@@ -99,13 +99,13 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 **Independent Test**: Run the full sync table in quickstart.md, in both directions, including the refusal path.
 
-- [ ] T030 [US3] Modify `createWorkOrder` in `src/app/(app)/work-orders/actions.ts` to create a `Card` with `workOrderId` set and `columnId` NULL **inside the existing transaction**, so a work order is never created without its card
-- [ ] T031 [US3] Add a backfill to `prisma/seed.ts` creating cards for pre-existing work orders that lack one, idempotently, and confirm the card count equals the work order count
-- [ ] T032 [US3] Extend `getBoardView` in `src/lib/board.ts` to merge derived work-order cards — placed by `woStatusesShown`, ordered `(priority desc, reportedAt asc)`, never reading a stored `columnId` (D1)
-- [ ] T033 [US3] Extend `moveCard` in `src/app/(app)/board/actions.ts` with the work-order path: set `workOrder.status` from the target column's `woStatusOnMove` under **work order authorization**, and **refuse with an explanation** when the target column has no mapping (FR-020, FR-021)
-- [ ] T034 [P] [US3] Mark work-order-backed cards visibly and link them to the work order in `src/app/(app)/board/card.tsx` (FR-018)
-- [ ] T035 [US3] Apply the Done-column rolling window in `src/lib/board.ts` with a show-everything toggle in `src/app/(app)/board/[departmentSlug]/board-view.tsx` (FR-030, D7)
-- [ ] T036 [US3] **Execute the full sync table** from quickstart.md in both directions, including the unmapped-column refusal and confirming no stored `columnId` has crept onto a work-order-backed card — the test that would catch D1 being quietly undone
+- [X] T030 [US3] Modify `createWorkOrder` in `src/app/(app)/work-orders/actions.ts` to create a `Card` with `workOrderId` set and `columnId` NULL **inside the existing transaction**, so a work order is never created without its card
+- [X] T031 [US3] Add a backfill to `prisma/seed.ts` creating cards for pre-existing work orders that lack one, idempotently, and confirm the card count equals the work order count
+- [X] T032 [US3] Extend `getBoardView` in `src/lib/board.ts` to merge derived work-order cards — placed by `woStatusesShown`, ordered `(priority desc, reportedAt asc)`, never reading a stored `columnId` (D1)
+- [X] T033 [US3] Extend `moveCard` in `src/app/(app)/board/actions.ts` with the work-order path: set `workOrder.status` from the target column's `woStatusOnMove` under **work order authorization**, and **refuse with an explanation** when the target column has no mapping (FR-020, FR-021)
+- [X] T034 [P] [US3] Mark work-order-backed cards visibly and link them to the work order in `src/app/(app)/board/card.tsx` (FR-018)
+- [X] T035 [US3] Apply the Done-column rolling window in `src/lib/board.ts` with a show-everything toggle in `src/app/(app)/board/[departmentSlug]/board-view.tsx` (FR-030, D7)
+- [X] T036 [US3] **Execute the full sync table** from quickstart.md in both directions, including the unmapped-column refusal and confirming no stored `columnId` has crept onto a work-order-backed card — the test that would catch D1 being quietly undone
 
 **Checkpoint**: Maintenance work is on the board at zero extra effort, and the stated design risk is closed by construction and confirmed by execution.
 

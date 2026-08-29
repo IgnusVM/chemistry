@@ -203,8 +203,27 @@ async function main() {
     }
   }
 
+  // Backfill: any work order without a card gets one. Idempotent, and it also
+  // covers work orders created while a board briefly did not exist.
+  const orphanWorkOrders = await prisma.workOrder.findMany({
+    where: { card: { is: null } },
+    select: { id: true, description: true, departmentId: true },
+  });
+  let backfilled = 0;
+  for (const wo of orphanWorkOrders) {
+    const board = await prisma.board.findUnique({
+      where: { departmentId: wo.departmentId },
+      select: { id: true },
+    });
+    if (!board) continue;
+    await prisma.card.create({
+      data: { boardId: board.id, workOrderId: wo.id, title: wo.description.slice(0, 120) },
+    });
+    backfilled++;
+  }
+
   console.log(
-    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, ${admin ? `org admin ${admin.email}, ` : "no org admin, "}Lamplighter asset type, ${storage.name}, and ${RESOLUTION_CODES.length} resolution codes. Task boards: ${allDepartments.length} department + ${allDivisions.length} division.`,
+    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, ${admin ? `org admin ${admin.email}, ` : "no org admin, "}Lamplighter asset type, ${storage.name}, and ${RESOLUTION_CODES.length} resolution codes. Task boards: ${allDepartments.length} department + ${allDivisions.length} division, ${backfilled} work order card(s) backfilled.`,
   );
 }
 

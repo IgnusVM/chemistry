@@ -75,6 +75,31 @@ export async function createWorkOrder(
   }
   if (!workOrder) return { error: "Could not generate a work order number. Try again." };
 
+  // Put it on the department's board. The card carries no columnId -- a
+  // work-order-backed card derives its column from the work order's status at
+  // read time, so there is no second piece of state to keep in step
+  // (specs/001-kanban-board/research.md D1).
+  //
+  // Not fatal if it fails: a work order without a board card is a lesser
+  // problem than a work order that could not be filed, and the backfill in
+  // prisma/seed.ts picks up any that slipped through on the next deploy.
+  const board = await prisma.board.findUnique({
+    where: { departmentId: parsed.data.departmentId },
+    select: { id: true },
+  });
+  if (board) {
+    await prisma.card
+      .create({
+        data: {
+          boardId: board.id,
+          workOrderId: workOrder.id,
+          title: parsed.data.description.slice(0, 120),
+          createdByUserId: user.id,
+        },
+      })
+      .catch(() => undefined);
+  }
+
   await recordAudit({
     entityType: "WorkOrder",
     entityId: workOrder.id,
