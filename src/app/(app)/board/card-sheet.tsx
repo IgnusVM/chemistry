@@ -2,9 +2,9 @@
 
 import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
-import { X, ArrowRight, ClipboardList, AlertTriangle } from "lucide-react";
+import { X, ArrowRight, ClipboardList, AlertTriangle, Link as LinkIcon, Plus } from "lucide-react";
 import type { BoardCard, CardTagView } from "@/lib/board";
-import { moveCard, setCardTags } from "./actions";
+import { moveCard, setCardTags, attachWorkOrder, detachWorkOrder } from "./actions";
 import { TagChip } from "./tag-chip";
 
 type ColumnChoice = { id: string; name: string; acceptsWorkOrderCards: boolean };
@@ -41,6 +41,7 @@ export function CardSheet({
 }) {
   const [pendingColumnId, setPendingColumnId] = useState<string | null>(null);
   const [tagIds, setTagIds] = useState<string[]>(card.tags.map((t) => t.id));
+  const [attachCode, setAttachCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -141,6 +142,63 @@ export function CardSheet({
           <p className="border-b border-neutral-200 px-4 py-3 text-sm whitespace-pre-wrap text-neutral-700">
             {card.statusNotes}
           </p>
+        ) : null}
+
+        {canWrite ? (
+          <div className="border-b border-neutral-200 p-3">
+            <p className="pb-2 text-xs font-medium text-neutral-500">Related work orders</p>
+            {card.refs.length > 0 ? (
+              <ul className="mb-2 space-y-1">
+                {card.refs.map((r) => (
+                  <li key={r.id} className="flex items-center gap-2">
+                    <LinkIcon className="h-3 w-3 shrink-0 text-neutral-400" aria-hidden />
+                    <span className="text-xs text-neutral-700">{r.code}</span>
+                    <span className="text-[11px] text-neutral-400">{r.status}</span>
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() =>
+                        startTransition(async () => {
+                          const res = await detachWorkOrder(card.id, r.id);
+                          if (res?.error) setError(res.error);
+                        })
+                      }
+                      className="ml-auto rounded px-1.5 py-0.5 text-[11px] text-neutral-400 hover:bg-neutral-100 hover:text-rose-600 disabled:opacity-50"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <div className="flex items-center gap-1.5">
+              <input
+                value={attachCode}
+                onChange={(e) => setAttachCode(e.target.value)}
+                placeholder="Work order number"
+                aria-label="Work order number to attach"
+                className="min-w-0 flex-1 rounded-md border border-neutral-200 px-2 py-1.5 text-xs placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={isPending || !attachCode.trim()}
+                aria-label="Attach work order"
+                onClick={() =>
+                  startTransition(async () => {
+                    const fd = new FormData();
+                    fd.set("cardId", card.id);
+                    fd.set("code", attachCode);
+                    const res = await attachWorkOrder(undefined, fd);
+                    if (res?.error) setError(res.error);
+                    else setAttachCode("");
+                  })
+                }
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-neutral-200 text-neutral-600 hover:bg-neutral-100 disabled:opacity-40"
+              >
+                <Plus className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+          </div>
         ) : null}
 
         {canWrite && allTags.length > 0 ? (

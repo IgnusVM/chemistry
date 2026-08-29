@@ -1,4 +1,4 @@
-import { ClipboardList, UserRound, CalendarClock, ArrowRight } from "lucide-react";
+import { ClipboardList, UserRound, CalendarClock, ArrowRight, Link as LinkIcon } from "lucide-react";
 import type { BoardCard } from "@/lib/board";
 import { TagChip } from "./tag-chip";
 
@@ -39,6 +39,23 @@ export function BoardCardView({ card }: { card: BoardCard }) {
       ) : null}
 
       <h3 className="text-sm leading-snug font-medium text-neutral-900">{card.title}</h3>
+
+      {card.refs.length > 0 ? (
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {card.refs.map((r) => (
+            <span
+              key={r.id}
+              // Outlined, not filled: an attached ticket is a REFERENCE. The
+              // filled badge above means the card *is* that work order, and
+              // conflating the two would misrepresent what moving the card does.
+              className="inline-flex items-center gap-1 rounded border border-dashed border-neutral-300 px-1.5 py-0.5 text-[11px] text-neutral-600"
+            >
+              <LinkIcon className="h-3 w-3" aria-hidden />
+              {r.code}
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       {card.tags.length > 0 ? (
         <div className="mt-1.5 flex flex-wrap gap-1">

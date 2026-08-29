@@ -173,10 +173,10 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 ### Still to do — manual ticket attachment (FR-005g)
 
-- [ ] T067 Add a `CardWorkOrderRef` join in `prisma/schema.prisma` so a card can reference work orders as context, distinct from `Card.workOrderId` which means the card *is* that work order
-- [ ] T068 Add `attachWorkOrder` and `detachWorkOrder` to `src/app/(app)/board/actions.ts`, guarded by `requireCardAccess`
-- [ ] T069 Show attached tickets on the card in `src/app/(app)/board/card.tsx`, visually distinct from a work-order-backed card so the two relationships are not confused
-- [ ] T070 Verify a division board never auto-creates a work order card, and that an attached ticket does not move when the work order's status changes — it is a reference, not a backing
+- [X] T067 Add a `CardWorkOrderRef` join in `prisma/schema.prisma` so a card can reference work orders as context, distinct from `Card.workOrderId` which means the card *is* that work order
+- [X] T068 Add `attachWorkOrder` and `detachWorkOrder` to `src/app/(app)/board/actions.ts`, guarded by `requireCardAccess`
+- [X] T069 Show attached tickets on the card in `src/app/(app)/board/card.tsx`, visually distinct from a work-order-backed card so the two relationships are not confused
+- [X] T070 Verify a division board never auto-creates a work order card, and that an attached ticket does not move when the work order's status changes — it is a reference, not a backing
 
 ---
 

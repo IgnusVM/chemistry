@@ -308,3 +308,64 @@ export async function setCardTags(
   await revalidateBoard(card.boardId);
   return { ok: true };
 }
+
+/**
+ * Attach a work order to a card as context.
+ *
+ * NOT the same relationship as a work-order-backed card. This card stays its
+ * own thing: it keeps its column, moves freely, and detaching leaves it
+ * untouched. Division boards rely on this exclusively, since they auto-create
+ * nothing (FR-005g).
+ *
+ * The work order may belong to any department — the point is to point at a
+ * ticket from a coordination card, and restricting that to your own department
+ * would defeat it on a division board.
+ */
+export async function attachWorkOrder(
+  _prev: BoardActionState,
+  formData: FormData,
+): Promise<BoardActionState> {
+  const user = await requireCurrentUser();
+  const cardId = String(formData.get("cardId") ?? "");
+  const code = String(formData.get("code") ?? "").trim();
+  if (!cardId || !code) return { error: "Enter a work order number." };
+
+  let card;
+  try {
+    card = await requireCardAccess(cardId);
+  } catch (err) {
+    return toState(err);
+  }
+
+  const wo = await prisma.workOrder.findUnique({ where: { code }, select: { id: true } });
+  if (!wo) return { error: `No work order with code "${code}".` };
+
+  await prisma.cardWorkOrderRef.upsert({
+    where: { cardId_workOrderId: { cardId, workOrderId: wo.id } },
+    update: {},
+    create: { cardId, workOrderId: wo.id },
+  });
+  await recordAudit({
+    entityType: "Card",
+    entityId: cardId,
+    action: "work order attached",
+    userId: user.id,
+    changes: { code },
+  });
+  await revalidateBoard(card.boardId);
+  return { ok: true };
+}
+
+export async function detachWorkOrder(cardId: string, workOrderId: string): Promise<BoardActionState> {
+  const user = await requireCurrentUser();
+  let card;
+  try {
+    card = await requireCardAccess(cardId);
+  } catch (err) {
+    return toState(err);
+  }
+  await prisma.cardWorkOrderRef.deleteMany({ where: { cardId, workOrderId } });
+  await recordAudit({ entityType: "Card", entityId: cardId, action: "work order detached", userId: user.id });
+  await revalidateBoard(card.boardId);
+  return { ok: true };
+}

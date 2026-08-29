@@ -105,10 +105,14 @@ export function unmappedColumnMessage(column: ColumnMapping): string {
 
 export type CardTagView = { id: string; name: string; color: string | null };
 
+export type WorkOrderRef = { id: string; code: string; status: WorkOrderStatus };
+
 export type BoardCard = {
   id: string;
   title: string;
   tags: CardTagView[];
+  /** Tickets a user attached as context. Distinct from `workOrder` below. */
+  refs: WorkOrderRef[];
   nextAction: string | null;
   dueDate: Date | null;
   statusNotes: string | null;
@@ -148,11 +152,16 @@ const CARD_SELECT = {
   updatedAt: true,
   owner: { select: { id: true, displayName: true } },
   tags: { select: { tag: { select: { id: true, name: true, color: true } } } },
+  refs: { select: { workOrder: { select: { id: true, code: true, status: true } } } },
 } as const;
 
 /** Flatten the join rows the board actually renders. */
-type WithTagRows = { tags: { tag: CardTagView }[] };
-const flattenTags = <T extends WithTagRows>(c: T) => ({ ...c, tags: c.tags.map((t) => t.tag) });
+type WithJoinRows = { tags: { tag: CardTagView }[]; refs: { workOrder: WorkOrderRef }[] };
+const flattenTags = <T extends WithJoinRows>(c: T) => ({
+  ...c,
+  tags: c.tags.map((t) => t.tag),
+  refs: c.refs.map((r) => r.workOrder),
+});
 
 /**
  * How far back a terminal work order stays on the active board.

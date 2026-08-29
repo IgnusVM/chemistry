@@ -486,6 +486,7 @@ model WorkOrder {
   attachments    WorkOrderAttachment[]
   partsUsed      WorkOrderPart[]
   card           Card?
+  referencedBy   CardWorkOrderRef[]
   codeFileVersions AssetCodeFileVersion[]
 
   @@index([departmentId])
@@ -703,6 +704,7 @@ model Card {
   createdBy User?        @relation("CardCreatedBy", fields: [createdByUserId], references: [id])
   workOrder WorkOrder?   @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
   tags      CardTag[]
+  refs      CardWorkOrderRef[]
 
   @@index([boardId, columnId, position])
   @@index([ownerUserId])
@@ -727,4 +729,28 @@ model CardTag {
 
   @@id([cardId, tagId])
   @@index([tagId])
+}
+
+// A card REFERENCING a work order, as context. Deliberately separate from
+// Card.workOrderId, which means the card IS that work order.
+//
+//   Card.workOrderId  -> the card is the work order's representation. Auto
+//                        created, column derived from status, cannot be moved
+//                        to an unmapped column, dies with the work order.
+//   CardWorkOrderRef  -> the card is its own thing and merely points at one or
+//                        more tickets. Stays standalone, moves freely, and
+//                        losing the reference does not touch the card.
+//
+// Division boards use this exclusively: they auto-create nothing, so a ticket
+// appears there only when someone attaches it deliberately.
+model CardWorkOrderRef {
+  cardId      String
+  workOrderId String
+  createdAt   DateTime @default(now())
+
+  card      Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, workOrderId])
+  @@index([workOrderId])
 }
