@@ -81,7 +81,11 @@ export function BoardViewGrid({
         {board.columns.map((col) => (
           <section
             key={col.id}
-            className="flex min-h-[60vh] w-[78vw] shrink-0 snap-start flex-col rounded-xl border border-neutral-200 bg-neutral-50 sm:min-h-[28rem] sm:w-72"
+            // Phone: fixed width so the next column peeks in and a thumb knows
+            // to swipe. Desktop: share the row equally, so a five-column board
+            // fits on screen with no horizontal scrolling at all. min-w keeps
+            // a board with many columns from squeezing cards unreadable.
+            className="flex min-h-[60vh] w-[78vw] shrink-0 snap-start flex-col rounded-xl border border-neutral-200 bg-neutral-50 sm:min-h-[28rem] sm:w-72 lg:w-auto lg:min-w-[15rem] lg:flex-1 lg:shrink"
             aria-label={col.name}
           >
             <header className="sticky top-0 z-10 flex items-center gap-2 rounded-t-xl border-b border-neutral-200 bg-neutral-50 px-3 py-2">

@@ -13,7 +13,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen flex-col bg-neutral-50">
       <header className="border-b border-neutral-200 bg-white print:hidden">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 xl:max-w-[84rem] 2xl:max-w-[120rem]">
           {/* Full nav is desktop-only; phones get the bottom tab bar instead. */}
           <nav className="hidden items-center gap-5 text-sm font-medium text-neutral-700 sm:flex">
             <Link href="/" className="text-neutral-900 font-semibold">
@@ -64,7 +64,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </header>
 
       {/* Bottom padding on phones keeps the last row clear of the fixed tab bar. */}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-24 sm:pb-6 print:max-w-none print:px-0 print:py-0">
+      {/* Grows on large displays rather than stranding half a 4K monitor.
+          Unchanged below xl, so laptops and phones see exactly what they did.
+          Capped at 100rem because content that spans a whole ultrawide is
+          harder to read, not easier -- the eye loses the line. */}
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-24 sm:pb-6 xl:max-w-[84rem] 2xl:max-w-[120rem] print:max-w-none print:px-0 print:py-0">
         {children}
       </main>
 
