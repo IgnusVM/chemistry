@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { AssetTypeForm } from "./asset-type-form";
 import type { CustomFieldDef } from "@/lib/custom-fields";
 
 export default async function AssetTypesAdminPage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
   const [assetTypes, departments] = await Promise.all([
     prisma.assetType.findMany({
       orderBy: { name: "asc" },

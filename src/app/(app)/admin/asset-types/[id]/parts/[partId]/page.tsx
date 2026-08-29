@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { AddPartOrderForm } from "./add-part-order-form";
 import { AddPartLinkForm } from "./add-part-link-form";
 import { PartLinkRow } from "./part-link-row";
@@ -15,7 +15,7 @@ export default async function PartDetailPage({
 }: {
   params: Promise<{ id: string; partId: string }>;
 }) {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
   const { id, partId } = await params;
 
   const part = await prisma.part.findUnique({

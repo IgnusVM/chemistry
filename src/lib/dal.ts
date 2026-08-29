@@ -1,6 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { decryptSession, getSessionCookie } from "@/lib/session";
 
@@ -63,9 +63,36 @@ export async function requireDepartmentAccess(
   if (!allowed) throw new Error("Not authorized for this department");
 }
 
+/**
+ * For SERVER ACTIONS. Throws, which the action machinery surfaces as a failed
+ * action rather than a rendered page.
+ */
 export async function requireOrgAdmin() {
   const user = await requireCurrentUser();
   if (!user.isOrgAdmin) throw new Error("Org admin required");
+  return user;
+}
+
+/**
+ * For PAGE components. Renders the normal not-found page instead of a 500.
+ *
+ * Two reasons this is not the same function as `requireOrgAdmin`:
+ *
+ *   - A thrown Error in a page renders as a server error, so a non-admin who
+ *     types an admin URL is told something went wrong rather than that the
+ *     page is not theirs. Worse, it fills production logs with 500s that are
+ *     not failures, which is how real failures get missed.
+ *   - `notFound()` works by throwing a framework control-flow signal. In a
+ *     server action that is the wrong shape entirely, so actions keep the
+ *     throwing variant above.
+ *
+ * 404 rather than 403 is deliberate and matches the division-board precedent:
+ * a refusal confirms the page exists, which is itself information. The admin
+ * nav is hidden from non-admins anyway, so anyone reaching here typed the URL.
+ */
+export async function requireOrgAdminPage() {
+  const user = await requireCurrentUser();
+  if (!user.isOrgAdmin) notFound();
   return user;
 }
 

@@ -1,9 +1,9 @@
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { BoardColumnEditor } from "./column-editor";
 
 export default async function BoardColumnsAdminPage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
 
   const boards = await prisma.board.findMany({
     select: {

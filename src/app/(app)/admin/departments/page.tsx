@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { DepartmentForm } from "./department-form";
 import { DepartmentRow } from "./department-row";
 
 export default async function DepartmentsAdminPage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
   const [departments, divisions] = await Promise.all([
     prisma.department.findMany({
       orderBy: { name: "asc" },

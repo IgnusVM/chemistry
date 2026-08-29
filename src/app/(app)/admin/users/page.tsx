@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { UserForm } from "./user-form";
 import { UserCard } from "./user-card";
 import { InviteGenerator } from "./invite-generator";
@@ -7,7 +7,7 @@ import { RevokeInviteButton } from "./revoke-invite-button";
 import { resolveBadges } from "@/lib/user-badge-data";
 
 export default async function UsersAdminPage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
   const [users, departments, invites] = await Promise.all([
     prisma.user.findMany({
       orderBy: { displayName: "asc" },

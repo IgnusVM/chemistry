@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { categoryLabel } from "@/lib/help";
 import { buttonClass } from "@/components/button";
 
 export default async function HelpAdminPage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
 
   const articles = await prisma.helpArticle.findMany({
     orderBy: [{ category: "asc" }, { order: "asc" }, { title: "asc" }],

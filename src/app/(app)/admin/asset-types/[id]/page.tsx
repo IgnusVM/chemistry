@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { getAttachmentUrl } from "@/lib/s3";
 import type { CustomFieldDef } from "@/lib/custom-fields";
 import { EditAssetTypeForm } from "./edit-asset-type-form";
@@ -16,7 +16,7 @@ import { CodeFileVersionHistory } from "@/components/code/code-file-version-hist
 import { DeleteCodeFileButton } from "@/components/code/delete-code-file-button";
 
 export default async function AssetTypeDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
   const { id } = await params;
 
   const assetType = await prisma.assetType.findUnique({

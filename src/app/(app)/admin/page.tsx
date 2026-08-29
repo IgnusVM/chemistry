@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 
 export default async function AdminPage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
 
   const [divisionCount, departmentCount, userCount, assetTypeCount, resolutionCodeCount, locationCount, tagCount, boardCount] =
     await Promise.all([

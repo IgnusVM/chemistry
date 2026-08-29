@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { ResolutionCodeForm } from "./resolution-code-form";
 import { ResolutionCodeRow } from "./resolution-code-row";
 
 export default async function ResolutionCodesAdminPage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
   const resolutionCodes = await prisma.resolutionCode.findMany({ orderBy: { code: "asc" } });
 
   return (

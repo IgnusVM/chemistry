@@ -1,9 +1,9 @@
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { TagManager } from "./tag-manager";
 
 export default async function TagsAdminPage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
   const tags = await prisma.tag.findMany({
     orderBy: { name: "asc" },
     select: { id: true, name: true, color: true, _count: { select: { cards: true } } },
