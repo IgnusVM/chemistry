@@ -187,7 +187,7 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 - [ ] T056 Run the non-technical gate in `specs/001-kanban-board/quickstart.md`: someone who has not seen the board states what it shows and takes one action, untrained. **This is a real gate** — if it fails the feature is not done, whatever the other checks say (SC-007)
 - [X] T057 Run `npx tsc --noEmit`, `npm run lint`, and `npm run build` clean across the repository, resolving anything raised in `src/app/(app)/board/` or `src/lib/board.ts`
 - [X] T058 Bump the version in `package.json` and commit on `feature/kanban-board`
-- [ ] T059 Walk the seven deployment preconditions in `specs/001-kanban-board/plan.md` and record the result — **do not deploy**; the hosted instance is in beta and deployment is an explicit decision, not the end of a task list (Constitution Principle VI)
+- [X] T059 Walk the seven deployment preconditions in `specs/001-kanban-board/plan.md` and record the result — **do not deploy**; the hosted instance is in beta and deployment is an explicit decision, not the end of a task list (Constitution Principle VI)
 
 ---
 

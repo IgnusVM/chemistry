@@ -173,6 +173,24 @@ Per Constitution Principle VI this stays branch-local. Before it could reach the
 6. **Rollback is understood**: the feature adds tables and nullable columns, so reverting the deploy leaves data intact and orphaned rather than corrupt. The one-way door is the seed creating boards — harmless if the feature is withdrawn.
 7. **Someone who has not seen it can use it** (SC-007). This is a real gate, not a nicety: the users are volunteers who did not choose this software.
 
+### Precondition results (T059, recorded 2026-08-29)
+
+Walked, not assumed. **Not deployed** — that remains an explicit decision.
+
+| # | Precondition | Result |
+|---|---|---|
+| 1 | Migration verified additive | ✅ All three migrations checked: no `DROP TABLE`, `DROP COLUMN`, `TRUNCATE`, `DELETE`, or `UPDATE` against existing rows. The one `ALTER COLUMN` relaxes a NOT NULL, which loses nothing. |
+| 2 | Seed backfill idempotent | ✅ Run four times against a populated database. Stable at 5 department + 1 division boards, 30 columns, 0 duplicates. |
+| 3 | Existing work orders backfilled | ✅ 1 work order, 1 backing card. Later runs backfill 0, as they should. |
+| 4 | Authorization boundary executed | ✅ Eight checks with a forged board id as a single-department member: other department refused, division board refused, cross-board column move refused, own board allowed, reads org-wide. |
+| 5 | Sync semantics exercised both ways | ✅ Six statuses land in the right column when changed elsewhere; moving a card changed the work order to `IN_PROGRESS`; unmapped column refused; stored `columnId` stays NULL throughout. |
+| 6 | Rollback understood | ✅ Three additive migrations and one relaxed constraint. Reverting the deploy leaves data intact and orphaned, never corrupt. The only one-way door is the seed creating boards, which is harmless if the feature is withdrawn. |
+| 7 | Untrained user can use it | ⏳ **Outstanding.** Cannot be self-certified — it needs a person who has not seen the board. This is a real gate, not a formality (SC-007). |
+
+**Verdict: six of seven met; the seventh is the one that requires a human.** Deployment is blocked on it, and on the explicit decision Principle VI requires.
+
+Also worth deciding before deploying: the local database carries `TEST-` fixture cards and two demo tags (Lamplighters, Gate). Those are local-only and will not travel, but production will start with empty boards and no tags, so somebody should create the real team tags.
+
 ## Complexity Tracking
 
 No constitution violations requiring justification beyond the `Division.leadUserId` note in the Constitution Check, which is additive and reversible.
