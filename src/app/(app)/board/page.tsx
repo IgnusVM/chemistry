@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { LayoutGrid, Lock } from "lucide-react";
+import { LayoutGrid, Lock, AlertTriangle, Activity, UserRound } from "lucide-react";
 import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
-import { listBoardsForUser } from "@/lib/board";
+import { listBoardsForUser, getRollup, type RollupCard } from "@/lib/board";
 import { visibleDivisionIds } from "@/lib/board-auth";
 
 /**
@@ -16,6 +16,7 @@ export default async function BoardIndexPage() {
   const accessible = await getAccessibleDepartmentIds("VIEWER");
   const visibleDivisions = await visibleDivisionIds();
   const { divisions, mine, others } = await listBoardsForUser(accessible, visibleDivisions);
+  const rollup = await getRollup(accessible, visibleDivisions);
 
   return (
     <div className="space-y-6">
@@ -23,6 +24,34 @@ export default async function BoardIndexPage() {
         <h1 className="text-lg font-semibold text-neutral-900">Boards</h1>
         <p className="text-sm text-neutral-500">One per department, plus divisions you lead.</p>
       </div>
+
+      {rollup.blocked.length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-rose-700 uppercase">
+            <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+            Stuck ({rollup.blocked.length})
+          </h2>
+          <ul className="space-y-1.5">
+            {rollup.blocked.map((c) => (
+              <RollupRow key={c.id} card={c} tone="blocked" />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {rollup.inFlight.length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-neutral-500 uppercase">
+            <Activity className="h-3.5 w-3.5" aria-hidden />
+            In flight ({rollup.inFlight.length})
+          </h2>
+          <ul className="space-y-1.5">
+            {rollup.inFlight.map((c) => (
+              <RollupRow key={c.id} card={c} tone="normal" />
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {divisions.length > 0 ? (
         <section className="space-y-2">
@@ -110,6 +139,50 @@ function BoardLink({
           {department.division ? (
             <span className="block truncate text-xs text-neutral-500">{department.division.name}</span>
           ) : null}
+        </span>
+      </Link>
+    </li>
+  );
+}
+
+/**
+ * One roll-up row.
+ *
+ * Every row names its board (FR-005, US5 scenario 3) — an aggregated card with
+ * no source is not actionable, because knowing something is stuck is useless
+ * without knowing whose it is.
+ */
+function RollupRow({ card, tone }: { card: RollupCard; tone: "blocked" | "normal" }) {
+  return (
+    <li>
+      <Link
+        href={card.boardHref}
+        className={
+          tone === "blocked"
+            ? "block rounded-lg border border-rose-200 bg-rose-50/60 p-2.5 hover:bg-rose-50"
+            : "block rounded-lg border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50"
+        }
+      >
+        {/* Title gets its own line. Competing with four badges for width on a
+            390px screen truncated it to "TEST- In...", which tells the reader
+            nothing -- and the whole point of the roll-up is reading it at a
+            glance. */}
+        <span className="block text-sm leading-snug font-medium text-neutral-900">{card.title}</span>
+        <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-[11px] font-medium text-neutral-600">
+            {card.boardName}
+          </span>
+          <span className="text-[11px] text-neutral-500">{card.columnName}</span>
+          <span
+            className={
+              card.owner
+                ? "inline-flex items-center gap-1 text-[11px] text-neutral-500"
+                : "inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700"
+            }
+          >
+            <UserRound className="h-3 w-3" aria-hidden />
+            {card.ownerLabel}
+          </span>
         </span>
       </Link>
     </li>

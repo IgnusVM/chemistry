@@ -136,10 +136,10 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 - [X] T043 [US5] Extend `updateDivision` in `src/app/(app)/admin/divisions/actions.ts` to accept and set `leadUserId`, org-admin only (FR-005c)
 - [X] T044 [US5] Add a division-lead picker to `src/app/(app)/admin/divisions/division-form.tsx` — **without this the column cannot be populated and the roll-up branch is dead code**, which is why it is in this feature rather than deferred
-- [ ] T045 [US5] Implement `getRollupView()` in `src/lib/board.ts` as the union of `getAccessibleDepartmentIds()` and the departments of divisions where `leadUserId` is the current user (D6, FR-005b)
-- [ ] T046 [US5] Create `src/app/(app)/board/page.tsx` rendering the roll-up, and make it the destination of the nav entry added in T016
-- [ ] T047 [US5] Make each card's source department identifiable in the roll-up in `src/app/(app)/board/page.tsx` — an aggregated card with no source is not actionable (FR-005, US5 scenario 3)
-- [ ] T048 [US5] Verify the entitlement matrix per quickstart.md, including that a member of one department sees exactly one board and is not led to believe others are hidden by error
+- [X] T045 [US5] Implement `getRollupView()` in `src/lib/board.ts` as the union of `getAccessibleDepartmentIds()` and the departments of divisions where `leadUserId` is the current user (D6, FR-005b)
+- [X] T046 [US5] Create `src/app/(app)/board/page.tsx` rendering the roll-up, and make it the destination of the nav entry added in T016
+- [X] T047 [US5] Make each card's source department identifiable in the roll-up in `src/app/(app)/board/page.tsx` — an aggregated card with no source is not actionable (FR-005, US5 scenario 3)
+- [X] T048 [US5] Verify the entitlement matrix per quickstart.md, including that a member of one department sees exactly one board and is not led to believe others are hidden by error
 
 **Checkpoint**: Jaysen can be set as Ops lead and see every Ops department's board.
 

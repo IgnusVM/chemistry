@@ -351,3 +351,81 @@ export async function listBoardsForUser(
 export async function listTags(): Promise<CardTagView[]> {
   return prisma.tag.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, color: true } });
 }
+
+/**
+ * The roll-up: in-flight cards across every board this user is entitled to see.
+ *
+ * Entitlement is not decided here. Department ids come from
+ * `getAccessibleDepartmentIds` and division ids from `visibleDivisionIds`,
+ * both resolved by the caller, so the restricted-read rule stays in the one
+ * named place the amended Principle II requires.
+ *
+ * Deliberately excludes the first and last columns — Ideas and Done. The
+ * question this view answers is "what is actually moving", and a roll-up that
+ * includes every backlog item across six departments answers nothing.
+ */
+export type RollupCard = BoardCard & {
+  columnName: string;
+  ownerLabel: string;
+  boardName: string;
+  boardHref: string;
+};
+
+export async function getRollup(
+  departmentIds: string[],
+  divisionIds: string[],
+): Promise<{ blocked: RollupCard[]; inFlight: RollupCard[]; boardCount: number }> {
+  const boards = await prisma.board.findMany({
+    where: {
+      OR: [{ departmentId: { in: departmentIds } }, { divisionId: { in: divisionIds } }],
+    },
+    select: {
+      id: true,
+      department: { select: { name: true, slug: true } },
+      division: { select: { name: true, slug: true } },
+      columns: {
+        orderBy: { position: "asc" },
+        select: { id: true, name: true, position: true, woStatusOnMove: true, woStatusesShown: true, color: true },
+      },
+    },
+  });
+
+  const blocked: RollupCard[] = [];
+  const inFlight: RollupCard[] = [];
+
+  for (const board of boards) {
+    const owner = board.department ?? board.division;
+    if (!owner) continue;
+    const href = board.department ? `/board/${owner.slug}` : `/board/division/${owner.slug}`;
+    const middle = board.columns.slice(1, -1);
+    if (middle.length === 0) continue;
+
+    const view = await loadBoard(board.id, {
+      kind: board.department ? "department" : "division",
+      id: board.id,
+      name: owner.name,
+      slug: owner.slug,
+      active: true,
+    });
+
+    for (const col of view.columns) {
+      if (!middle.some((m) => m.id === col.id)) continue;
+      for (const card of col.cards) {
+        const entry: RollupCard = {
+          ...card,
+          columnName: col.name,
+          ownerLabel: card.owner?.displayName ?? "Nobody yet",
+          boardName: owner.name,
+          boardHref: href,
+        };
+        // "Blocked" is whatever the last middle column is, by convention --
+        // surfaced separately because a stuck thing nobody has looked at is
+        // the single most useful thing a roll-up can show.
+        if (col.id === middle[middle.length - 1].id) blocked.push(entry);
+        else inFlight.push(entry);
+      }
+    }
+  }
+
+  return { blocked, inFlight, boardCount: boards.length };
+}
