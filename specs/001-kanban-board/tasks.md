@@ -77,17 +77,17 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 **Independent Test**: At 390px, create a card with a title only and move it two columns using taps alone.
 
-- [ ] T019 [P] [US2] Define zod schemas for card create, update, and move in `src/app/(app)/board/schemas.ts`, with title required, trimmed, non-empty, and length-capped (FR-010, Principle V)
-- [ ] T020 [US2] Implement `createCard` in `src/app/(app)/board/actions.ts` using `requireBoardAccess`, defaulting to the first column, recording an audit entry and revalidating
-- [ ] T021 [US2] Implement `moveCard` in `src/app/(app)/board/actions.ts` — standalone path only at this stage: update `columnId` and `position` in a transaction, refusing when `expectedUpdatedAt` is stale and reporting the conflict (FR-032, D4)
-- [ ] T022 [P] [US2] Implement `updateCard` in `src/app/(app)/board/actions.ts` for title, owner, next action, due date, and status notes — deliberately **not** column, so the two authorization paths never blur (contracts/server-actions.md)
-- [ ] T023 [P] [US2] Implement `archiveCard` and `deleteCard` in `src/app/(app)/board/actions.ts`, both refusing on work-order-backed cards
-- [ ] T024 [P] [US2] Create `src/app/(app)/board/new-card-form.tsx` — inline, title-only, submitting without leaving the board (SC-002)
-- [ ] T025 [US2] Create `src/app/(app)/board/card-sheet.tsx` — a bottom sheet opened by tapping a card, listing columns so a move takes exactly two taps, with **no drag gesture implemented** (D3, SC-003)
-- [ ] T026 [US2] Apply the move optimistically in `src/app/(app)/board/card-sheet.tsx` using the mechanism confirmed in T008, and **revert visibly with an explanation on failure** (FR-034, D3)
-- [ ] T027 [US2] Hide create and move affordances from users without department write access in `src/app/(app)/board/[departmentSlug]/board-view.tsx` — the interface must not offer actions that will be refused (FR-004)
-- [ ] T028 [US2] **Execute the authorization boundary** per quickstart.md: as a member of department A only, call `createCard` and `moveCard` directly against department B's board with a forged board id and confirm the *action* refuses — not merely that the button was hidden (FR-003, Principle IV)
-- [ ] T029 [US2] Verify concurrency and failure honesty per quickstart.md: a stale `expectedUpdatedAt` is refused and reported, and a move made with the network offline reverts visibly
+- [X] T019 [P] [US2] Define zod schemas for card create, update, and move in `src/app/(app)/board/schemas.ts`, with title required, trimmed, non-empty, and length-capped (FR-010, Principle V)
+- [X] T020 [US2] Implement `createCard` in `src/app/(app)/board/actions.ts` using `requireBoardAccess`, defaulting to the first column, recording an audit entry and revalidating
+- [X] T021 [US2] Implement `moveCard` in `src/app/(app)/board/actions.ts` — standalone path only at this stage: update `columnId` and `position` in a transaction, refusing when `expectedUpdatedAt` is stale and reporting the conflict (FR-032, D4)
+- [X] T022 [P] [US2] Implement `updateCard` in `src/app/(app)/board/actions.ts` for title, owner, next action, due date, and status notes — deliberately **not** column, so the two authorization paths never blur (contracts/server-actions.md)
+- [X] T023 [P] [US2] Implement `archiveCard` and `deleteCard` in `src/app/(app)/board/actions.ts`, both refusing on work-order-backed cards
+- [X] T024 [P] [US2] Create `src/app/(app)/board/new-card-form.tsx` — inline, title-only, submitting without leaving the board (SC-002)
+- [X] T025 [US2] Create `src/app/(app)/board/card-sheet.tsx` — a bottom sheet opened by tapping a card, listing columns so a move takes exactly two taps, with **no drag gesture implemented** (D3, SC-003)
+- [X] T026 [US2] Apply the move optimistically in `src/app/(app)/board/card-sheet.tsx` using the mechanism confirmed in T008, and **revert visibly with an explanation on failure** (FR-034, D3)
+- [X] T027 [US2] Hide create and move affordances from users without department write access in `src/app/(app)/board/[departmentSlug]/board-view.tsx` — the interface must not offer actions that will be refused (FR-004)
+- [X] T028 [US2] **Execute the authorization boundary** per quickstart.md: as a member of department A only, call `createCard` and `moveCard` directly against department B's board with a forged board id and confirm the *action* refuses — not merely that the button was hidden (FR-003, Principle IV)
+- [X] T029 [US2] Verify concurrency and failure honesty per quickstart.md: a stale `expectedUpdatedAt` is refused and reported, and a move made with the network offline reverts visibly
 
 **Checkpoint**: The board is writable, on a phone, with the authorization boundary proven by execution.
 

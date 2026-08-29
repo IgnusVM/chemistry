@@ -1,6 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import { Lock } from "lucide-react";
-import type { BoardView } from "@/lib/board";
+import type { BoardView, BoardCard } from "@/lib/board";
 import { BoardCardView } from "./card";
+import { NewCardForm } from "./new-card-form";
+import { CardSheet } from "./card-sheet";
 
 /**
  * Column accent colours, resolved as Tailwind classes rather than raw hex so
@@ -23,8 +28,19 @@ const ACCENT: Record<string, string> = {
  * needing a scrollbar. Column headers stay visible while their cards scroll
  * vertically, so a reader never loses track of which state they are reading
  * (SC-001).
+ *
+ * Tapping a card opens the sheet, which is also where moving happens — two
+ * taps, no drag (research.md D3).
  */
 export function BoardViewGrid({ board, canWrite }: { board: BoardView; canWrite: boolean }) {
+  const [selected, setSelected] = useState<{ card: BoardCard; columnId: string } | null>(null);
+
+  const columnChoices = board.columns.map((c) => ({
+    id: c.id,
+    name: c.name,
+    acceptsWorkOrderCards: c.woStatusOnMove !== null,
+  }));
+
   return (
     <div className="space-y-3">
       {!board.owner.active ? (
@@ -59,9 +75,22 @@ export function BoardViewGrid({ board, canWrite }: { board: BoardView; canWrite:
               {col.cards.length === 0 ? (
                 <p className="px-1 py-3 text-xs text-neutral-400">Nothing here.</p>
               ) : (
-                col.cards.map((card) => <BoardCardView key={card.id} card={card} />)
+                col.cards.map((card) => (
+                  <button
+                    key={card.id}
+                    type="button"
+                    onClick={() => setSelected({ card, columnId: col.id })}
+                    className="rounded-lg text-left focus:ring-2 focus:ring-neutral-400 focus:outline-none"
+                  >
+                    <BoardCardView card={card} />
+                  </button>
+                ))
               )}
             </div>
+
+            {/* Capture sits at the bottom of the column it adds to, so the
+                column is both where you read and where you write. */}
+            {canWrite ? <NewCardForm boardId={board.boardId} columnId={col.id} /> : null}
           </section>
         ))}
       </div>
@@ -72,6 +101,16 @@ export function BoardViewGrid({ board, canWrite }: { board: BoardView; canWrite:
             ? `You can read this board. Adding and moving cards is for the ${board.owner.name} lead.`
             : `You can read this board. Adding and moving cards needs membership of ${board.owner.name}.`}
         </p>
+      ) : null}
+
+      {selected ? (
+        <CardSheet
+          card={selected.card}
+          columns={columnChoices}
+          currentColumnId={selected.columnId}
+          canWrite={canWrite}
+          onClose={() => setSelected(null)}
+        />
       ) : null}
     </div>
   );

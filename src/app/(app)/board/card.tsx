@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { ClipboardList, UserRound, CalendarClock, ArrowRight } from "lucide-react";
 import type { BoardCard } from "@/lib/board";
 
 function dueLabel(due: Date) {
-  const days = Math.ceil((due.getTime() - Date.now()) / 86_400_000);
+  const days = Math.ceil((new Date(due).getTime() - Date.now()) / 86_400_000);
   if (days < 0) return { text: `${Math.abs(days)}d overdue`, urgent: true };
   if (days === 0) return { text: "Due today", urgent: true };
   if (days === 1) return { text: "Due tomorrow", urgent: false };
@@ -20,20 +19,22 @@ function dueLabel(due: Date) {
  * An unowned card is shown as explicitly unowned rather than as blank space
  * (FR-013) — a card in progress with nobody on it is the single most useful
  * thing a board can surface, and blank reads as "not filled in yet".
+ *
+ * Presentational only, and deliberately contains no links: the whole card is a
+ * tap target that opens the sheet, and a link inside it would be a nested
+ * interactive element that swallows the tap on a phone. The work order link
+ * lives in the sheet instead.
  */
 export function BoardCardView({ card }: { card: BoardCard }) {
   const due = card.dueDate ? dueLabel(card.dueDate) : null;
 
   return (
-    <article className="rounded-lg border border-neutral-200 bg-white p-3 shadow-sm">
+    <article className="rounded-lg border border-neutral-200 bg-white p-3 text-left shadow-sm">
       {card.workOrder ? (
-        <Link
-          href={`/work-orders/${card.workOrder.code}`}
-          className="mb-1.5 inline-flex items-center gap-1 rounded border border-sky-200 bg-sky-50 px-1.5 py-0.5 text-[11px] font-medium text-sky-700 hover:bg-sky-100"
-        >
+        <span className="mb-1.5 inline-flex items-center gap-1 rounded border border-sky-200 bg-sky-50 px-1.5 py-0.5 text-[11px] font-medium text-sky-700">
           <ClipboardList className="h-3 w-3" aria-hidden />
           {card.workOrder.code}
-        </Link>
+        </span>
       ) : null}
 
       <h3 className="text-sm leading-snug font-medium text-neutral-900">{card.title}</h3>
