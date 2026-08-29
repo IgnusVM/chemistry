@@ -128,12 +128,14 @@ Existing Next.js app at repository root: `src/app/(app)/`, `src/lib/`, `prisma/`
 
 ## Phase 7: User Story 5 — See across departments (Priority: P5)
 
+> **T043 and T044 were pulled forward on 2026-08-29**, out of phase order. They were scoped here when division-lead only affected roll-up entitlement; division *boards* then made them the difference between a working feature and one with no way to configure it.
+
 **Goal**: Anyone whose role spans departments sees their boards in one place — including the Ops lead.
 
 **Independent Test**: Run the entitlement matrix — org admin sees all; division lead sees their division; single-department member sees one.
 
-- [ ] T043 [US5] Extend `updateDivision` in `src/app/(app)/admin/divisions/actions.ts` to accept and set `leadUserId`, org-admin only (FR-005c)
-- [ ] T044 [US5] Add a division-lead picker to `src/app/(app)/admin/divisions/division-form.tsx` — **without this the column cannot be populated and the roll-up branch is dead code**, which is why it is in this feature rather than deferred
+- [X] T043 [US5] Extend `updateDivision` in `src/app/(app)/admin/divisions/actions.ts` to accept and set `leadUserId`, org-admin only (FR-005c)
+- [X] T044 [US5] Add a division-lead picker to `src/app/(app)/admin/divisions/division-form.tsx` — **without this the column cannot be populated and the roll-up branch is dead code**, which is why it is in this feature rather than deferred
 - [ ] T045 [US5] Implement `getRollupView()` in `src/lib/board.ts` as the union of `getAccessibleDepartmentIds()` and the departments of divisions where `leadUserId` is the current user (D6, FR-005b)
 - [ ] T046 [US5] Create `src/app/(app)/board/page.tsx` rendering the roll-up, and make it the destination of the nav entry added in T016
 - [ ] T047 [US5] Make each card's source department identifiable in the roll-up in `src/app/(app)/board/page.tsx` — an aggregated card with no source is not actionable (FR-005, US5 scenario 3)

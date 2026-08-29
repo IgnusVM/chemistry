@@ -53,6 +53,9 @@ const updateDivisionSchema = z.object({
     .min(2)
     .regex(/^[a-z0-9-]+$/, "slug must be lowercase letters, numbers, and hyphens"),
   description: z.string().optional(),
+  // Empty string means "no lead" -- the select's blank option. Coerced to null
+  // rather than left as "" so the column holds a real absence.
+  leadUserId: z.string().optional().transform((v) => (v ? v : null)),
 });
 
 export async function updateDivision(
@@ -66,9 +69,17 @@ export async function updateDivision(
     name: formData.get("name"),
     slug: formData.get("slug"),
     description: formData.get("description") || undefined,
+    leadUserId: formData.get("leadUserId") ?? undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  // The lead must be a real user. Without this a stale or forged id would be
+  // written straight into the column that gates division board visibility.
+  if (parsed.data.leadUserId) {
+    const lead = await prisma.user.findUnique({ where: { id: parsed.data.leadUserId }, select: { id: true } });
+    if (!lead) return { error: "That user no longer exists." };
   }
 
   const existing = await prisma.division.findUnique({ where: { slug: parsed.data.slug } });

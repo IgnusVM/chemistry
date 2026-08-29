@@ -5,17 +5,21 @@ import { DivisionRow } from "./division-row";
 
 export default async function DivisionsAdminPage() {
   await requireOrgAdmin();
-  const divisions = await prisma.division.findMany({
-    orderBy: { name: "asc" },
-    include: { _count: { select: { departments: true } } },
-  });
+  const [divisions, users] = await Promise.all([
+    prisma.division.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { departments: true } }, lead: { select: { id: true, displayName: true } } },
+    }),
+    prisma.user.findMany({ orderBy: { displayName: "asc" }, select: { id: true, displayName: true } }),
+  ]);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">Divisions</h1>
         <p className="text-sm text-neutral-500">
-          Groupings above departments, e.g. Ops. Most orgs will only need a handful.
+          Groupings above departments, e.g. Ops. Most orgs will only need a handful. A
+          division&rsquo;s lead is the only person besides org admins who can see its board.
         </p>
       </div>
 
@@ -27,6 +31,7 @@ export default async function DivisionsAdminPage() {
             <th className="px-4 py-2">Name</th>
             <th className="px-4 py-2">Slug</th>
             <th className="px-4 py-2">Departments</th>
+            <th className="px-4 py-2">Lead</th>
             <th className="px-4 py-2" />
           </tr>
         </thead>
@@ -34,12 +39,13 @@ export default async function DivisionsAdminPage() {
           {divisions.map((div) => (
             <DivisionRow
               key={div.id}
-              division={{ id: div.id, name: div.name, slug: div.slug, description: div.description, departmentCount: div._count.departments }}
+              division={{ id: div.id, name: div.name, slug: div.slug, description: div.description, departmentCount: div._count.departments, lead: div.lead }}
+              users={users}
             />
           ))}
           {divisions.length === 0 && (
             <tr>
-              <td colSpan={4} className="px-4 py-6 text-center text-neutral-500">
+              <td colSpan={5} className="px-4 py-6 text-center text-neutral-500">
                 No divisions yet.
               </td>
             </tr>
