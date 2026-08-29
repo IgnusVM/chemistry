@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { ChevronLeft } from "lucide-react";
 import { requireCurrentUser, hasDepartmentAccess } from "@/lib/dal";
 import { getDepartmentBoard, listTags } from "@/lib/board";
+import { DENSITY_COOKIE, parseDensity } from "../density";
 import { BoardViewGrid } from "../board-view";
 
 export default async function DepartmentBoardPage({
@@ -15,6 +17,7 @@ export default async function DepartmentBoardPage({
   await requireCurrentUser();
   const { departmentSlug } = await params;
   const { tag, done } = await searchParams;
+  const density = parseDensity((await cookies()).get(DENSITY_COOKIE)?.value);
 
   // Reads are org-wide (FR-002) -- no department filter here. Write access is
   // resolved separately, purely to decide what the interface offers.
@@ -40,7 +43,7 @@ export default async function DepartmentBoardPage({
         <p className="text-sm text-neutral-500">What&rsquo;s happening, who&rsquo;s got it, and what&rsquo;s stuck.</p>
       </div>
 
-      <BoardViewGrid board={board} canWrite={canWrite} tags={tags} activeTagId={tag} showAllDone={done === "all"} />
+      <BoardViewGrid board={board} canWrite={canWrite} tags={tags} activeTagId={tag} showAllDone={done === "all"} initialDensity={density} />
     </div>
   );
 }

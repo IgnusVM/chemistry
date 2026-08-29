@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Lock } from "lucide-react";
+import { Lock, Rows3, Rows4 } from "lucide-react";
 import Link from "next/link";
 import type { BoardView, BoardCard, CardTagView } from "@/lib/board";
 import { BoardCardView } from "./card";
 import { NewCardForm } from "./new-card-form";
 import { CardSheet } from "./card-sheet";
 import { TagFilter } from "./tag-filter";
+import { DENSITY_COOKIE, type Density } from "./density";
 
 /**
  * Column accent colours, resolved as Tailwind classes rather than raw hex so
@@ -40,14 +41,27 @@ export function BoardViewGrid({
   tags,
   activeTagId,
   showAllDone,
+  initialDensity = "comfortable",
 }: {
   board: BoardView;
   canWrite: boolean;
   tags: CardTagView[];
   activeTagId?: string;
   showAllDone?: boolean;
+  initialDensity?: Density;
 }) {
   const [selected, setSelected] = useState<{ card: BoardCard; columnId: string } | null>(null);
+  // Seeded from the server-read cookie, so the first paint is already right.
+  // Toggling updates state immediately and writes the cookie for next time --
+  // no round trip, no flash.
+  const [density, setDensity] = useState<Density>(initialDensity);
+
+  function toggleDensity() {
+    const next: Density = density === "compact" ? "comfortable" : "compact";
+    setDensity(next);
+    // One year; it is a display preference, not a session thing.
+    document.cookie = `${DENSITY_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
+  }
 
   const columnChoices = board.columns.map((c) => ({
     id: c.id,
@@ -59,12 +73,27 @@ export function BoardViewGrid({
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <TagFilter tags={tags} activeTagId={activeTagId} />
-        <Link
-          href={showAllDone ? "?" : "?done=all"}
-          className="text-xs text-neutral-500 underline-offset-2 hover:text-neutral-900 hover:underline"
-        >
-          {showAllDone ? "Hide older done" : "Show all done"}
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={toggleDensity}
+            aria-pressed={density === "compact"}
+            className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 bg-white px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-100"
+          >
+            {density === "compact" ? (
+              <Rows3 className="h-3.5 w-3.5" aria-hidden />
+            ) : (
+              <Rows4 className="h-3.5 w-3.5" aria-hidden />
+            )}
+            {density === "compact" ? "Comfortable" : "Compact"}
+          </button>
+          <Link
+            href={showAllDone ? "?" : "?done=all"}
+            className="text-xs text-neutral-500 underline-offset-2 hover:text-neutral-900 hover:underline"
+          >
+            {showAllDone ? "Hide older done" : "Show all done"}
+          </Link>
+        </div>
       </div>
 
       {!board.owner.active ? (
@@ -99,7 +128,7 @@ export function BoardViewGrid({
               </span>
             </header>
 
-            <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-2">
+            <div className={`flex flex-1 flex-col overflow-y-auto ${density === "compact" ? "gap-1 p-1.5" : "gap-2 p-2"}`}>
               {col.cards.length === 0 ? (
                 <p className="px-1 py-3 text-xs text-neutral-400">Nothing here.</p>
               ) : (
@@ -110,7 +139,7 @@ export function BoardViewGrid({
                     onClick={() => setSelected({ card, columnId: col.id })}
                     className="rounded-lg text-left focus:ring-2 focus:ring-neutral-400 focus:outline-none"
                   >
-                    <BoardCardView card={card} />
+                    <BoardCardView card={card} density={density} />
                   </button>
                 ))
               )}

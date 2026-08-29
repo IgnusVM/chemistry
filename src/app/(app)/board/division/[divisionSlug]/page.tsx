@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { ChevronLeft, Lock } from "lucide-react";
 import { requireCurrentUser } from "@/lib/dal";
 import { getDivisionBoard, listTags } from "@/lib/board";
 import { canViewDivisionBoard } from "@/lib/board-auth";
+import { DENSITY_COOKIE, parseDensity } from "../../density";
 import { BoardViewGrid } from "../../board-view";
 
 export default async function DivisionBoardPage({
@@ -16,6 +18,7 @@ export default async function DivisionBoardPage({
   await requireCurrentUser();
   const { divisionSlug } = await params;
   const { tag, done } = await searchParams;
+  const density = parseDensity((await cookies()).get(DENSITY_COOKIE)?.value);
 
   const [board, tags] = await Promise.all([
     getDivisionBoard(divisionSlug, { tagId: tag, showAllDone: done === "all" }),
@@ -50,7 +53,7 @@ export default async function DivisionBoardPage({
         </p>
       </div>
 
-      <BoardViewGrid board={board} canWrite={board.owner.active} tags={tags} activeTagId={tag} showAllDone={done === "all"} />
+      <BoardViewGrid board={board} canWrite={board.owner.active} tags={tags} activeTagId={tag} showAllDone={done === "all"} initialDensity={density} />
     </div>
   );
 }
