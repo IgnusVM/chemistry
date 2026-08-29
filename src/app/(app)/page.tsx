@@ -19,8 +19,12 @@ export default async function DashboardPage() {
 
   const quote = getRandomQuote();
 
+  // The dashboard is a sparse landing page, so it keeps a cap while list and
+  // board pages use the full width. Stretched to 1920 the hero banner becomes
+  // a huge empty gradient and the assigned-work rows fling their status badge
+  // to the far edge, which reads as broken rather than spacious.
   return (
-    <div className="space-y-8">
+    <div className="max-w-5xl space-y-8">
       <ChemistryLogo />
 
       <blockquote className="border-l-2 border-neutral-200 pl-4">
