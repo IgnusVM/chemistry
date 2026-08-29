@@ -45,6 +45,7 @@ next-env.d.ts
 
 # Prisma-installed AI agent skill references (local tooling, not app code)
 /.claude/skills/prisma-*
+/.claude/skills/speckit-*
 /.agents/skills/prisma-*
 /.windsurf/skills/prisma-*
 /skills-lock.json
