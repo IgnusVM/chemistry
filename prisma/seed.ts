@@ -226,7 +226,7 @@ async function main() {
   // covers work orders created while a board briefly did not exist.
   const orphanWorkOrders = await prisma.workOrder.findMany({
     where: { card: { is: null } },
-    select: { id: true, description: true, departmentId: true },
+    select: { id: true, title: true, description: true, departmentId: true },
   });
   let backfilled = 0;
   for (const wo of orphanWorkOrders) {
@@ -236,7 +236,10 @@ async function main() {
     });
     if (!board) continue;
     await prisma.card.create({
-      data: { boardId: board.id, workOrderId: wo.id, title: wo.description.slice(0, 120) },
+      // Title first: description is the long account of the problem, and a
+      // card headed with 120 characters of it is unreadable on a board. Older
+      // tickets predate the title field and still fall back to description.
+      data: { boardId: board.id, workOrderId: wo.id, title: (wo.title || wo.description).slice(0, 120) },
     });
     backfilled++;
   }
