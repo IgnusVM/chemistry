@@ -27,7 +27,11 @@ export function NewCardForm({ boardId, columnId }: { boardId: string; columnId: 
   }, [state]);
 
   return (
-    <form ref={formRef} action={action} className="px-1 pb-1">
+    // Matches the column header and the card list above it. It used to sit at
+    // 4px while they sat at 12px and 8px, so the same column edge had three
+    // different insets down its length and the submit button looked stuck to
+    // the border.
+    <form ref={formRef} action={action} className="px-3 pt-1 pb-3">
       <input type="hidden" name="boardId" value={boardId} />
       <input type="hidden" name="columnId" value={columnId} />
       <div className="flex items-center gap-1.5">

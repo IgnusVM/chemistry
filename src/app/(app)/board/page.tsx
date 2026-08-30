@@ -165,8 +165,8 @@ function RollupRow({ card, tone }: { card: RollupCard; tone: "blocked" | "normal
         href={card.boardHref}
         className={
           tone === "blocked"
-            ? "block rounded-lg border border-rose-200 bg-rose-50/60 p-2.5 hover:bg-rose-50"
-            : "block rounded-lg border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50"
+            ? "block rounded-lg border border-rose-200 bg-rose-50/60 px-3.5 py-3 hover:bg-rose-50"
+            : "block rounded-lg border border-neutral-200 bg-white px-3.5 py-3 hover:bg-neutral-50"
         }
       >
         {/* Title gets its own line on a phone. Competing with four badges for

@@ -128,9 +128,9 @@ export function BoardViewGrid({
               </span>
             </header>
 
-            <div className={`flex flex-1 flex-col overflow-y-auto ${density === "compact" ? "gap-1 p-1.5" : "gap-2 p-2"}`}>
+            <div className={`flex flex-1 flex-col overflow-y-auto ${density === "compact" ? "gap-1 px-3 py-1.5" : "gap-2 px-3 py-2"}`}>
               {col.cards.length === 0 ? (
-                <p className="px-1 py-3 text-xs text-neutral-400">Nothing here.</p>
+                <p className="py-3 text-xs text-neutral-400">Nothing here.</p>
               ) : (
                 col.cards.map((card) => (
                   <button
