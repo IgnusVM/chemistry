@@ -62,6 +62,18 @@ Refusing a move into an unmapped column (FR-021) rather than allowing it is deli
 
 ## D3. Tap to move, with honest optimism
 
+> **SUPERSEDED IN PART (2026-08-29, v0.9.0).** Drag was added on request. The
+> reasoning below still holds and two taps remains the primary path — it is the
+> one that works in gloves and the only one available from a keyboard. Drag is
+> additive, exactly as the last paragraph of the rationale anticipated: it went
+> in without disturbing the tap path, and both call the same `moveCard`.
+>
+> What changed in the reasoning: "close to unusable on touch" was true of HTML5
+> drag-and-drop, which never fires on touch at all. A Pointer Events
+> implementation with a press-and-hold to start is a different proposition — a
+> swipe across a card still scrolls, because the hold is what separates the two.
+> SC-003's "no drag gesture anywhere" no longer describes the app.
+
 **Decision**: Tapping a card opens a bottom sheet showing the card and a list of columns. Tapping a column moves it and closes the sheet — **two taps, no drag, no library** (SC-003).
 
 The move applies optimistically and **reverts visibly with an explanation if the action fails** (FR-034). Drag-and-drop is not implemented in this feature at all.

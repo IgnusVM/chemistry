@@ -593,21 +593,23 @@ It is not a project management system and it is not where work gets assigned. It
 
 **Tags group cards across boards.** Usually by team. See [Tagging cards](/help/board/board-tags).
 
-To move something, tap the card and tap where it goes — see [Moving a card](/help/board/moving-a-card).`,
+To move something, drag it to another column, or tap the card and tap where it goes — see [Moving a card](/help/board/moving-a-card).`,
   },
   {
     slug: "moving-a-card",
     title: "Moving a card",
     category: "board",
     order: 1,
-    summary: "Two taps. There is no dragging, and that is deliberate.",
-    body: `**Tap the card. Tap the column you want.** That's the whole thing.
+    summary: "Drag it, or tap twice. Both work, and the second one always works.",
+    body: `There are two ways, and they do exactly the same thing.
 
-Tapping a card opens it. Near the bottom is a **Move to** list with every column on the board. Tap one and the card moves.
+**Drag it.** Pick the card up and drop it on the column you want. With a mouse, just drag. On a phone, **press and hold** the card for a moment first — it lifts, and then you can move it. The hold is what tells Chemistry you meant to move a card rather than scroll the board, so swiping across a card still scrolls the way it always did.
 
-**There is no drag-and-drop, on purpose.** Dragging is what most people expect from a board like this, so its absence is a decision rather than a missing feature.
+Drag toward the left or right edge and the board scrolls along with you, so you can reach a column that is off screen.
 
-Chemistry is used on a phone, outdoors, often in dust and often wearing gloves. Drag-and-drop is awkward on a touchscreen at the best of times: you have to press, wait for the drag to engage, keep your finger down while the page scrolls, and release in exactly the right place. In a dust storm with cold hands it is close to unusable, and a mis-drop puts work in the wrong column without telling you. Two taps work every time, work one-handed, and are easy to undo.
+**Or tap twice.** Tap the card, then tap a column in the **Move to** list near the bottom.
+
+**Use whichever suits the moment.** Dragging is quicker at a desk. Two taps is the one that always works — in gloves, with dusty hands, on a dirty screen, one-handed. Nothing lands in the wrong column because a finger slipped, and it is also the way that works with a keyboard or a screen reader.
 
 **If a column is greyed out**, the card is a work order and that column has no matching status. That is not a bug — see [Cards and work orders](/help/board/cards-and-work-orders).
 
