@@ -196,6 +196,8 @@ model User {
   borrowedLoans       AssetLoan[]            @relation("LoanBorrower")
   loansCheckedOut     AssetLoan[]            @relation("LoanCheckedOutBy")
   loansCheckedIn      AssetLoan[]            @relation("LoanCheckedInBy")
+  posts               Post[]
+  postReplies         PostReply[]
 }
 
 model InviteCode {
@@ -753,4 +755,73 @@ model CardWorkOrderRef {
 
   @@id([cardId, workOrderId])
   @@index([workOrderId])
+}
+
+/// A noticeboard post. Only org admins write these; everyone reads them.
+/// Rich content (images, link previews) lives in the two child tables rather
+/// than as columns, because a post has zero or many of each.
+model Post {
+  id           String   @id @default(cuid())
+  authorUserId String?
+  body         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  author  User?       @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+  images  PostImage[]
+  links   PostLink[]
+  replies PostReply[]
+
+  /// The feed reads newest-first and pages by this.
+  @@index([createdAt])
+}
+
+/// An uploaded image on a post. Deliberately NOT rendered until asked for:
+/// the feed shows a placeholder and fetches a presigned URL on demand, so
+/// scrolling past a hundred posts costs nothing in object storage.
+model PostImage {
+  id       String @id @default(cuid())
+  postId   String
+  s3Key    String
+  filename String
+  mimeType String
+  position Int    @default(0)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+/// A link with the preview metadata captured when the post was written.
+/// Stored rather than re-fetched so the feed never makes outbound requests
+/// while someone scrolls, and so a preview cannot change under a reader.
+model PostLink {
+  id          String  @id @default(cuid())
+  postId      String
+  url         String
+  title       String?
+  description String?
+  imageUrl    String?
+  siteName    String?
+  position    Int     @default(0)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+/// A reply. Any signed-in member may write one, and it is TEXT ONLY -- no
+/// images, no links expanded -- which keeps both the moderation surface and
+/// the storage cost to what a sentence can carry.
+model PostReply {
+  id           String   @id @default(cuid())
+  postId       String
+  authorUserId String?
+  body         String
+  createdAt    DateTime @default(now())
+
+  post   Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User? @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+
+  @@index([postId, createdAt])
 }
