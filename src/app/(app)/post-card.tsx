@@ -4,7 +4,6 @@ import { useActionState, useState, useTransition } from "react";
 import { Trash2, MessageSquare, ExternalLink } from "lucide-react";
 import { addReply, deleteReply, deletePost, type FeedActionState } from "./feed-actions";
 import { DeferredImage } from "./deferred-image";
-import { LoadImageMark } from "@/components/load-image-mark";
 import type { FeedPost } from "@/lib/feed";
 
 function when(iso: string) {
@@ -15,9 +14,20 @@ function when(iso: string) {
   return new Date(iso).toLocaleDateString();
 }
 
-/** A link preview. Its image is deferred too — it is someone else's server. */
+/**
+ * A link preview.
+ *
+ * Its image loads normally: it comes from the linked site, not our object
+ * storage, so showing it costs the organisation nothing. It is still lazy, so a
+ * long feed doesn't fetch a hundred of them before anyone scrolls that far.
+ *
+ * The frame is a fixed 1.91:1 — the shape sites author their preview images to
+ * — with object-cover. Without it, one site's 1200x630 banner and another's
+ * square logo make two cards of wildly different heights and the column stops
+ * reading as a list.
+ */
 function LinkPreview({ link }: { link: FeedPost["links"][number] }) {
-  const [showImage, setShowImage] = useState(false);
+  const [broken, setBroken] = useState(false);
   return (
     <a
       href={link.url}
@@ -25,22 +35,16 @@ function LinkPreview({ link }: { link: FeedPost["links"][number] }) {
       rel="noopener noreferrer"
       className="block overflow-hidden rounded-lg border border-neutral-200 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
     >
-      {link.imageUrl ? (
-        showImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={link.imageUrl} alt="" className="max-h-64 w-full object-cover" />
-        ) : (
-          <span
-            role="button"
-            tabIndex={0}
-            onClick={(e) => { e.preventDefault(); setShowImage(true); }}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setShowImage(true); } }}
-            className="flex cursor-pointer flex-col items-center gap-1.5 border-b border-neutral-200 bg-neutral-50 py-6 hover:bg-neutral-100"
-          >
-            <LoadImageMark className="h-10 w-10" />
-            <span className="text-xs font-medium text-neutral-700">Load preview image</span>
-          </span>
-        )
+      {link.imageUrl && !broken ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={link.imageUrl}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onError={() => setBroken(true)}
+          className="aspect-[1.91/1] w-full border-b border-neutral-200 bg-neutral-100 object-cover"
+        />
       ) : null}
       <span className="block p-3">
         <span className="flex items-center gap-1 text-[11px] text-neutral-500 uppercase">
@@ -98,9 +102,11 @@ export function PostCard({
       <p className="mt-2 text-sm whitespace-pre-wrap text-neutral-800">{post.body}</p>
 
       {post.images.length > 0 ? (
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        // A lone image gets the full width and a taller frame; several share a
+        // two-column grid so the post keeps a predictable height either way.
+        <div className={`mt-3 grid gap-2 ${post.images.length > 1 ? "sm:grid-cols-2" : ""}`}>
           {post.images.map((img) => (
-            <DeferredImage key={img.id} image={img} />
+            <DeferredImage key={img.id} image={img} lone={post.images.length === 1} />
           ))}
         </div>
       ) : null}

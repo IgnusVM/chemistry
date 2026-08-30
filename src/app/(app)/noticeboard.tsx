@@ -145,9 +145,6 @@ function Composer() {
         aria-label="Post body"
         className="w-full resize-y rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
       />
-      <p className="text-xs text-neutral-500">
-        Paste a link and its preview is captured when you post.
-      </p>
       <div className="flex flex-wrap items-center gap-2">
         <label className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-md border border-neutral-200 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-100">
           <ImagePlus className="h-3.5 w-3.5" aria-hidden />
