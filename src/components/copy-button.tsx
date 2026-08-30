@@ -54,7 +54,7 @@ export function CopyButton({
         : state === "failed" ? `Could not copy ${label}`
         : `Copy ${label}`
       }
-      title={state === "failed" ? "Couldn't copy — select the text instead" : `Copy ${label}`}
+      title={state === "failed" ? "Couldn't copy. Select the text instead." : `Copy ${label}`}
       // Negative margin keeps the 44px target from growing the line it sits in.
       className={`-my-3 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md align-middle transition-colors print:hidden ${
         state === "copied"

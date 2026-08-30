@@ -44,7 +44,7 @@ export function SelectionToolbar({
       )}
       {tooManyToSelectAll && (
         <span className="text-xs text-neutral-500">
-          ({totalMatching} match your filter — narrow it to select more than what&rsquo;s on this page)
+          ({totalMatching} match your filter. Narrow it to select more than what&rsquo;s on this page.)
         </span>
       )}
 

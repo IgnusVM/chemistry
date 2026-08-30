@@ -27,7 +27,7 @@ export function DashboardQuote({ quote }: { quote: { text: string; author: strin
   return (
     <blockquote className="border-l-2 border-neutral-200 pl-4">
       <p className="text-sm text-neutral-600 italic">&ldquo;{shown.text}&rdquo;</p>
-      <footer className="mt-1 text-xs text-neutral-400">&mdash; {shown.author}</footer>
+      <footer className="mt-1 text-xs text-neutral-400">{shown.author}</footer>
     </blockquote>
   );
 }

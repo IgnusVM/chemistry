@@ -2,7 +2,7 @@ import { requireCurrentUser } from "@/lib/dal";
 import { QrScanner } from "./qr-scanner";
 import { HelpLink } from "@/components/help-link";
 
-export const metadata = { title: "Scan — Chemistry" };
+export const metadata = { title: "Scan · Chemistry" };
 
 export default async function ScanPage() {
   await requireCurrentUser();

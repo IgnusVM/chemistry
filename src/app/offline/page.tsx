@@ -1,6 +1,6 @@
 import { WifiOff } from "lucide-react";
 
-export const metadata = { title: "Offline — Chemistry" };
+export const metadata = { title: "Offline · Chemistry" };
 
 export default function OfflinePage() {
   return (

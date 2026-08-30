@@ -39,7 +39,7 @@ export default async function AssetTypesAdminPage() {
                 <div>
                   <div className="font-medium text-neutral-900">{type.name}</div>
                   <div className="text-sm text-neutral-500">
-                    {[type.manufacturer, type.model].filter(Boolean).join(" · ") || "—"}
+                    {[type.manufacturer, type.model].filter(Boolean).join(" · ") || "–"}
                     {type.defaultDepartment && ` · ${type.defaultDepartment.name}`}
                   </div>
                 </div>

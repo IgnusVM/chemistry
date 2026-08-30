@@ -20,7 +20,16 @@ export type Task = {
  * while holding a tool in the other hand. It reverts and says why if the write
  * fails, rather than leaving a tick that never reached the database.
  */
-export function TaskList({ workOrderId, tasks }: { workOrderId: string; tasks: Task[] }) {
+export function TaskList({
+  workOrderId,
+  tasks,
+  help,
+}: {
+  workOrderId: string;
+  tasks: Task[];
+  /** The help control, rendered on the server: it reads the database. */
+  help?: React.ReactNode;
+}) {
   const [state, action, pending] = useActionState<TaskState, FormData>(addWorkOrderTask, undefined);
   const [busy, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +61,7 @@ export function TaskList({ workOrderId, tasks }: { workOrderId: string; tasks: T
             {tasks.length - open} of {tasks.length} done
           </span>
         ) : null}
+        {help}
       </h2>
 
       {tasks.length === 0 ? (

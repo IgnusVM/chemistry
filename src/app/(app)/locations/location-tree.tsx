@@ -59,7 +59,7 @@ function LocationNode({
             <div>
               <label className="block text-xs font-medium text-neutral-600">Parent location</label>
               <select name="parentLocationId" defaultValue={node.parentLocationId ?? ""} className={`mt-1 ${inputClass}`}>
-                <option value="">—</option>
+                <option value="">(None)</option>
                 {eligibleParents.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name}

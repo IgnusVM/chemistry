@@ -16,7 +16,7 @@ import { TabbedPageProvider, TabbedPageTabs, JumpToTabButton } from "@/component
 import { AddNoteForm } from "@/components/add-note-form";
 import { Button, buttonClass } from "@/components/button";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
-import { WO_STATUSES } from "@/lib/constants";
+import { WO_STATUSES, statusLabel } from "@/lib/constants";
 import { renderNoteHtml } from "@/lib/notes";
 import { resolveBadge, resolveBadges } from "@/lib/user-badge-data";
 import { UserBadge, UserBadgeLabel } from "@/components/user-badge";
@@ -217,7 +217,11 @@ export default async function WorkOrderDetailPage({
         )}
       </div>
 
-      <TaskList workOrderId={workOrder.id} tasks={tasks} />
+      <TaskList
+        workOrderId={workOrder.id}
+        tasks={tasks}
+        help={<HelpLink topic="Task checklists" article="work-orders/task-checklists" />}
+      />
 
       <div id="notes-section" className="rounded-md border border-neutral-200 bg-white p-4">
         <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
@@ -252,7 +256,7 @@ export default async function WorkOrderDetailPage({
             <div key={file.id} className="space-y-1">
               <div className="text-xs font-medium text-neutral-600">
                 {file.filename}
-                {file.description && <span className="ml-1 font-normal text-neutral-400">— {file.description}</span>}
+                {file.description && <span className="ml-1 font-normal text-neutral-400">· {file.description}</span>}
               </div>
               <CodeFileEditorForm
                 codeFileId={file.id}
@@ -302,7 +306,7 @@ export default async function WorkOrderDetailPage({
         <h2 className="text-sm font-semibold text-neutral-900">Attachments</h2>
         <HelpLink topic="Attachments on work orders" article="photos-documents/photos-on-work-orders" />
       </div>
-      <p className="text-xs text-neutral-500">Photos, reports, receipts — anything worth keeping with this ticket.</p>
+      <p className="text-xs text-neutral-500">Photos, reports, receipts: anything worth keeping with this ticket.</p>
       {workOrder.attachments.length > 0 && (
         <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {workOrder.attachments.map((attachment, i) => (
@@ -340,7 +344,7 @@ export default async function WorkOrderDetailPage({
         <div className="flex items-center gap-1 text-xs tracking-wide text-neutral-400 uppercase">
           <span className="font-mono">{workOrder.code}</span>
           <CopyButton value={workOrder.code} label="work order number" />
-          <span>· {workOrder.department.name} · {workOrder.type.replace("_", " ")}</span>
+          <span>· {workOrder.department.name} · {statusLabel(workOrder.type)}</span>
         </div>
         <h1 className="text-xl font-semibold text-neutral-900">{workOrder.title || workOrder.description}</h1>
         <div className="mt-1 flex items-center gap-2">
@@ -382,7 +386,7 @@ export default async function WorkOrderDetailPage({
                 {workOrder.asset.assetTag}
               </Link>
             ) : (
-              "—"
+              "–"
             )
           }
         />
@@ -401,7 +405,7 @@ export default async function WorkOrderDetailPage({
                 {workOrder.reportedBy.displayName}
               </Link>
             ) : (
-              "—"
+              "–"
             )
           }
         />

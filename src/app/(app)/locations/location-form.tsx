@@ -29,7 +29,7 @@ export function LocationForm({ locations }: { locations: Location[] }) {
       <div>
         <label className="block text-xs font-medium text-neutral-600">Parent location</label>
         <select name="parentLocationId" className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
-          <option value="">—</option>
+          <option value="">(None)</option>
           {locations.map((l) => (
             <option key={l.id} value={l.id}>
               {l.name}

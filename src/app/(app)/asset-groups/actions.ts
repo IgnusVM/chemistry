@@ -125,7 +125,7 @@ export async function addAssetsToGroup(
   if (notFound.length > 0) parts.push(`not found: ${notFound.join(", ")}`);
   const alreadyCount = skipped - notFound.length;
   if (alreadyCount > 0) parts.push(`already in group: ${alreadyCount}`);
-  return { message: parts.join(" — ") };
+  return { message: parts.join(". ") };
 }
 
 export async function removeAssetFromGroup(assetGroupId: string, assetId: string) {

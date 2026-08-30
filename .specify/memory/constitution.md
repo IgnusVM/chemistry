@@ -43,6 +43,19 @@ layer, never interface-only.
 
 Templates requiring updates: none. The Constitution Check gate in plan-template.md is
 generic and continues to apply as written.
+
+AMENDMENT 1.1.0 -> 1.2.0 (2026-08-30)
+Bump rationale: MINOR. Principle VII added. No existing principle removed or redefined.
+
+Driver: the product had no stated voice, so every string was written to whatever register
+the author happened to be in that hour. The principle names the register, derives its rules
+from primary text rather than from vibes, and states the limits that outrank it.
+
+Templates requiring updates: none. The Constitution Check gate in plan-template.md is generic
+and continues to apply as written.
+
+Follow-on work required by this amendment: user-facing copy across the application is being
+brought into line in the same change, including removal of every em dash.
 -->
 
 # Chemistry Constitution
@@ -169,6 +182,67 @@ The hosted instance is in active use by the organization. Therefore:
 organization's actual inventory, and a member using the system today is doing real work with
 it.
 
+### VII. The Product Has a Voice
+
+Every string a user reads is product design: help articles, page introductions, empty states,
+error messages, confirmation dialogs, button text. They MUST be written rather than typed.
+
+The voice is calm, precise, faintly amused, and on the reader's side. The reference is Douglas
+Adams, and specifically the register of the Guide itself: a reference work that is honestly
+trying to be useful, written by someone with a sense of humour and no patience for pomposity.
+
+**Study the mechanism, not the result.** Adams is funny structurally. Copying his subject
+matter produces something embarrassing; copying his technique produces something good. Four
+passages, and what each one is actually doing:
+
+- *"The ships hung in the sky in much the same way that bricks don't."* A flat description
+  until its final word. Nothing is decorated. One word inverts the whole sentence.
+- *"For a moment, nothing happened. Then, after a second or so, nothing continued to happen."*
+  A non-event reported with the gravity of an event. The joke is the register, not the content.
+- *"...almost, but not quite, entirely unlike tea."* Comedy out of exactness. "Nothing like
+  tea" is not funny. The over-precise qualification is.
+- *"DON'T PANIC ... in large friendly letters."* Reassurance whose specificity quietly concedes
+  that the situation deserves panic. The detail carries it.
+
+The rules that fall out of that:
+
+1. **Deadpan beats jokes.** State the true thing plainly and let the situation be funny by
+   itself. Never announce that something is absurd.
+2. **Precision is the humour.** A specific, slightly too exact detail. Never a vague
+   intensifier.
+3. **Put the turn at the end.** Comic weight lands on the last word of a sentence, so build
+   toward it rather than opening with it.
+4. **Understate.** Never oversell. If a line needs an exclamation mark, it is not working.
+5. **Never pun.** Adams almost never did. Wordplay reads as effort, and effort is the one thing
+   this voice cannot show.
+6. **Like the reader.** The humour is never at the expense of the user, or of the volunteer who
+   filed the ticket, or of whoever broke the thing.
+
+**Hard limits, which outrank the voice every single time:**
+
+- Clarity wins. A sentence that is funnier and less clear ships less funny. Principle V does
+  not negotiate with tone.
+- Destructive actions, errors, permission refusals, and anything involving lost work are
+  written straight. Someone who has just lost an afternoon is not an audience.
+- No jokes in field labels, validation messages, or button text. Those are wayfinding, and a
+  person scanning for a control is not reading.
+- Voice belongs in help articles, empty states, and descriptive prose, where a reader has a
+  moment and might like the company.
+- At most one light touch per screen. Charm accumulates into noise, and a system that is
+  relentlessly charming is exhausting by the second day of an event.
+
+**Punctuation.** User-facing copy MUST NOT use em dashes. Rewrite each one with the grammar the
+sentence actually wanted: a full stop, a comma, a colon, a semicolon, or brackets. An em dash
+is usually a sentence that has not decided what it is. This rule covers what a user reads. It
+does not govern source comments or repository documents, including this one.
+
+*Rationale*: This system is used one weekend a year by tired volunteers who did not choose it.
+Prose that sounds like a ticketing system makes the work feel like work. Prose that is visibly
+trying to be funny is worse than either. The target is the third thing: the sense that a
+competent person wrote this, anticipated what you were about to be confused by, and did not
+waste your time.
+
+
 ## Technology Constraints
 
 **Stack**: Next.js 16 (App Router, Turbopack), React 19, TypeScript strict, Tailwind v4
@@ -232,4 +306,4 @@ corrected rather than merged with a note to fix later.
 Principle V. Complexity that a volunteer has to learn is a cost paid by every user, every year,
 against a body that turns over.
 
-**Version**: 1.1.0 | **Ratified**: 2026-08-28 | **Last Amended**: 2026-08-29
+**Version**: 1.2.0 | **Ratified**: 2026-08-28 | **Last Amended**: 2026-08-30

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { statusLabel } from "@/lib/constants";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
@@ -6,7 +7,7 @@ import { renderNoteHtml } from "@/lib/notes";
 import { buttonClass } from "@/components/button";
 import { PrintButton } from "./print-button";
 
-export const metadata = { title: "Print work order — Chemistry" };
+export const metadata = { title: "Print work order · Chemistry" };
 
 /**
  * Paper service record for a single work order. A separate route rather than
@@ -35,7 +36,7 @@ export default async function PrintWorkOrderPage({
   });
   if (!workOrder) notFound();
 
-  const fmt = (d: Date | null) => (d ? d.toLocaleString() : "—");
+  const fmt = (d: Date | null) => (d ? d.toLocaleString() : "–");
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -68,14 +69,14 @@ export default async function PrintWorkOrderPage({
         <section className="grid grid-cols-2 gap-x-8 gap-y-3 border-b border-neutral-200 py-4 text-sm sm:grid-cols-3">
           <Field label="Status" value={workOrder.status.replace("_", " ")} />
           <Field label="Priority" value={workOrder.priority.replace("_", " ")} />
-          <Field label="Type" value={workOrder.type} />
-          <Field label="Asset" value={workOrder.asset ? `${workOrder.asset.assetTag} — ${workOrder.asset.name}` : "—"} />
-          <Field label="Asset type" value={workOrder.asset?.assetType.name ?? "—"} />
+          <Field label="Type" value={statusLabel(workOrder.type)} />
+          <Field label="Asset" value={workOrder.asset ? `${workOrder.asset.assetTag} · ${workOrder.asset.name}` : "–"} />
+          <Field label="Asset type" value={workOrder.asset?.assetType.name ?? "–"} />
           <Field
             label="Location"
-            value={workOrder.asset?.currentLocation?.name ?? workOrder.asset?.customLocationText ?? "—"}
+            value={workOrder.asset?.currentLocation?.name ?? workOrder.asset?.customLocationText ?? "–"}
           />
-          <Field label="Reported by" value={workOrder.reportedBy?.displayName ?? "—"} />
+          <Field label="Reported by" value={workOrder.reportedBy?.displayName ?? "–"} />
           <Field label="Assigned to" value={workOrder.assignedTo?.displayName ?? "Unassigned"} />
           <Field label="Reported" value={fmt(workOrder.reportedAt)} />
           <Field label="Started" value={fmt(workOrder.startedAt)} />
@@ -91,15 +92,15 @@ export default async function PrintWorkOrderPage({
           <dl className="space-y-2 text-sm">
             <div>
               <dt className="text-xs text-neutral-500">Code</dt>
-              <dd className="text-neutral-900">{workOrder.resolutionCode?.label ?? "—"}</dd>
+              <dd className="text-neutral-900">{workOrder.resolutionCode?.label ?? "–"}</dd>
             </div>
             <div>
               <dt className="text-xs text-neutral-500">Notes</dt>
-              <dd className="whitespace-pre-wrap text-neutral-900">{workOrder.resolutionNotes || "—"}</dd>
+              <dd className="whitespace-pre-wrap text-neutral-900">{workOrder.resolutionNotes || "–"}</dd>
             </div>
             <div>
               <dt className="text-xs text-neutral-500">Labor minutes</dt>
-              <dd className="text-neutral-900">{workOrder.laborMinutes ?? "—"}</dd>
+              <dd className="text-neutral-900">{workOrder.laborMinutes ?? "–"}</dd>
             </div>
           </dl>
         </Section>

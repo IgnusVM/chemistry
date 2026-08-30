@@ -30,7 +30,7 @@ export default async function LoginPage({
         ) : (
           <>
             <p className="mt-1 text-sm text-neutral-500">
-              Sign in with your email — we&apos;ll send you a link.
+              Sign in with your email and we&apos;ll send you a link.
             </p>
             <LoginForm next={next} />
           </>

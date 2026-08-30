@@ -377,7 +377,7 @@ export async function uploadWorkOrderAttachments(
     try {
       await uploadAttachment(key, buffer, file.type);
     } catch {
-      return { error: "Upload failed — storage isn't reachable right now. Try again in a bit." };
+      return { error: "Upload failed. Storage isn't reachable right now, so try again in a bit." };
     }
     await prisma.workOrderAttachment.create({
       data: {
@@ -465,7 +465,7 @@ export async function addWorkOrderPart(
   });
   if (!part) {
     if (!parsed.data.description) {
-      return { error: `"${parsed.data.partNumber}" is a new part — add a description to create it.` };
+      return { error: `"${parsed.data.partNumber}" is a new part. Add a description to create it.` };
     }
     part = await prisma.part.create({
       data: {
@@ -540,7 +540,7 @@ export async function deleteWorkOrderPart(workOrderPartId: string) {
 
 const editSchema = z.object({
   workOrderId: z.string().min(1),
-  title: z.string().trim().min(1, "Give it a title.").max(140, "Keep the title short — the detail belongs below."),
+  title: z.string().trim().min(1, "Give it a title.").max(140, "Keep the title short. The detail belongs below."),
   description: z.string().trim().max(10000).optional(),
   priority: z.enum(WO_PRIORITIES).optional(),
   type: z.enum(WO_TYPES).optional(),

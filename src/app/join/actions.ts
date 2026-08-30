@@ -57,5 +57,5 @@ export async function joinWithInvite(
     };
   }
 
-  return { message: "Account created — check your email for a sign-in link." };
+  return { message: "Account created. Check your email for a sign-in link." };
 }

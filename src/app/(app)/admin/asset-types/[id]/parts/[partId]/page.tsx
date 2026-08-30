@@ -52,7 +52,7 @@ export default async function PartDetailPage({
 
       <div className="rounded-md border border-neutral-200 bg-white p-4">
         <h2 className="text-sm font-semibold text-neutral-900">Links</h2>
-        <p className="text-xs text-neutral-500">Where to buy it and roughly what it costs — no order required.</p>
+        <p className="text-xs text-neutral-500">Where to buy it and roughly what it costs. No order required.</p>
         {part.links.length > 0 ? (
           <ul className="mt-3 divide-y divide-neutral-200">
             {part.links.map((link, i) => (

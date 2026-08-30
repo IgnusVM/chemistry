@@ -60,7 +60,7 @@ export function ClosedWorkOrderView({
                   {workOrder.asset.assetTag}
                 </Link>
               ) : (
-                "—"
+                "–"
               )
             }
           />
@@ -73,15 +73,15 @@ export function ClosedWorkOrderView({
                   {workOrder.reportedBy.displayName}
                 </Link>
               ) : (
-                "—"
+                "–"
               )
             }
           />
           <InfoTile
             label="Assigned to"
-            value={workOrder.assignedTo ? <UserBadgeLabel badge={assignedToBadge} /> : "—"}
+            value={workOrder.assignedTo ? <UserBadgeLabel badge={assignedToBadge} /> : "–"}
           />
-          <InfoTile label="Closed" value={workOrder.closedAt ? workOrder.closedAt.toLocaleDateString() : "—"} />
+          <InfoTile label="Closed" value={workOrder.closedAt ? workOrder.closedAt.toLocaleDateString() : "–"} />
         </div>
 
         <div className="rounded-md border border-neutral-200 bg-white p-4">
@@ -92,15 +92,15 @@ export function ClosedWorkOrderView({
           <dl className="mt-2 space-y-2 text-sm">
             <div>
               <dt className="text-xs text-neutral-500">Code</dt>
-              <dd className="text-neutral-900">{workOrder.resolutionCode?.label ?? "—"}</dd>
+              <dd className="text-neutral-900">{workOrder.resolutionCode?.label ?? "–"}</dd>
             </div>
             <div>
               <dt className="text-xs text-neutral-500">Notes</dt>
-              <dd className="whitespace-pre-wrap text-neutral-900">{workOrder.resolutionNotes || "—"}</dd>
+              <dd className="whitespace-pre-wrap text-neutral-900">{workOrder.resolutionNotes || "–"}</dd>
             </div>
             <div>
               <dt className="text-xs text-neutral-500">Labor minutes</dt>
-              <dd className="text-neutral-900">{workOrder.laborMinutes ?? "—"}</dd>
+              <dd className="text-neutral-900">{workOrder.laborMinutes ?? "–"}</dd>
             </div>
           </dl>
         </div>
@@ -182,7 +182,7 @@ export function ClosedWorkOrderView({
         <div className="space-y-2 rounded-md border border-neutral-200 bg-white p-4">
           <h2 className="text-sm font-semibold text-neutral-900">Closed</h2>
           <p className="text-xs text-neutral-500">
-            This work order is closed — everything above is locked. Reopen it to make changes.
+            This work order is closed, so everything above is locked. Reopen it to make changes.
           </p>
           <Link href={`/work-orders/${workOrder.code}/print`} className={buttonClass("secondary", "w-full")}>
             <Printer className="h-4 w-4" />

@@ -51,7 +51,7 @@ export function NoteEditor({
           rows={5}
           value={markdown}
           onChange={(e) => setMarkdown(e.target.value)}
-          placeholder={`${placeholder} Markdown supported — **bold**, lists, and fenced code blocks.`}
+          placeholder={`${placeholder} Markdown supported: **bold**, lists, and fenced code blocks.`}
           className="w-full rounded-md border border-neutral-300 px-2 py-1.5 font-mono text-sm"
         />
       )}

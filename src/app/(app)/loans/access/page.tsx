@@ -5,7 +5,7 @@ import { grantableDepartments } from "@/lib/loans";
 import { GrantForm } from "./grant-form";
 import { RevokeButton } from "./revoke-button";
 
-export const metadata = { title: "Check-out access — Chemistry" };
+export const metadata = { title: "Check-out access · Chemistry" };
 
 export default async function LoanAccessPage() {
   await requireCurrentUser();

@@ -14,7 +14,7 @@ export function PinForm({ hasPin }: { hasPin: boolean }) {
           {hasPin ? "Change your PIN" : "Set a PIN"}
         </h2>
         <p className="text-xs text-neutral-500">
-          Once set, signing in again on this device just needs the PIN — no email round-trip.
+          Once set, signing in again on this device just needs the PIN, with no email round-trip.
         </p>
       </div>
       <div className="flex flex-wrap gap-3">

@@ -26,7 +26,7 @@ export function BadgeForm({
   return (
     <div className="rounded-md border border-neutral-200 bg-white p-4">
       <h2 className="text-sm font-semibold text-neutral-900">Badge</h2>
-      <p className="text-xs text-neutral-500">Shown as a small icon next to your name on notes, work orders, and attachments — only used when no profile picture is set.</p>
+      <p className="text-xs text-neutral-500">Shown as a small icon next to your name on notes, work orders, and attachments. It is only used when no profile picture is set.</p>
 
       <form
         onSubmit={(e) => {

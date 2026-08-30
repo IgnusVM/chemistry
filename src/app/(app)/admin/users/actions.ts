@@ -132,7 +132,7 @@ export async function deleteUser(userId: string) {
   if (target.isOrgAdmin) {
     const otherAdminCount = await prisma.user.count({ where: { isOrgAdmin: true, id: { not: userId } } });
     if (otherAdminCount === 0) {
-      throw new Error("Can't delete the last org admin — grant someone else admin first.");
+      throw new Error("Can't delete the last org admin. Grant someone else admin first.");
     }
   }
 
@@ -244,7 +244,7 @@ export async function toggleOrgAdmin(userId: string, isOrgAdmin: boolean) {
       where: { isOrgAdmin: true, id: { not: userId } },
     });
     if (otherAdminCount === 0) {
-      throw new Error("Can't remove the last org admin — grant someone else admin first.");
+      throw new Error("Can't remove the last org admin. Grant someone else admin first.");
     }
   }
 

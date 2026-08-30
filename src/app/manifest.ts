@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Chemistry — Alchemy Asset Management",
+    name: "Chemistry · Alchemy Asset Management",
     short_name: "Chemistry",
     description: "Asset management and work orders for Alchemy departments.",
     // Installed app opens straight to the mobile-first home, not the desktop dashboard.

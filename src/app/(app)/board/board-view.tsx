@@ -196,7 +196,7 @@ export function BoardViewGrid({
       {!board.owner.active ? (
         <p className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-xs text-neutral-600">
           <Lock className="h-3.5 w-3.5" aria-hidden />
-          {board.owner.name} is deactivated — this board is read-only.
+          {board.owner.name} is deactivated, so this board is read-only.
         </p>
       ) : null}
 

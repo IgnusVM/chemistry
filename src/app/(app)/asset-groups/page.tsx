@@ -45,7 +45,7 @@ export default async function AssetGroupsPage() {
                   </Link>
                 </td>
                 <td className="hidden px-2 py-2 text-neutral-500 sm:table-cell sm:px-4">
-                  {group.description ?? "—"}
+                  {group.description ?? "–"}
                 </td>
                 <td className="px-3 py-2 sm:px-4">{group._count.members}</td>
                 <td className="px-3 py-2 sm:px-4 text-neutral-500">{group.createdAt.toLocaleDateString()}</td>

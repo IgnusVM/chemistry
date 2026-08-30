@@ -51,7 +51,7 @@ export function BulkNewForm({ assetIds }: { assetIds: string[] }) {
       </div>
 
       <p className="text-xs text-neutral-400">
-        Each work order&rsquo;s department is taken from its own asset — not chosen here.
+        Each work order&rsquo;s department is taken from its own asset, not chosen here.
       </p>
 
       <Button type="submit" pending={pending} pendingText="Creating…">

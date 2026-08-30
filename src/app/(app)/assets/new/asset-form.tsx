@@ -122,7 +122,7 @@ export function AssetForm({
             <Field key={field.key} label={field.label + (field.required ? " *" : "")}>
               {field.type === "select" ? (
                 <select name={`cf_${field.key}`} required={field.required} className={inputClass}>
-                  <option value="">—</option>
+                  <option value="">Select…</option>
                   {field.options?.map((opt) => (
                     <option key={opt} value={opt}>
                       {opt}

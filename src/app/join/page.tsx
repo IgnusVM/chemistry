@@ -16,7 +16,7 @@ export default async function JoinPage({
         <h1 className="text-xl font-semibold text-neutral-900">Chemistry</h1>
         {invite && token ? (
           <>
-            <p className="mt-1 text-sm text-neutral-500">You&apos;ve been invited — create your account.</p>
+            <p className="mt-1 text-sm text-neutral-500">You&apos;ve been invited. Create your account.</p>
             <JoinForm token={token} />
           </>
         ) : (

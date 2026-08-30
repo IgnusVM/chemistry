@@ -7,7 +7,7 @@ import { resolveBadges } from "@/lib/user-badge-data";
 import { UserBadgeLabel } from "@/components/user-badge";
 import { HelpLink } from "@/components/help-link";
 
-export const metadata = { title: "Checked out — Chemistry" };
+export const metadata = { title: "Checked out · Chemistry" };
 
 export default async function LoansPage() {
   const user = await requireCurrentUser();

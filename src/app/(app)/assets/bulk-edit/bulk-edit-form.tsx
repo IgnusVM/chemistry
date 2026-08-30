@@ -22,7 +22,7 @@ export function BulkEditForm({ ids, locations }: { ids: string[]; locations: Loc
       <div>
         <label className={`block text-xs font-medium text-neutral-600`}>Status</label>
         <select name="status" defaultValue="" className={`${inputClass} mt-1`}>
-          <option value="">— No change —</option>
+          <option value="">(No change)</option>
           {ASSET_STATUSES.map((s) => (
             <option key={s} value={s}>
               {s.replace("_", " ")}
@@ -39,7 +39,7 @@ export function BulkEditForm({ ids, locations }: { ids: string[]; locations: Loc
           onChange={(e) => setLocationChange(e.target.value as "none" | "clear" | "set")}
           className={`${inputClass} mt-1`}
         >
-          <option value="none">— No change —</option>
+          <option value="none">(No change)</option>
           <option value="clear">Clear location</option>
           <option value="set">Set to…</option>
         </select>

@@ -51,7 +51,7 @@ export default async function BulkNewWorkOrdersPage({
         <div className="max-h-40 overflow-y-auto text-sm text-neutral-600">
           {assets.map((a) => (
             <div key={a.id}>
-              <span className="font-medium text-neutral-900">{a.assetTag}</span> — {a.name}{" "}
+              <span className="font-medium text-neutral-900">{a.assetTag}</span> · {a.name}{" "}
               <span className="text-neutral-400">({a.owningDepartment.name})</span>
             </div>
           ))}

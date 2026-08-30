@@ -71,7 +71,7 @@ export function EditAssetTypeForm({
             defaultValue={assetType.defaultDepartmentId ?? ""}
             className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
           >
-            <option value="">—</option>
+            <option value="">(None)</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}
@@ -93,7 +93,7 @@ export function EditAssetTypeForm({
         </div>
       </div>
       <p className="text-xs text-neutral-400">
-        Pre-fills each new asset&rsquo;s value at creation — editable per-asset afterward.
+        Pre-fills each new asset&rsquo;s value at creation, and stays editable per-asset afterward.
       </p>
 
       <label className="flex items-start gap-2 text-sm text-neutral-700">

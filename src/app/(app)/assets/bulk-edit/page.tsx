@@ -46,7 +46,7 @@ export default async function BulkEditAssetsPage({
         </Link>
         <h1 className="text-lg font-semibold text-neutral-900">Bulk edit {assets.length} assets</h1>
         <p className="text-sm text-neutral-500">
-          Only status and location can be changed in bulk — everything else stays per-asset.
+          Only status and location can be changed in bulk. Everything else stays per-asset.
         </p>
       </div>
 
@@ -54,7 +54,7 @@ export default async function BulkEditAssetsPage({
         <div className="max-h-40 overflow-y-auto text-sm text-neutral-600">
           {assets.map((a) => (
             <div key={a.id}>
-              <span className="font-medium text-neutral-900">{a.assetTag}</span> — {a.name}
+              <span className="font-medium text-neutral-900">{a.assetTag}</span> · {a.name}
             </div>
           ))}
         </div>

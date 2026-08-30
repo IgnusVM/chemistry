@@ -33,7 +33,7 @@ export function AssetTypeForm({
         <div>
           <label className="block text-xs font-medium text-neutral-600">Default department</label>
           <select name="defaultDepartmentId" className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
-            <option value="">—</option>
+            <option value="">(None)</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}

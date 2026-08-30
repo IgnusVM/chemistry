@@ -108,7 +108,7 @@ export default async function AssetDetailPage({
               <div key={def.key}>
                 <dt className="text-xs text-neutral-500">{def.label}</dt>
                 <dd className="flex items-center gap-1 text-neutral-900">
-                  <span className="min-w-0 break-all">{String(customFields[def.key] ?? "—")}</span>
+                  <span className="min-w-0 break-all">{String(customFields[def.key] ?? "–")}</span>
                   {customFields[def.key] ? (
                     <CopyButton value={String(customFields[def.key])} label={def.label} />
                   ) : null}
@@ -275,12 +275,12 @@ export default async function AssetDetailPage({
                 {asset.customLocationText} <CustomLocationMark />
               </>
             ) : (
-              "—"
+              "–"
             )
           }
         />
-        <InfoTile label="Value" value={asset.acquisitionCost ? `$${asset.acquisitionCost.toString()}` : "—"} />
-        <InfoTile label="Acquired" value={asset.acquisitionDate ? asset.acquisitionDate.toLocaleDateString() : "—"} />
+        <InfoTile label="Value" value={asset.acquisitionCost ? `$${asset.acquisitionCost.toString()}` : "–"} />
+        <InfoTile label="Acquired" value={asset.acquisitionDate ? asset.acquisitionDate.toLocaleDateString() : "–"} />
         <InfoTile label="Created" value={asset.createdAt.toLocaleDateString()} />
       </div>
 
@@ -356,7 +356,7 @@ function InfoTile({ label, value }: { label: string; value: React.ReactNode }) {
 
 function CustomLocationMark() {
   return (
-    <span title="Custom location — not on the standard locations list" className="text-amber-500">
+    <span title="Custom location, not on the standard locations list" className="text-amber-500">
       *
     </span>
   );

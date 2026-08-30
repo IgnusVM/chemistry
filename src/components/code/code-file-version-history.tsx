@@ -81,7 +81,7 @@ export function CodeFileVersionHistory({
                   />
                 </td>
                 <td className="py-2 pr-2 text-neutral-900">
-                  {v.message || (i === versions.length - 1 ? "Initial version" : "—")}
+                  {v.message || (i === versions.length - 1 ? "Initial version" : "–")}
                 </td>
                 <td className="py-2 pr-2 text-neutral-500">{v.createdBy?.displayName ?? "Unknown"}</td>
                 <td className="py-2 pr-2 text-neutral-500">{v.createdAt.toLocaleString()}</td>
@@ -91,7 +91,7 @@ export function CodeFileVersionHistory({
                       {v.workOrder.code}
                     </Link>
                   ) : (
-                    "—"
+                    "–"
                   )}
                 </td>
                 <td className="py-2 text-right">

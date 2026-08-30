@@ -97,7 +97,7 @@ export default async function AssetGroupDetailPage({
                     {member.asset.owningDepartment.name}
                   </td>
                   <td className="hidden px-2 py-2 text-neutral-500 sm:px-4 md:table-cell">
-                    {member.asset.currentLocation?.name ?? "—"}
+                    {member.asset.currentLocation?.name ?? "–"}
                   </td>
                   <td className="px-3 py-2 sm:px-4">
                     <span className={`rounded-full px-2 py-0.5 text-xs ${ASSET_STATUS_STYLES[member.asset.status]}`}>

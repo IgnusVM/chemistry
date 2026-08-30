@@ -85,7 +85,7 @@ export async function bulkCloseWorkOrders(
 
     if (newPartAssetTypeIds.length > 0 && !data.partDescription?.trim()) {
       return {
-        error: `"${partNumber}" is a new part for ${newPartAssetTypeIds.length} of the asset type(s) involved — add a description to create it.`,
+        error: `"${partNumber}" is a new part for ${newPartAssetTypeIds.length} of the asset type(s) involved. Add a description to create it.`,
       };
     }
 

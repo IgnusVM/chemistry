@@ -42,7 +42,7 @@ export default async function BulkNewWorkOrdersDonePage({
                 {wo.code}
               </Link>
               <span className="text-neutral-500">
-                {wo.asset?.assetTag ?? "—"} · {(wo.title || wo.description).length > 50 ? `${(wo.title || wo.description).slice(0, 50)}…` : wo.title || wo.description}
+                {wo.asset?.assetTag ?? "–"} · {(wo.title || wo.description).length > 50 ? `${(wo.title || wo.description).slice(0, 50)}…` : wo.title || wo.description}
               </span>
             </li>
           ))}

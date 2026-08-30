@@ -24,7 +24,7 @@ export function ContactForm({
       <div>
         <h2 className="text-sm font-semibold text-neutral-900">Contact info</h2>
         <p className="text-xs text-neutral-500">
-          Optional — only used for work order and asset notifications you opt into.
+          Optional, and only used for work order and asset notifications you opt into.
         </p>
       </div>
       <div>
@@ -57,7 +57,7 @@ export function ContactForm({
         <input
           name="contactDuringBurnOther"
           defaultValue={contactDuringBurnOther ?? ""}
-          placeholder="Other instructions — camp location, radio channel, etc."
+          placeholder="Other instructions: camp location, radio channel, and so on"
           className="mt-2 w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
         />
       </div>

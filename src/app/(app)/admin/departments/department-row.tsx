@@ -56,7 +56,7 @@ export function DepartmentRow({
             <div>
               <label className="block text-xs font-medium text-neutral-600">Division</label>
               <select name="divisionId" defaultValue={department.divisionId ?? ""} className={`mt-1 ${inputClass}`}>
-                <option value="">—</option>
+                <option value="">(None)</option>
                 {divisions.map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.name}
@@ -84,7 +84,7 @@ export function DepartmentRow({
   return (
     <tr>
       <td className="px-4 py-2 font-medium text-neutral-900">{department.name}</td>
-      <td className="px-4 py-2 text-neutral-500">{department.divisionName ?? "—"}</td>
+      <td className="px-4 py-2 text-neutral-500">{department.divisionName ?? "–"}</td>
       <td className="px-4 py-2 text-neutral-500">{department.slug}</td>
       <td className="px-4 py-2">{department.assetCount}</td>
       <td className="px-4 py-2">{department.memberCount}</td>

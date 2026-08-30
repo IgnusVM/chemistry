@@ -203,7 +203,7 @@ export function BulkAssetForm({
         </Field>
       </div>
 
-      <Field label="Value ($) — same for every asset in this batch">
+      <Field label="Value ($), same for every asset in this batch">
         <input
           name="acquisitionCost"
           type="number"
@@ -220,13 +220,13 @@ export function BulkAssetForm({
       {selectedType && selectedType.fields.length > 0 && (
         <div className="space-y-3 rounded-md bg-neutral-50 p-3">
           <div className="text-xs font-medium text-neutral-600">
-            {selectedType.name} fields — same value applied to every asset in this batch
+            {selectedType.name} fields, with the same value applied to every asset in this batch
           </div>
           {selectedType.fields.map((field) => (
             <Field key={field.key} label={field.label}>
               {field.type === "select" ? (
                 <select name={`cf_${field.key}`} className={inputClass}>
-                  <option value="">—</option>
+                  <option value="">Select…</option>
                   {field.options?.map((opt) => (
                     <option key={opt} value={opt}>
                       {opt}

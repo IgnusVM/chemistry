@@ -30,7 +30,7 @@ export function LocationField({
         onChange={(e) => setValue(e.target.value)}
         className={`${inputClass}${label ? " mt-1" : ""}`}
       >
-        <option value="">—</option>
+        <option value="">(None)</option>
         {locations.map((l) => (
           <option key={l.id} value={l.id}>
             {l.name}

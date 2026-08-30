@@ -77,7 +77,7 @@ export default async function AssetTypeDetailPage({ params }: { params: Promise<
           <h2 className="text-sm font-semibold text-neutral-900">Documents</h2>
           <HelpLink topic="Asset type documents" article="photos-documents/asset-type-documents" />
         </div>
-        <p className="text-sm text-neutral-500">Service manuals, schematics, spec sheets — anything worth keeping with this asset type.</p>
+        <p className="text-sm text-neutral-500">Service manuals, schematics, spec sheets: anything worth keeping with this asset type.</p>
         {assetType.documents.length > 0 && (
           <ul className="mt-3 divide-y divide-neutral-200">
             {assetType.documents.map((doc, i) => (
@@ -105,7 +105,7 @@ export default async function AssetTypeDetailPage({ params }: { params: Promise<
       <div className="rounded-md border border-neutral-200 bg-white p-4">
         <h2 className="text-sm font-semibold text-neutral-900">Parts</h2>
         <p className="text-sm text-neutral-500">
-          Parts known for this asset type — new ones are added automatically the first time they&rsquo;re
+          Parts known for this asset type. New ones are added automatically the first time they&rsquo;re
           logged as used on a work order, or add one directly below.
         </p>
         {assetType.parts.length > 0 && (
@@ -134,7 +134,7 @@ export default async function AssetTypeDetailPage({ params }: { params: Promise<
                     <td className="py-2 pr-2 text-neutral-600">{part.description}</td>
                     <td className="py-2 pr-2 text-neutral-500">{part.orders.length}</td>
                     <td className="py-2 pr-2 text-neutral-500">
-                      {part.orders[0]?.price ? `$${part.orders[0].price.toString()}` : "—"}
+                      {part.orders[0]?.price ? `$${part.orders[0].price.toString()}` : "–"}
                     </td>
                     <td className="py-2 text-right">
                       <DeletePartButton partId={part.id} />

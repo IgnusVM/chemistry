@@ -60,7 +60,7 @@ export function TagManager({ tags }: { tags: Tag[] }) {
                 {editState?.error && <p className="w-full text-sm text-red-600">{editState.error}</p>}
               </form>
               <p className="mt-2 text-xs text-neutral-500">
-                Renaming or recolouring changes this tag everywhere it is used — it is one tag across
+                Renaming or recolouring changes this tag everywhere it is used. It is one tag across
                 every board, which is what makes filtering by it mean anything.
               </p>
             </li>
@@ -93,7 +93,7 @@ export function TagManager({ tags }: { tags: Tag[] }) {
         )}
         {tags.length === 0 && (
           <li className="text-sm text-neutral-500">
-            No tags yet. Tags are usually a team — add one above and it becomes available on every board.
+            No tags yet. Tags are usually a team. Add one above and it becomes available on every board.
           </li>
         )}
       </ul>

@@ -29,7 +29,7 @@ export function DepartmentForm({ divisions }: { divisions: { id: string; name: s
       <div>
         <label className="block text-xs font-medium text-neutral-600">Division</label>
         <select name="divisionId" className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
-          <option value="">—</option>
+          <option value="">(None)</option>
           {divisions.map((d) => (
             <option key={d.id} value={d.id}>
               {d.name}

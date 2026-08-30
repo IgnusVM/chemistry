@@ -181,7 +181,7 @@ export async function uploadAssetTypeDocuments(
     try {
       await uploadAttachment(key, buffer, file.type);
     } catch {
-      return { error: "Upload failed — storage isn't reachable right now. Try again in a bit." };
+      return { error: "Upload failed. Storage isn't reachable right now, so try again in a bit." };
     }
     await prisma.assetTypeDocument.create({
       data: {

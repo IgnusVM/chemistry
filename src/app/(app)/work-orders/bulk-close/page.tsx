@@ -46,7 +46,7 @@ export default async function BulkCloseWorkOrdersPage({
         </Link>
         <h1 className="text-lg font-semibold text-neutral-900">Bulk close {workOrders.length} work orders</h1>
         <p className="text-sm text-neutral-500">
-          Only fields universal to every selected work order are shown — asset stays per-work-order.
+          Only fields universal to every selected work order are shown. The asset stays per-work-order.
         </p>
       </div>
 
@@ -54,7 +54,7 @@ export default async function BulkCloseWorkOrdersPage({
         <div className="max-h-40 overflow-y-auto text-sm text-neutral-600">
           {workOrders.map((wo) => (
             <div key={wo.id}>
-              <span className="font-medium text-neutral-900">{wo.code}</span> — {wo.title || wo.description}
+              <span className="font-medium text-neutral-900">{wo.code}</span> · {wo.title || wo.description}
               {wo.asset && <span className="text-neutral-400"> · {wo.asset.assetTag}</span>}
               {wo.status === "CLOSED" && <span className="ml-1 text-xs text-neutral-400">(already closed)</span>}
             </div>

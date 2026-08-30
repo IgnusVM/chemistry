@@ -189,7 +189,7 @@ export default async function AssetsPage({
                           {asset.customLocationText} <span className="text-amber-500">*</span>
                         </>
                       ) : (
-                        "—"
+                        "–"
                       ))}
                   </td>
                   <td className="px-3 py-2 sm:px-4">

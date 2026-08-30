@@ -183,14 +183,14 @@ export default async function WorkOrdersPage({
                         {wo.asset.assetTag}
                       </Link>
                     ) : (
-                      "—"
+                      "–"
                     )}
                   </td>
                   <td className="hidden px-3 py-2 sm:px-4 text-neutral-500 lg:table-cell">{wo.department.name}</td>
                   <td className={`hidden px-3 py-2 sm:px-4 md:table-cell ${PRIORITY_STYLES[wo.priority]}`}>
                     {wo.priority.replace("_", " ")}
                   </td>
-                  <td className="hidden px-3 py-2 sm:px-4 text-neutral-500 lg:table-cell">{wo.assignedTo?.displayName ?? "—"}</td>
+                  <td className="hidden px-3 py-2 sm:px-4 text-neutral-500 lg:table-cell">{wo.assignedTo?.displayName ?? "–"}</td>
                   <td className="px-3 py-2 sm:px-4">
                     <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[wo.status]}`}>
                       {wo.status.replace("_", " ")}
