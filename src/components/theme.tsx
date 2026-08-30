@@ -1,9 +1,9 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useSyncExternalStore } from "react";
-import { Monitor, Moon, Sun } from "lucide-react";
+import { createContext, useCallback, useContext, useSyncExternalStore } from "react";
+import { Moon, Sun } from "lucide-react";
 
-export type Theme = "light" | "dark" | "system";
+export type Theme = "light" | "dark";
 
 export const THEME_STORAGE_KEY = "chemistry.theme";
 
@@ -14,13 +14,7 @@ export const THEME_STORAGE_KEY = "chemistry.theme";
  * that copy has to be inlined into the document head with no bundle involved.
  */
 function apply(theme: Theme) {
-  const effective =
-    theme === "system"
-      ? window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light"
-      : theme;
-  document.documentElement.classList.toggle("dark", effective === "dark");
+  document.documentElement.classList.toggle("dark", theme === "dark");
 }
 
 /**
@@ -35,11 +29,15 @@ const THEME_EVENT = "chemistry:themechange";
 function readTheme(): Theme {
   try {
     const t = localStorage.getItem(THEME_STORAGE_KEY);
-    if (t === "light" || t === "dark" || t === "system") return t;
+    if (t === "light" || t === "dark") return t;
   } catch {
     // Private mode or blocked storage — fall through to the default.
   }
-  return "system";
+  // Light is the default and there is no "follow the system" option. Following
+  // the OS meant someone whose phone sits in night mode met an app in a theme
+  // they never chose, on a first visit, with no obvious way to explain it.
+  // Two states, both chosen on purpose.
+  return "light";
 }
 
 function subscribe(onChange: () => void) {
@@ -52,22 +50,12 @@ function subscribe(onChange: () => void) {
 }
 
 const ThemeContext = createContext<{ theme: Theme; setTheme: (t: Theme) => void }>({
-  theme: "system",
+  theme: "light",
   setTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const theme = useSyncExternalStore(subscribe, readTheme, () => "system" as Theme);
-
-  // Follow the OS while in "system" mode. This one is a genuine subscription to
-  // an outside system, which is what effects are for.
-  useEffect(() => {
-    if (theme !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => apply("system");
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, [theme]);
+  const theme = useSyncExternalStore(subscribe, readTheme, () => "light" as Theme);
 
   const setTheme = useCallback((t: Theme) => {
     try {
@@ -90,17 +78,16 @@ export const useTheme = () => useContext(ThemeContext);
  * genuinely unpleasant at night — the exact time this feature matters.
  */
 export function ThemeScript() {
-  const js = `try{var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});var d=t==="dark"||((t==="system"||!t)&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d)}catch(e){}`;
+  const js = `try{var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});document.documentElement.classList.toggle("dark",t==="dark")}catch(e){}`;
   return <script dangerouslySetInnerHTML={{ __html: js }} />;
 }
 
 const OPTIONS: { value: Theme; label: string; Icon: typeof Sun }[] = [
   { value: "light", label: "Light", Icon: Sun },
   { value: "dark", label: "Dark", Icon: Moon },
-  { value: "system", label: "System", Icon: Monitor },
 ];
 
-/** Segmented light / dark / system control. */
+/** Segmented light / dark control. */
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
@@ -132,17 +119,17 @@ export function ThemeToggle() {
   );
 }
 
-/** Compact icon-only cycle, for the nav bar where there's no room for three buttons. */
+/** Compact icon-only toggle, for the nav bar where there's no room for two buttons. */
 export function ThemeCycleButton({ className = "" }: { className?: string }) {
   const { theme, setTheme } = useTheme();
-  const next: Record<Theme, Theme> = { light: "dark", dark: "system", system: "light" };
-  const Icon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
+  const next: Theme = theme === "light" ? "dark" : "light";
+  const Icon = theme === "light" ? Sun : Moon;
 
   return (
     <button
       type="button"
-      onClick={() => setTheme(next[theme])}
-      aria-label={`Theme: ${theme}. Switch to ${next[theme]}.`}
+      onClick={() => setTheme(next)}
+      aria-label={`Theme: ${theme}. Switch to ${next}.`}
       title={`Theme: ${theme}`}
       className={`rounded-md p-1.5 text-neutral-500 hover:text-neutral-900 ${className}`}
     >

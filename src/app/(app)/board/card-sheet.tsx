@@ -99,7 +99,7 @@ export function CardSheet({
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute inset-0 bg-neutral-900/40"
+        className="absolute inset-0 bg-black/40"
       />
       {/* Clear the fixed mobile tab bar on phones, or the last column option
           sits behind it and cannot be tapped. Matches the padding the nav's

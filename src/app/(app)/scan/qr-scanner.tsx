@@ -180,7 +180,7 @@ export function QrScanner() {
 
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-xl bg-neutral-900">
+      <div className="relative overflow-hidden rounded-xl bg-black">
         <video
           ref={videoRef}
           playsInline

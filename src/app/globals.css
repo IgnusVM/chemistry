@@ -2,7 +2,7 @@
 @plugin "@tailwindcss/typography";
 
 /* Class-based dark mode. Tailwind v4 defaults `dark:` to prefers-color-scheme,
-   but the theme is user-selectable (light / dark / follow the system), so it has
+   but the theme is user-selectable (light or dark, no follow-the-system), so it has
    to key off a class we control on <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -203,6 +203,28 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/*
+ * Native form controls need a real background, not a transparent one.
+ *
+ * Tailwind's preflight resets these to `background-color: transparent`. On the
+ * page that looks right in both themes, because the surface behind shows
+ * through. The drop-down a <select> opens is different: it is drawn by the
+ * browser, and with no background of its own it lands on a light system surface
+ * while the option text keeps the near-white colour inherited from the dark
+ * theme. White on white — the list was there and unreadable.
+ *
+ * Setting it through the palette variables fixes both themes at once, since
+ * --color-white is the raised-surface colour in each.
+ */
+@layer base {
+  select,
+  option,
+  optgroup {
+    background-color: var(--color-white);
+    color: var(--color-neutral-900);
+  }
+}
+
 /* Every interactive element gets a visible focus ring, app-wide — most
    small inline buttons (Edit/Cancel/Remove links, tab strips) are plain
    `<button>`s that don't go through the shared <Button> component and
@@ -243,3 +265,17 @@ body {
     background-position: 0% 50%;
   }
 }
+
+/*
+ * A note on neutral-900 for surfaces.
+ *
+ * `--color-neutral-900` is *text* in the light theme and inverts to near-white
+ * in the dark one. So `bg-neutral-900` is a dark surface in light mode and a
+ * WHITE one in dark mode. Three modal scrims and the camera viewfinder were
+ * written that way: in dark mode the scrims veiled the page in white instead of
+ * darkening it, and the viewfinder turned white underneath permanently-white
+ * overlay text.
+ *
+ * Use `bg-black` for anything that must stay dark in both themes — `--color-black`
+ * is deliberately not remapped — and `text-onaccent` for what sits on it.
+ */
