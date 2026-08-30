@@ -14,7 +14,9 @@
  */
 export function ChemistryLogo() {
   return (
-    <div className="flex items-center gap-3 sm:gap-6">
+    // The mark carries ~3% transparent padding of its own, so the optical gap
+    // runs a little wider than the gap utility alone suggests.
+    <div className="flex items-center gap-2 sm:gap-4">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/chemistry-logo.webp"
