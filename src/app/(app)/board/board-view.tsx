@@ -218,7 +218,14 @@ export function BoardViewGrid({
             // to swipe. Desktop: share the row equally, so a five-column board
             // fits on screen with no horizontal scrolling at all. min-w keeps
             // a board with many columns from squeezing cards unreadable.
-            className={`flex min-h-[60vh] w-[78vw] shrink-0 snap-start flex-col rounded-xl border bg-neutral-50 transition-colors sm:min-h-[28rem] sm:w-72 lg:w-auto lg:min-w-[15rem] lg:flex-1 lg:shrink ${
+            //
+            // The height is CAPPED, not just floored. Previously only min-height
+            // was set, so a column with 23 cards grew to 2400px and the page
+            // scrolled instead of the column — which defeats the point, because
+            // scrolling one column dragged every other column off screen too.
+            // Bounded here, the list's own overflow-y finally has something to
+            // scroll against. dvh so mobile browser chrome doesn't cut it off.
+            className={`flex h-[calc(100dvh-18rem)] max-h-[calc(100dvh-18rem)] min-h-[20rem] w-[78vw] shrink-0 snap-start flex-col rounded-xl border bg-neutral-50 transition-colors sm:h-[calc(100dvh-14rem)] sm:max-h-[calc(100dvh-14rem)] sm:w-72 lg:w-auto lg:min-w-[15rem] lg:flex-1 lg:shrink ${
               isOver && droppable
                 ? "border-fuchsia-400 bg-fuchsia-50"
                 : isOver && cardDrag.active

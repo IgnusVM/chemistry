@@ -39,10 +39,16 @@ export function BoardCardView({ card, density = "comfortable" }: { card: BoardCa
   // still works either way.
   if (density === "compact") {
     return (
-      <article className="rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-left shadow-sm">
-        <div className="flex items-start gap-1.5">
-          <span className="min-w-0 flex-1 text-[13px] leading-snug text-neutral-900">{card.title}</span>
-          <span className="mt-0.5 flex shrink-0 items-center gap-1">
+      // One line, always. Compact exists to get a whole column on screen at
+      // once, and a wrapping title makes row height depend on how wordy someone
+      // was — two cards became as tall as four and the count you can see at a
+      // glance stopped being predictable. The full title is one tap away.
+      <article className="rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-left shadow-sm">
+        <div className="flex items-center gap-1.5">
+          <span className="min-w-0 flex-1 truncate text-[13px] leading-snug text-neutral-900" title={card.title}>
+            {card.title}
+          </span>
+          <span className="flex shrink-0 items-center gap-1">
             {card.workOrder ? (
               <ClipboardList className="h-3 w-3 text-sky-600" aria-label={`Work order ${card.workOrder.code}`} />
             ) : null}
