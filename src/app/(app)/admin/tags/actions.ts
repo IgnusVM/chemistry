@@ -39,6 +39,28 @@ export async function createTag(_prev: TagFormState, formData: FormData): Promis
   revalidatePath("/board");
 }
 
+export async function updateTag(_prev: TagFormState, formData: FormData): Promise<TagFormState> {
+  const admin = await requireOrgAdmin();
+  const tagId = String(formData.get("tagId") ?? "");
+  if (!tagId) return { error: "Missing tag." };
+
+  const parsed = tagSchema.safeParse({
+    name: formData.get("name"),
+    color: formData.get("color") || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+
+  // Renaming onto another tag's name would break the promise that a tag means
+  // one thing org-wide.
+  const clash = await prisma.tag.findUnique({ where: { name: parsed.data.name } });
+  if (clash && clash.id !== tagId) return { error: `"${parsed.data.name}" already exists.` };
+
+  await prisma.tag.update({ where: { id: tagId }, data: parsed.data });
+  await recordAudit({ entityType: "Tag", entityId: tagId, action: "updated", userId: admin.id, changes: parsed.data });
+  revalidatePath("/admin/tags");
+  revalidatePath("/board");
+}
+
 export async function deleteTag(tagId: string): Promise<void> {
   const admin = await requireOrgAdmin();
   // Cards survive; only the assignments go. Deleting a tag should never

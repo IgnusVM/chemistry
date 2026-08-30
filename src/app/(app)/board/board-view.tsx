@@ -38,10 +38,21 @@ function applyMove(cols: Columns, mv: { cardId: string; toColumnId: string }): C
  */
 const ACCENT: Record<string, string> = {
   slate: "bg-slate-400",
-  sky: "bg-sky-400",
+  stone: "bg-stone-400",
+  red: "bg-red-400",
+  orange: "bg-orange-400",
   amber: "bg-amber-400",
-  rose: "bg-rose-400",
+  lime: "bg-lime-400",
   emerald: "bg-emerald-400",
+  teal: "bg-teal-400",
+  cyan: "bg-cyan-400",
+  sky: "bg-sky-400",
+  blue: "bg-blue-400",
+  indigo: "bg-indigo-400",
+  violet: "bg-violet-400",
+  purple: "bg-purple-400",
+  pink: "bg-pink-400",
+  rose: "bg-rose-400",
 };
 
 /**

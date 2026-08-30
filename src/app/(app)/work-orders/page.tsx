@@ -118,7 +118,7 @@ export default async function WorkOrdersPage({
         <SelectionToolbar
           entityType="WorkOrder"
           filterParams={{ q, department, status, priority, mine, assignedToName }}
-          actions={[{ label: "Bulk close selected", targetPath: "/work-orders/bulk-close" }]}
+          actions={[{ label: "Close selected", targetPath: "/work-orders/bulk-close" }]}
         />
 
         <div className="overflow-x-auto rounded-md border border-neutral-200 bg-white">
