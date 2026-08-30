@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { getRandomQuote } from "@/lib/quotes";
 import { ChemistryLogo } from "./chemistry-logo";
+import { DashboardQuote } from "./dashboard-quote";
 import { NewWorkOrderButton } from "./new-work-order-button";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
 import { TERMINAL_WO_STATUSES } from "@/lib/constants";
@@ -27,10 +28,7 @@ export default async function DashboardPage() {
     <div className="max-w-5xl space-y-8">
       <ChemistryLogo />
 
-      <blockquote className="border-l-2 border-neutral-200 pl-4">
-        <p className="text-sm italic text-neutral-600">&ldquo;{quote.text}&rdquo;</p>
-        <footer className="mt-1 text-xs text-neutral-400">— {quote.author}</footer>
-      </blockquote>
+      <DashboardQuote quote={quote} />
 
       <NewWorkOrderButton />
 
