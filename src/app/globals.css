@@ -25,6 +25,29 @@
   --color-neutral-500: #5f5f5f;
 }
 
+/*
+ * SPACING: how far content sits from the edge that encloses it.
+ *
+ * There was no rule, only values chosen per component, and it showed: one board
+ * column stacked a 12px header, an 8px card list and a 4px capture form down a
+ * single edge. Each was defensible alone; together they looked like a mistake.
+ *
+ *   px-1.5  (6px)   chips and pills only — a badge is sized by its text
+ *   p-3    (12px)   dense rows, compact cards, list rows
+ *   p-4    (16px)   panels, cards, dialogs, anything that reads as a surface
+ *
+ * Two rules that matter more than the numbers:
+ *
+ *   1. One inset per container edge. Everything stacked inside a card shares
+ *      the card's left edge — header, body and footer alike.
+ *   2. A pill's BOX aligns with its siblings; its text is inset by its own
+ *      padding, and that is correct, not a misalignment.
+ *
+ * Avoid px-2.5 / px-3.5 and other in-between steps: an off-scale value is how
+ * the rule erodes. Verified with `rhythm.mjs` / `margins.mjs` (scratchpad),
+ * which measure painted content against the enclosing border box.
+ */
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
