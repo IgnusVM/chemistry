@@ -27,12 +27,14 @@ export class BoardAccessError extends Error {
 /**
  * Resolve a board's owner from storage and check write access against it.
  *
- * The two owner kinds have different rules, and the branch is here rather than
+ * The three owner kinds have different rules, and the branch is here rather than
  * at call sites so no action has to know which kind it is dealing with:
  *   - department board -> department membership at `minRole`, or org admin
  *   - division board   -> the division lead, or org admin. Same set that may
  *                         read it; there is no one who can see a division
  *                         board but not write to it.
+ *   - personal board   -> its owner, and nobody else. Not org admins, not
+ *                         Directors. Same set that may read it.
  */
 export async function requireBoardAccess(
   boardId: string,
@@ -44,11 +46,24 @@ export async function requireBoardAccess(
       id: true,
       departmentId: true,
       divisionId: true,
+      userId: true,
       department: { select: { active: true, name: true } },
       division: { select: { active: true, name: true } },
     },
   });
   if (!board) throw new BoardAccessError("That board no longer exists.");
+
+  // Settled before the owner-activity checks below: a personal board has no
+  // department or division that could be deactivated, and the rule is simply
+  // whether this is your own. Nobody else may write to it — not org admins,
+  // not Directors — which is the same set that may read it.
+  if (board.userId) {
+    const user = await getCurrentUser();
+    if (!user || user.id !== board.userId) {
+      throw new BoardAccessError("That is someone else's personal kanban.");
+    }
+    return board;
+  }
 
   const owner = board.department ?? board.division;
   // The CHECK constraint Board_owner_exactly_one makes this unreachable, but a
@@ -118,6 +133,20 @@ export async function canViewDivisionBoard(divisionId: string): Promise<boolean>
     select: { leadUserId: true },
   });
   return division?.leadUserId === user.id;
+}
+
+/**
+ * Whether this user may READ a personal board.
+ *
+ * The application's second restricted read, and the only one with no
+ * administrative override. An org admin or a Director can read every
+ * department and division board in the organisation; neither can read this.
+ * That asymmetry is the whole meaning of the word "personal" — an exception
+ * for administrators would quietly turn a private space into a monitored one.
+ */
+export async function canViewPersonalBoard(ownerUserId: string): Promise<boolean> {
+  const user = await getCurrentUser();
+  return !!user && user.id === ownerUserId;
 }
 
 /** Same rule, applied to a set — one query rather than one per division. */

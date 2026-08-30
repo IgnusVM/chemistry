@@ -25,7 +25,7 @@ export default async function AdminPage() {
     { href: "/admin/asset-types", label: "Asset Types", description: "Templates and their custom fields.", count: assetTypeCount },
     { href: "/admin/resolution-codes", label: "Resolution Codes", description: "CMMS-style outcome codes for work orders.", count: resolutionCodeCount },
     { href: "/admin/tags", label: "Tags", description: "Labels for board cards, usually a team.", count: tagCount },
-    { href: "/admin/board-columns", label: "Board Columns", description: "Column names, colours, and work order status mapping.", count: boardCount },
+    { href: "/admin/board-columns", label: "Kanban Columns", description: "Column names, colours, and work order status mapping.", count: boardCount },
     { href: "/locations", label: "Locations", description: "Storage facilities, camps, and placements.", count: locationCount },
   ];
 

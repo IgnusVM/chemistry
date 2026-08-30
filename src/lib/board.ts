@@ -2,6 +2,7 @@ import "server-only";
 import type { WorkOrderStatus } from "@/generated/prisma/client";
 import { WO_STATUSES } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/dal";
 
 /**
  * The single home for the status-to-column mapping.
@@ -127,7 +128,7 @@ export type BoardColumnView = ColumnMapping & { color: string | null; cards: Boa
 
 /** A board belongs to exactly one owner, of one of two kinds. */
 export type BoardOwner = {
-  kind: "department" | "division";
+  kind: "department" | "division" | "personal";
   id: string;
   name: string;
   slug: string;
@@ -317,6 +318,68 @@ export async function getDivisionBoard(
 }
 
 /**
+ * The signed-in person's own kanban, created the first time they open it.
+ *
+ * **Restricted read, and the strictest one in the app**: a personal board is
+ * visible to its owner and to nobody else -- not org admins, not Directors.
+ * "Personal" would mean nothing otherwise.
+ *
+ * The owner is resolved from the SESSION, never from an argument, so there is
+ * no id a caller could substitute for someone else's.
+ *
+ * Created lazily rather than backfilled for every account: most people will
+ * never open one, and an installation should not carry a board per user who
+ * has not asked for it.
+ *
+ * Its columns carry no work-order statuses. A ticket belongs to a department,
+ * and a personal board that absorbed them would pull shared work out of the
+ * place the rest of the team is looking. Tickets can still be attached to a
+ * card as context, the same way division boards do it.
+ */
+export async function getOrCreatePersonalBoard(
+  opts: { showAllDone?: boolean; tagId?: string } = {},
+): Promise<BoardView | null> {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  let board = await prisma.board.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+
+  if (!board) {
+    board = await prisma.board.create({
+      data: {
+        userId: user.id,
+        columns: {
+          // The status mappings match every other board's, even though no work
+          // order will ever be auto-placed here. assertBoardInvariant requires
+          // each status to live in exactly one column, because a work-order
+          // card's column is DERIVED from its status and an unmapped status
+          // would make its card invisible. Leaving them empty threw on first
+          // load. Division boards carry the same mappings for the same reason.
+          create: [
+            { name: "Ideas", position: 0, color: "slate", woStatusOnMove: null, woStatusesShown: [] },
+            { name: "Next up", position: 1, color: "sky", woStatusOnMove: "OPEN" as const, woStatusesShown: ["OPEN" as const] },
+            { name: "Doing", position: 2, color: "amber", woStatusOnMove: "IN_PROGRESS" as const, woStatusesShown: ["IN_PROGRESS" as const] },
+            { name: "Waiting", position: 3, color: "rose", woStatusOnMove: "WAITING_PARTS" as const, woStatusesShown: ["WAITING_PARTS" as const] },
+            { name: "Done", position: 4, color: "emerald", woStatusOnMove: "COMPLETE" as const, woStatusesShown: ["COMPLETE" as const, "CLOSED" as const, "CANCELLED" as const] },
+          ],
+        },
+      },
+      select: { id: true },
+    });
+  }
+
+  return loadBoard(
+    board.id,
+    { kind: "personal", id: user.id, name: "My kanban", slug: "me", active: true },
+    opts,
+  );
+}
+
+
+/**
  * Which department boards to offer this user.
  *
  * Reads are org-wide, so this is about usefulness rather than permission: put
@@ -410,7 +473,7 @@ export async function getRollup(
     if (middle.length === 0) continue;
 
     const view = await loadBoard(board.id, {
-      kind: board.department ? "department" : "division",
+      kind: board.department ? "department" : board.division ? "division" : "personal",
       id: board.id,
       name: owner.name,
       slug: owner.slug,
