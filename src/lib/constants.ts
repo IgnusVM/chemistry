@@ -53,3 +53,7 @@ export function statusLabel(status: string) {
   const s = status.replace(/_/g, " ").toLowerCase();
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
+// A work order task is a checklist line, not a description. Short enough to
+// scan a list of them at a glance, which is the only reason to have them.
+export const WO_TASK_MAX_LENGTH = 50;

@@ -33,7 +33,7 @@ export default async function AccountPage() {
         <div>
           <h2 className="text-sm font-semibold text-neutral-900">Appearance</h2>
           <p className="text-xs text-neutral-500">
-            Saved on this device. &ldquo;System&rdquo; follows your phone or computer&rsquo;s setting.
+            Saved on this device, so each phone or laptop you sign in on can differ.
           </p>
         </div>
         <ThemeToggle />

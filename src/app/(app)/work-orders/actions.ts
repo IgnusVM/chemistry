@@ -10,13 +10,14 @@ import { recordAudit } from "@/lib/audit";
 import { sendWorkOrderAssignedEmail } from "@/lib/mailer";
 import { buildAttachmentKey, uploadAttachment, deleteAttachmentObject } from "@/lib/s3";
 import { generateWorkOrderCode } from "@/lib/work-order-code";
-import { WO_TYPES, WO_PRIORITIES, WO_STATUSES, ALLOWED_ATTACHMENT_TYPES, NOTE_FORMATS } from "@/lib/constants";
+import { WO_TYPES, WO_PRIORITIES, WO_STATUSES, ALLOWED_ATTACHMENT_TYPES, NOTE_FORMATS, WO_TASK_MAX_LENGTH } from "@/lib/constants";
 import { sanitizeNoteBody } from "@/lib/notes";
 import { recordRevision } from "@/lib/work-order-revisions";
 
 const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 
 const createSchema = z.object({
+  title: z.string().trim().min(1, "Give it a title.").max(140),
   description: z.string().min(1),
   assetTag: z.string().optional(),
   departmentId: z.string().min(1),
@@ -33,6 +34,7 @@ export async function createWorkOrder(
   const user = await requireCurrentUser();
 
   const parsed = createSchema.safeParse({
+    title: formData.get("title"),
     description: formData.get("description"),
     assetTag: formData.get("assetTag") || undefined,
     departmentId: formData.get("departmentId"),
@@ -60,6 +62,7 @@ export async function createWorkOrder(
       workOrder = await prisma.workOrder.create({
         data: {
           code,
+          title: parsed.data.title,
           description: parsed.data.description,
           assetId,
           departmentId: parsed.data.departmentId,
@@ -94,11 +97,25 @@ export async function createWorkOrder(
         data: {
           boardId: board.id,
           workOrderId: workOrder.id,
-          title: parsed.data.description.slice(0, 120),
+          title: parsed.data.title.slice(0, 120),
           createdByUserId: user.id,
         },
       })
       .catch(() => undefined);
+  }
+
+  // Checklist rows from the form. Blank boxes are simply not tasks: the form
+  // offers another row on demand, so an empty one means the person stopped
+  // typing rather than that they wanted an empty task.
+  const taskTexts = formData
+    .getAll("tasks")
+    .filter((t): t is string => typeof t === "string")
+    .map((t) => t.trim().slice(0, 50))
+    .filter(Boolean);
+  if (taskTexts.length) {
+    await prisma.workOrderTask.createMany({
+      data: taskTexts.map((text, position) => ({ workOrderId: workOrder.id, text, position })),
+    });
   }
 
   await recordAudit({
@@ -659,4 +676,78 @@ export async function redoWorkOrderEdit(workOrderId: string): Promise<EditWorkOr
     userId: user.id, changes: revision.after as Record<string, unknown>,
   });
   revalidatePath(`/work-orders/${workOrder.code}`);
+}
+
+
+const taskSchema = z.object({
+  workOrderId: z.string().min(1),
+  text: z.string().trim().min(1, "Give the task a name.").max(WO_TASK_MAX_LENGTH, "Keep tasks to a few words."),
+});
+
+export type TaskState = { error?: string } | undefined;
+
+export async function addWorkOrderTask(_prev: TaskState, formData: FormData): Promise<TaskState> {
+  await requireCurrentUser();
+  const parsed = taskSchema.safeParse({
+    workOrderId: formData.get("workOrderId"),
+    text: formData.get("text"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+
+  const workOrder = await requireWorkOrderAccess(parsed.data.workOrderId);
+  const last = await prisma.workOrderTask.findFirst({
+    where: { workOrderId: workOrder.id },
+    orderBy: { position: "desc" },
+    select: { position: true },
+  });
+
+  await prisma.workOrderTask.create({
+    data: { workOrderId: workOrder.id, text: parsed.data.text, position: (last?.position ?? -1) + 1 },
+  });
+  revalidatePath(`/work-orders/${workOrder.code}`);
+}
+
+/** Tick or untick one task. Who ticked it is recorded; who unticked it is not. */
+export async function toggleWorkOrderTask(taskId: string, done: boolean): Promise<TaskState> {
+  const user = await requireCurrentUser();
+  const task = await prisma.workOrderTask.findUnique({
+    where: { id: taskId },
+    select: { id: true, workOrderId: true },
+  });
+  if (!task) return { error: "That task is already gone." };
+
+  const workOrder = await requireWorkOrderAccess(task.workOrderId);
+  await prisma.workOrderTask.update({
+    where: { id: task.id },
+    data: {
+      done,
+      completedAt: done ? new Date() : null,
+      completedByUserId: done ? user.id : null,
+    },
+  });
+  revalidatePath(`/work-orders/${workOrder.code}`);
+}
+
+export async function deleteWorkOrderTask(taskId: string): Promise<TaskState> {
+  await requireCurrentUser();
+  const task = await prisma.workOrderTask.findUnique({
+    where: { id: taskId },
+    select: { id: true, workOrderId: true },
+  });
+  if (!task) return { error: "That task is already gone." };
+  const workOrder = await requireWorkOrderAccess(task.workOrderId);
+  await prisma.workOrderTask.delete({ where: { id: task.id } });
+  revalidatePath(`/work-orders/${workOrder.code}`);
+}
+
+/**
+ * How many tasks are still open, for the warning shown before closing.
+ *
+ * It only reports; it does not refuse. An unticked checkbox is often a task
+ * that turned out not to be needed, and a ticket that cannot be closed until
+ * the list is tidy is a ticket people stop using checklists on.
+ */
+export async function countOpenTasks(workOrderId: string): Promise<number> {
+  await requireCurrentUser();
+  return prisma.workOrderTask.count({ where: { workOrderId, done: false } });
 }

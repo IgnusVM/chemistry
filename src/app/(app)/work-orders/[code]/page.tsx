@@ -24,6 +24,8 @@ import { HelpLink } from "@/components/help-link";
 import { CopyButton } from "@/components/copy-button";
 import { EditWorkOrder } from "./edit-work-order";
 import { getRevisionState } from "@/lib/work-order-revisions";
+import { TaskList } from "./task-list";
+import { CloseTicketButton } from "./close-ticket-button";
 
 export default async function WorkOrderDetailPage({
   params,
@@ -50,6 +52,17 @@ export default async function WorkOrderDetailPage({
 
   // Whether the undo and redo buttons have anything to offer.
   const revisions = await getRevisionState(workOrder.id);
+
+  const taskRows = await prisma.workOrderTask.findMany({
+    where: { workOrderId: workOrder.id },
+    orderBy: { position: "asc" },
+    include: { completedBy: { select: { displayName: true } } },
+  });
+  const tasks = taskRows.map((t) => ({
+    id: t.id, text: t.text, done: t.done,
+    completedByName: t.completedBy?.displayName ?? null,
+  }));
+  const openTaskCount = tasks.filter((t) => !t.done).length;
 
   if (workOrder.status === "CLOSED") {
     const attachmentUrls = await Promise.all(workOrder.attachments.map((a) => getAttachmentUrl(a.s3Key)));
@@ -203,6 +216,8 @@ export default async function WorkOrderDetailPage({
           <p className="mt-3 text-sm text-neutral-400">Link an asset to this work order to log parts used.</p>
         )}
       </div>
+
+      <TaskList workOrderId={workOrder.id} tasks={tasks} />
 
       <div id="notes-section" className="rounded-md border border-neutral-200 bg-white p-4">
         <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
@@ -441,13 +456,7 @@ export default async function WorkOrderDetailPage({
             </Button>
           </form>
 
-          <form action={updateWorkOrderStatus}>
-            <input type="hidden" name="workOrderId" value={workOrder.id} />
-            <input type="hidden" name="status" value="CLOSED" />
-            <Button type="submit" variant="secondary">
-              Close ticket
-            </Button>
-          </form>
+          <CloseTicketButton workOrderId={workOrder.id} openTaskCount={openTaskCount} />
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <JumpToTabButton tabId="details" scrollToId="notes-section">+ Note</JumpToTabButton>

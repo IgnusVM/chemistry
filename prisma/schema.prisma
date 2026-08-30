@@ -205,6 +205,7 @@ model User {
   personalBoard       Board?
   postReplies         PostReply[]
   workOrderRevisions  WorkOrderRevision[]
+  completedTasks      WorkOrderTask[]
 }
 
 model InviteCode {
@@ -503,6 +504,7 @@ model WorkOrder {
   referencedBy   CardWorkOrderRef[]
   codeFileVersions AssetCodeFileVersion[]
   revisions        WorkOrderRevision[]
+  tasks            WorkOrderTask[]
 
   @@index([departmentId])
   @@index([status])
@@ -866,4 +868,27 @@ model WorkOrderRevision {
   editedBy  User?     @relation(fields: [editedByUserId], references: [id], onDelete: SetNull)
 
   @@index([workOrderId, createdAt])
+}
+
+/// A checkbox on a work order: one small thing that has to happen before the
+/// ticket is finished.
+///
+/// Short by design (50 characters). These are a checklist, not a place to
+/// describe the problem -- that is what the description is for -- and a long
+/// one stops being scannable, which is the only reason to have checkboxes at
+/// all.
+model WorkOrderTask {
+  id               String    @id @default(cuid())
+  workOrderId      String
+  text             String
+  done             Boolean   @default(false)
+  position         Int       @default(0)
+  completedAt      DateTime?
+  completedByUserId String?
+  createdAt        DateTime  @default(now())
+
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  completedBy User?     @relation(fields: [completedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([workOrderId, position])
 }
