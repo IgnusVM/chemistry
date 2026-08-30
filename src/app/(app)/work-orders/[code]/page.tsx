@@ -21,6 +21,7 @@ import { renderNoteHtml } from "@/lib/notes";
 import { resolveBadge, resolveBadges } from "@/lib/user-badge-data";
 import { UserBadge, UserBadgeLabel } from "@/components/user-badge";
 import { HelpLink } from "@/components/help-link";
+import { CopyButton } from "@/components/copy-button";
 
 export default async function WorkOrderDetailPage({
   params,
@@ -316,8 +317,10 @@ export default async function WorkOrderDetailPage({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-xs uppercase tracking-wide text-neutral-400">
-          {workOrder.code} · {workOrder.department.name} · {workOrder.type.replace("_", " ")}
+        <div className="flex items-center gap-1 text-xs tracking-wide text-neutral-400 uppercase">
+          <span className="font-mono">{workOrder.code}</span>
+          <CopyButton value={workOrder.code} label="work order number" />
+          <span>· {workOrder.department.name} · {workOrder.type.replace("_", " ")}</span>
         </div>
         <h1 className="text-xl font-semibold text-neutral-900">{workOrder.description}</h1>
         <div className="mt-1 flex items-center gap-2">
