@@ -53,3 +53,4 @@ dev-server.log
 
 # Copied from node_modules by scripts/copy-zxing-wasm.mjs at build time
 /public/zxing_reader.wasm
+create-tmp.mjs
