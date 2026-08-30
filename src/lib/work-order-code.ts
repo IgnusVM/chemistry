@@ -8,6 +8,7 @@ const TYPE_PREFIXES: Record<WorkOrderType, string> = {
   INSPECTION: "IN",
   MODIFICATION: "MO",
   DECOMMISSION: "DC",
+  GENERAL: "GN",
 };
 
 function datePartFor(at: Date) {

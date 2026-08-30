@@ -59,7 +59,7 @@ export default async function WorkOrderDetailPage({
     include: { completedBy: { select: { displayName: true } } },
   });
   const tasks = taskRows.map((t) => ({
-    id: t.id, text: t.text, done: t.done,
+    id: t.id, text: t.text, done: t.done, instructions: t.instructions,
     completedByName: t.completedBy?.displayName ?? null,
   }));
   const openTaskCount = tasks.filter((t) => !t.done).length;

@@ -48,6 +48,7 @@ enum WorkOrderType {
   INSPECTION
   MODIFICATION
   DECOMMISSION
+  GENERAL
 }
 
 enum WorkOrderPriority {
@@ -881,6 +882,7 @@ model WorkOrderTask {
   id               String    @id @default(cuid())
   workOrderId      String
   text             String
+  instructions     String?
   done             Boolean   @default(false)
   position         Int       @default(0)
   completedAt      DateTime?

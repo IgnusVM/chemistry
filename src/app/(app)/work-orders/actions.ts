@@ -107,14 +107,22 @@ export async function createWorkOrder(
   // Checklist rows from the form. Blank boxes are simply not tasks: the form
   // offers another row on demand, so an empty one means the person stopped
   // typing rather than that they wanted an empty task.
-  const taskTexts = formData
-    .getAll("tasks")
-    .filter((t): t is string => typeof t === "string")
-    .map((t) => t.trim().slice(0, 50))
-    .filter(Boolean);
-  if (taskTexts.length) {
+  // Instructions ride alongside by index: the form always submits one
+  // instructions field per task row, blank or not, so the two lists stay aligned
+  // even when a row in the middle is left empty.
+  const rawTasks = formData.getAll("tasks").filter((t): t is string => typeof t === "string");
+  const rawInstructions = formData
+    .getAll("taskInstructions")
+    .filter((t): t is string => typeof t === "string");
+  const tasks = rawTasks
+    .map((text, i) => ({
+      text: text.trim().slice(0, WO_TASK_MAX_LENGTH),
+      instructions: (rawInstructions[i] ?? "").trim().slice(0, 2000) || null,
+    }))
+    .filter((t) => t.text);
+  if (tasks.length) {
     await prisma.workOrderTask.createMany({
-      data: taskTexts.map((text, position) => ({ workOrderId: workOrder.id, text, position })),
+      data: tasks.map((t, position) => ({ workOrderId: workOrder.id, ...t, position })),
     });
   }
 
@@ -682,6 +690,8 @@ export async function redoWorkOrderEdit(workOrderId: string): Promise<EditWorkOr
 const taskSchema = z.object({
   workOrderId: z.string().min(1),
   text: z.string().trim().min(1, "Give the task a name.").max(WO_TASK_MAX_LENGTH, "Keep tasks to a few words."),
+  // Optional room to say how, so the one-line text can stay one line.
+  instructions: z.string().trim().max(2000, "Keep instructions under 2000 characters.").optional(),
 });
 
 export type TaskState = { error?: string } | undefined;
@@ -691,6 +701,7 @@ export async function addWorkOrderTask(_prev: TaskState, formData: FormData): Pr
   const parsed = taskSchema.safeParse({
     workOrderId: formData.get("workOrderId"),
     text: formData.get("text"),
+    instructions: formData.get("instructions") || undefined,
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
 
@@ -702,7 +713,12 @@ export async function addWorkOrderTask(_prev: TaskState, formData: FormData): Pr
   });
 
   await prisma.workOrderTask.create({
-    data: { workOrderId: workOrder.id, text: parsed.data.text, position: (last?.position ?? -1) + 1 },
+    data: {
+      workOrderId: workOrder.id,
+      text: parsed.data.text,
+      instructions: parsed.data.instructions || null,
+      position: (last?.position ?? -1) + 1,
+    },
   });
   revalidatePath(`/work-orders/${workOrder.code}`);
 }

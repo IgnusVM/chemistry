@@ -1,4 +1,5 @@
 "use client";
+import { FileText } from "lucide-react";
 
 import { useActionState, useState } from "react";
 import { createWorkOrder } from "../actions";
@@ -109,20 +110,51 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
  * checklist, and three empty boxes on every form would be three things to skip
  * past every time one is filed.
  */
+function TaskRow({ index }: { index: number }) {
+  const [showInstructions, setShowInstructions] = useState(false);
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-1">
+        <input
+          name="tasks"
+          maxLength={WO_TASK_MAX_LENGTH}
+          placeholder={index === 0 ? "Something that has to happen" : "Another task"}
+          aria-label={`Task ${index + 1}`}
+          className={`${inputClass} min-w-0 flex-1`}
+        />
+        <button
+          type="button"
+          onClick={() => setShowInstructions((v) => !v)}
+          aria-expanded={showInstructions}
+          aria-label={`${showInstructions ? "Hide" : "Add"} instructions for task ${index + 1}`}
+          title={showInstructions ? "Hide instructions" : "Add instructions"}
+          className="-my-3 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+        >
+          <FileText className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
+      {/* Always submitted, even when hidden, so instructions stay aligned with
+          their task by index on the server. */}
+      <textarea
+        name="taskInstructions"
+        rows={3}
+        maxLength={2000}
+        hidden={!showInstructions}
+        placeholder="What to do, in as much detail as it needs"
+        aria-label={`Instructions for task ${index + 1}`}
+        className={`${inputClass} resize-y`}
+      />
+    </div>
+  );
+}
+
 function TaskFields() {
   const [count, setCount] = useState(1);
   return (
     <Field label="Tasks (optional)">
       <div className="space-y-1.5">
         {Array.from({ length: count }).map((_, i) => (
-          <input
-            key={i}
-            name="tasks"
-            maxLength={WO_TASK_MAX_LENGTH}
-            placeholder={i === 0 ? "Something that has to happen" : "Another task"}
-            aria-label={`Task ${i + 1}`}
-            className={inputClass}
-          />
+          <TaskRow key={i} index={i} />
         ))}
         {count < 10 ? (
           <button
