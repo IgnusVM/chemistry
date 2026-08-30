@@ -39,9 +39,14 @@ export function BadgeForm({
         }}
         className="mt-3 flex flex-wrap items-end gap-3"
       >
-        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-neutral-50">
+        {/* The preview showed an 18px mark inside a 36px circle — half of it
+            empty, which read as a rendering fault rather than a small icon.
+            The artwork itself fills 99% of its own viewBox; only the ratio was
+            wrong. A badge is a mark, not a UI glyph, so it wants most of the
+            circle. */}
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-neutral-50">
           {/* eslint-disable-next-line react-hooks/static-components -- stable lookup, see UserBadge */}
-          <PreviewIcon className={`h-4.5 w-4.5 ${previewColorClass}`} />
+          <PreviewIcon className={`h-8 w-8 ${previewColorClass}`} />
         </div>
 
         <div>

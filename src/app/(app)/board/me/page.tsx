@@ -40,7 +40,7 @@ export default async function PersonalBoardPage({
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <h1 className="text-lg font-semibold text-neutral-900">My kanban</h1>
-          <span className="inline-flex items-center gap-1 rounded-full border border-fuchsia-200 bg-fuchsia-50 px-2 py-0.5 text-[11px] font-medium text-fuchsia-700">
+          <span className="only-you-glow inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium">
             <UserRound className="h-3 w-3" aria-hidden />
             Only you
           </span>

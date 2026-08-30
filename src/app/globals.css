@@ -279,3 +279,75 @@ body {
  * Use `bg-black` for anything that must stay dark in both themes — `--color-black`
  * is deliberately not remapped — and `text-onaccent` for what sits on it.
  */
+
+/*
+ * The "Only you" marker on a personal kanban.
+ *
+ * A slow drift between teal-green and the violet the badge already uses, with
+ * the glow following the same cycle. Slow on purpose: this sits on screen while
+ * someone reads their own board, and anything quick enough to catch the eye
+ * twice becomes something to look away from.
+ *
+ * `prefers-reduced-motion` stops the animation and settles on the violet end —
+ * a badge that pulses is decoration, and for anyone who has asked the system
+ * for less movement it has no business overriding that. The text and border
+ * still carry the meaning either way; the colour never was the message.
+ */
+@keyframes only-you-drift {
+  0%,
+  100% {
+    color: #6d28d9;
+    border-color: #c4b5fd;
+    background-color: #f5f3ff;
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.35);
+  }
+  50% {
+    color: #0f766e;
+    border-color: #5eead4;
+    background-color: #f0fdfa;
+    box-shadow: 0 0 10px 2px rgba(13, 148, 136, 0.35);
+  }
+}
+
+.only-you-glow {
+  /* The violet end of the cycle, declared statically. Without this the
+     reduced-motion rule below left the marker with no colour at all: with
+     `animation: none` no keyframe applies, and the element fell back to plain
+     body text on no background. The animation is decoration layered over a
+     badge that is already correct standing still. */
+  color: #6d28d9;
+  border-color: #c4b5fd;
+  background-color: #f5f3ff;
+  animation: only-you-drift 6s ease-in-out infinite;
+}
+
+/* Dark theme runs the same cycle at the light end of each ramp, since the
+   badge sits on a dark card there rather than a white one. */
+.dark .only-you-glow {
+  color: #c4b5fd;
+  border-color: #5b21b6;
+  background-color: #1e1533;
+  animation-name: only-you-drift-dark;
+}
+
+@keyframes only-you-drift-dark {
+  0%,
+  100% {
+    color: #c4b5fd;
+    border-color: #5b21b6;
+    background-color: #1e1533;
+    box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.35);
+  }
+  50% {
+    color: #5eead4;
+    border-color: #115e59;
+    background-color: #0d2427;
+    box-shadow: 0 0 12px 2px rgba(45, 212, 191, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .only-you-glow {
+    animation: none;
+  }
+}

@@ -44,7 +44,7 @@ export default async function BoardIndexPage() {
           <UserRound className="h-4 w-4 shrink-0 text-fuchsia-500" aria-hidden />
           <span className="min-w-0">
             <span className="block truncate text-sm font-medium text-neutral-900">My kanban</span>
-            <span className="block truncate text-xs text-fuchsia-700">
+            <span className="only-you-glow block w-fit truncate rounded-full border px-2 py-0.5 text-[11px] font-medium">
               Only you can see this one
             </span>
           </span>
