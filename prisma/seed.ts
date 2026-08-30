@@ -34,17 +34,36 @@ async function main() {
   // instance simply has no admin until BOOTSTRAP_ADMIN_EMAIL is provided.
   // Re-running the seed later is how you grant it.
   const bootstrapEmail = process.env.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase();
-  const admin = bootstrapEmail
-    ? await prisma.user.upsert({
+
+  // The seed runs on every container start, so `update: { isOrgAdmin: true }`
+  // did not bootstrap an administrator once -- it re-asserted the flag forever,
+  // silently undoing any deliberate change on the next deploy. It reverted the
+  // root Director's removed org-admin tag within minutes of setting it, and it
+  // would equally have re-promoted anyone demoted on purpose.
+  //
+  // The recovery this exists for is still intact: an instance whose bootstrap
+  // account has NO route to admin gets the flag back by re-running the seed.
+  // An account that already has one is left exactly as configured.
+  const existing = bootstrapEmail
+    ? await prisma.user.findUnique({
         where: { email: bootstrapEmail },
-        update: { isOrgAdmin: true },
-        create: {
-          email: bootstrapEmail,
-          displayName: process.env.BOOTSTRAP_ADMIN_NAME?.trim() || bootstrapEmail.split("@")[0],
-          isOrgAdmin: true,
-        },
+        select: { id: true, email: true, isOrgAdmin: true, isDirector: true },
       })
     : null;
+
+  const admin = !bootstrapEmail
+    ? null
+    : existing
+      ? existing.isOrgAdmin || existing.isDirector
+        ? existing
+        : await prisma.user.update({ where: { id: existing.id }, data: { isOrgAdmin: true } })
+      : await prisma.user.create({
+          data: {
+            email: bootstrapEmail,
+            displayName: process.env.BOOTSTRAP_ADMIN_NAME?.trim() || bootstrapEmail.split("@")[0],
+            isOrgAdmin: true,
+          },
+        });
 
   if (!admin) {
     console.log("BOOTSTRAP_ADMIN_EMAIL is not set — seeding structure only, with no org admin.");
