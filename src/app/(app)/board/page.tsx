@@ -42,20 +42,6 @@ export default async function BoardIndexPage() {
         </section>
       ) : null}
 
-      {rollup.inFlight.length > 0 ? (
-        <section className="space-y-2">
-          <h2 className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-neutral-500 uppercase">
-            <Activity className="h-3.5 w-3.5" aria-hidden />
-            In flight ({rollup.inFlight.length})
-          </h2>
-          <ul className="space-y-1.5">
-            {rollup.inFlight.map((c) => (
-              <RollupRow key={c.id} card={c} tone="normal" />
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
       {divisions.length > 0 ? (
         <section className="space-y-2">
           <h2 className="text-xs font-semibold tracking-wide text-neutral-500 uppercase">
@@ -119,7 +105,62 @@ export default async function BoardIndexPage() {
           </ul>
         </section>
       ) : null}
+
+      {/* In flight sits last, and as tiles rather than rows.
+          Stuck stays at the top because it is the thing that needs someone to
+          act; in-flight work is context — useful to survey, not to read line by
+          line. A grid says "here is the shape of what is happening" at a glance,
+          and it takes a fraction of the height that full-width rows did. */}
+      {rollup.inFlight.length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-neutral-500 uppercase">
+            <Activity className="h-3.5 w-3.5" aria-hidden />
+            In flight ({rollup.inFlight.length})
+          </h2>
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-2">
+            {rollup.inFlight.map((c) => (
+              <RollupTile key={c.id} card={c} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
+  );
+}
+
+/**
+ * One in-flight card, as a square tile.
+ *
+ * Square so the grid reads as a grid at any column count, and small enough that
+ * a busy org's worth of active work still fits on one screen. The title gets
+ * the room; everything else is a footnote at the bottom of the tile.
+ */
+function RollupTile({ card }: { card: RollupCard }) {
+  return (
+    <li>
+      <Link
+        href={card.boardHref}
+        className="flex aspect-square flex-col rounded-lg border border-neutral-200 bg-white p-3 hover:border-neutral-300 hover:bg-neutral-50"
+      >
+        <span className="truncate text-[11px] font-medium text-neutral-500">{card.boardName}</span>
+        <span className="mt-1 line-clamp-3 text-sm leading-snug font-medium text-neutral-900">
+          {card.title}
+        </span>
+        <span className="mt-auto flex flex-col gap-1 pt-2">
+          <span className="truncate text-[11px] text-neutral-500">{card.columnName}</span>
+          <span
+            className={
+              card.owner
+                ? "inline-flex items-center gap-1 truncate text-[11px] text-neutral-500"
+                : "inline-flex w-fit items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700"
+            }
+          >
+            <UserRound className="h-3 w-3 shrink-0" aria-hidden />
+            <span className="truncate">{card.ownerLabel}</span>
+          </span>
+        </span>
+      </Link>
+    </li>
   );
 }
 
