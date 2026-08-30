@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               Asset Groups
             </Link>
             <Link href="/board" className="hover:text-neutral-900">
-              Board
+              Kanban
             </Link>
             <Link href="/work-orders" className="hover:text-neutral-900">
               Work Orders

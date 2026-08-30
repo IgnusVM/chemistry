@@ -40,7 +40,7 @@ export default async function DivisionBoardPage({
           className="-my-2 inline-flex items-center gap-1 py-2 text-xs text-neutral-500 hover:text-neutral-900"
         >
           <ChevronLeft className="h-3 w-3" aria-hidden />
-          All boards
+          All kanbans
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <h1 className="text-lg font-semibold text-neutral-900">{board.owner.name}</h1>

@@ -581,7 +581,7 @@ It's a separate page rather than printing the ticket screen directly, because th
 
 It is not a project management system and it is not where work gets assigned. It is a shared picture that anyone can glance at.
 
-**Every department has one.** Open **Board** in the nav to see the list, plus a roll-up across the top showing anything stuck and anything in flight right now. If you lead a division, you also see that division's board — see [Division boards](/help/board/division-boards).
+**Every department has one, and so do you.** Open **Kanban** in the nav to see the list, plus a roll-up across the top showing anything stuck and anything in flight right now. You also get a personal kanban that nobody else can see — see [Your personal kanban](/help/board/personal-kanban). If you lead a division, that division's kanban is there too — see [Division boards](/help/board/division-boards).
 
 **A card is one piece of work.** It has a title, an owner, a next action, and somewhere to note what's going on. The next action is the useful field: "waiting on Dave to confirm the trailer" tells the next person more than a status ever will.
 
@@ -704,6 +704,24 @@ These differ because one is about display and the other about intent. Done can *
 **Deleting a column** asks where its cards should go first — nothing is discarded.
 
 **A note on editing help articles.** The articles in this guide that ship with Chemistry are rewritten from the source files each time the application starts. If you edit one of those through **Manage articles**, your changes will be replaced on the next update. Articles *you* create are never touched — only the ones that came with the app. If you need a permanent change to a shipped article, ask whoever maintains the installation to change it at the source.`,
+  },
+  {
+    slug: "personal-kanban",
+    title: "Your personal kanban",
+    category: "board",
+    order: 6,
+    summary: "A board of your own that nobody else can open.",
+    body: `Alongside the department kanbans, you have one of your own. Open **Kanban** in the nav and it is at the top, under "Yours alone".
+
+**Nobody else can see it.** Not your department lead, not an org admin, not whoever runs the system. Every other kanban in Chemistry can be read by anyone signed in; this one is the exception, and it is the exception on purpose. It is for the things you are keeping track of rather than the things the team needs to see.
+
+**It works exactly like the others.** The same columns, the same cards, the same two ways to move them — drag, or tap and pick a column. See [Moving a card](/help/board/moving-a-card).
+
+**It starts with five columns**: Ideas, Next up, Doing, Waiting, Done. Rename them, add your own, or throw them away — it is yours, and changing it affects nobody else.
+
+**Work orders do not land here.** A ticket belongs to the department that has to do it, and a ticket that quietly moved onto someone's private board would be work the rest of the team could no longer see. You can still attach a ticket to one of your cards as a reminder to follow it up — see [Cards and work orders](/help/board/cards-and-work-orders).
+
+**Tags are shared.** The tag list is the same one every kanban uses, so a tag means what it means everywhere. Which tags you put on your own cards is still only visible to you.`,
   },
 ];
 

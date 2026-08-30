@@ -34,8 +34,8 @@ export default async function BoardColumnsAdminPage() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-1">
-          <h1 className="text-lg font-semibold text-neutral-900">Board columns</h1>
-          <HelpLink topic="Board columns" article="board/board-columns-admin" />
+          <h1 className="text-lg font-semibold text-neutral-900">Kanban columns</h1>
+          <HelpLink topic="Kanban columns" article="board/board-columns-admin" />
         </div>
       </div>
 

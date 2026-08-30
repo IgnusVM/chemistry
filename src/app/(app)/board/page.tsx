@@ -23,10 +23,33 @@ export default async function BoardIndexPage() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-1">
-          <h1 className="text-lg font-semibold text-neutral-900">Boards</h1>
-          <HelpLink topic="The board" article="board/what-the-board-is" />
+          {/* かんばん here, "Kanban" in the nav. The nav has to be scannable by
+              someone who does not read kana; a page they have already arrived
+              at can carry the word properly. `lang` so a screen reader switches
+              to Japanese instead of spelling it out, with the romaji as the
+              accessible label so it is still announced usefully. */}
+          <h1 lang="ja" className="text-2xl font-semibold text-neutral-900" aria-label="Kanban">
+            かんばん
+          </h1>
+          <HelpLink topic="The kanban" article="board/what-the-board-is" />
         </div>
       </div>
+
+      <section className="space-y-2">
+        <h2 className="text-xs font-semibold tracking-wide text-neutral-500 uppercase">Yours alone</h2>
+        <Link
+          href="/board/me"
+          className="flex items-center gap-3 rounded-lg border border-fuchsia-200 bg-fuchsia-50/40 p-3 hover:border-fuchsia-300 hover:bg-fuchsia-50"
+        >
+          <UserRound className="h-4 w-4 shrink-0 text-fuchsia-500" aria-hidden />
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-medium text-neutral-900">My kanban</span>
+            <span className="block truncate text-xs text-fuchsia-700">
+              Only you can see this one
+            </span>
+          </span>
+        </Link>
+      </section>
 
       {rollup.blocked.length > 0 ? (
         <section className="space-y-2">
