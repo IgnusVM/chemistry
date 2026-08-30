@@ -3,6 +3,7 @@ import type { WorkOrderStatus } from "@/generated/prisma/client";
 import { WO_STATUSES } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/dal";
+import { ensurePersonalBoard } from "@/lib/personal-board";
 
 /**
  * The single home for the status-to-column mapping.
@@ -347,29 +348,7 @@ export async function getOrCreatePersonalBoard(
     select: { id: true },
   });
 
-  if (!board) {
-    board = await prisma.board.create({
-      data: {
-        userId: user.id,
-        columns: {
-          // The status mappings match every other board's, even though no work
-          // order will ever be auto-placed here. assertBoardInvariant requires
-          // each status to live in exactly one column, because a work-order
-          // card's column is DERIVED from its status and an unmapped status
-          // would make its card invisible. Leaving them empty threw on first
-          // load. Division boards carry the same mappings for the same reason.
-          create: [
-            { name: "Ideas", position: 0, color: "slate", woStatusOnMove: null, woStatusesShown: [] },
-            { name: "Next up", position: 1, color: "sky", woStatusOnMove: "OPEN" as const, woStatusesShown: ["OPEN" as const] },
-            { name: "Doing", position: 2, color: "amber", woStatusOnMove: "IN_PROGRESS" as const, woStatusesShown: ["IN_PROGRESS" as const] },
-            { name: "Waiting", position: 3, color: "rose", woStatusOnMove: "WAITING_PARTS" as const, woStatusesShown: ["WAITING_PARTS" as const] },
-            { name: "Done", position: 4, color: "emerald", woStatusOnMove: "COMPLETE" as const, woStatusesShown: ["COMPLETE" as const, "CLOSED" as const, "CANCELLED" as const] },
-          ],
-        },
-      },
-      select: { id: true },
-    });
-  }
+  if (!board) board = await ensurePersonalBoard(user.id);
 
   return loadBoard(
     board.id,
