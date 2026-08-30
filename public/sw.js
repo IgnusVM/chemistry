@@ -8,7 +8,7 @@
  * and fall back to a static offline page when there's no signal.
  */
 
-const CACHE = "chemistry-static-v1";
+const CACHE = "chemistry-static-v2";
 const OFFLINE_URL = "/offline";
 
 const PRECACHE = [OFFLINE_URL, "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"];
@@ -32,8 +32,24 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+/*
+ * In development the asset URLs are NOT immutable. Turbopack reuses chunk paths
+ * under /_next/static/ across rebuilds, so a cache-first strategy serves stale
+ * JavaScript and CSS indefinitely — through a reload, a hard reload, and a
+ * restarted dev server. It presents as edits that "did not apply", or worse as
+ * a half-updated page where some chunks are new and some are old.
+ *
+ * Only production builds have content-hashed asset URLs, which is the property
+ * that makes caching them safe.
+ */
+const IS_DEV =
+  self.location.hostname === "localhost" ||
+  self.location.hostname === "127.0.0.1" ||
+  self.location.hostname.endsWith(".local");
+
 /** Immutable, non-user-specific assets that are safe to serve from cache. */
 function isCacheableAsset(url) {
+  if (IS_DEV) return false;
   if (url.origin !== self.location.origin) return false;
   return (
     url.pathname.startsWith("/_next/static/") ||

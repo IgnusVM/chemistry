@@ -34,7 +34,7 @@ export function NewCardForm({ boardId, columnId }: { boardId: string; columnId: 
     <form ref={formRef} action={action} className="px-3 pt-1 pb-3">
       <input type="hidden" name="boardId" value={boardId} />
       <input type="hidden" name="columnId" value={columnId} />
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-stretch gap-1.5">
         <input
           ref={inputRef}
           name="title"
@@ -48,7 +48,7 @@ export function NewCardForm({ boardId, columnId }: { boardId: string; columnId: 
           type="submit"
           disabled={pending}
           aria-label="Add card"
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100 disabled:opacity-50"
+          className="inline-flex w-9 shrink-0 items-center justify-center rounded-md border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100 disabled:opacity-50"
         >
           <Plus className="h-4 w-4" aria-hidden />
         </button>
