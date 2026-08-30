@@ -4,6 +4,7 @@ import { useState } from "react";
 import { addMembership } from "./actions";
 import { MembershipRow } from "./membership-row";
 import { OrgAdminToggle } from "./org-admin-toggle";
+import { DirectorBadge, DirectorToggle } from "./director-controls";
 import { EditUserProfileForm } from "./edit-user-profile-form";
 import { DeleteUserButton } from "./delete-user-button";
 import { UserBadge } from "@/components/user-badge";
@@ -11,15 +12,20 @@ import type { ResolvedBadge } from "@/lib/user-badge-data";
 
 export function UserCard({
   user,
+  viewerIsRoot,
+  targetIsRoot,
   departments,
   badge,
 }: {
+  viewerIsRoot: boolean;
+  targetIsRoot: boolean;
   user: {
     id: string;
     displayName: string;
     name: string | null;
     email: string;
     isOrgAdmin: boolean;
+    isDirector: boolean;
     memberships: { departmentId: string; department: { name: string }; role: "VIEWER" | "MEMBER" | "LEAD" }[];
   };
   departments: { id: string; name: string }[];
@@ -36,6 +42,7 @@ export function UserCard({
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 font-medium text-neutral-900">
             <UserBadge badge={badge} size="md" />
             <span>{user.displayName}</span>
+            {user.isDirector && !targetIsRoot ? <DirectorBadge /> : null}
             {user.name && <span className="font-normal text-neutral-500">({user.name})</span>}
           </div>
           <div className="truncate text-sm text-neutral-500">{user.email}</div>
@@ -48,6 +55,9 @@ export function UserCard({
               Edit
             </button>
           )}
+          {viewerIsRoot ? (
+            <DirectorToggle userId={user.id} isDirector={user.isDirector} isRoot={targetIsRoot} />
+          ) : null}
           <OrgAdminToggle userId={user.id} isOrgAdmin={user.isOrgAdmin} />
           <DeleteUserButton userId={user.id} displayName={user.displayName} />
         </div>

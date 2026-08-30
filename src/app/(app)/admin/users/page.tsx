@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdminPage } from "@/lib/dal";
+import { requireOrgAdminPage, isRootDirector } from "@/lib/dal";
 import { UserForm } from "./user-form";
 import { UserCard } from "./user-card";
 import { InviteGenerator } from "./invite-generator";
@@ -8,7 +8,7 @@ import { resolveBadges } from "@/lib/user-badge-data";
 import { HelpLink } from "@/components/help-link";
 
 export default async function UsersAdminPage() {
-  await requireOrgAdminPage();
+  const viewer = await requireOrgAdminPage();
   const [users, departments, invites] = await Promise.all([
     prisma.user.findMany({
       orderBy: { displayName: "asc" },
@@ -60,7 +60,14 @@ export default async function UsersAdminPage() {
 
       <div className="space-y-3">
         {users.map((user, i) => (
-          <UserCard key={user.id} user={user} departments={departments} badge={badges[i]} />
+          <UserCard
+            key={user.id}
+            user={user}
+            departments={departments}
+            badge={badges[i]}
+            viewerIsRoot={isRootDirector(viewer)}
+            targetIsRoot={isRootDirector(user)}
+          />
         ))}
       </div>
     </div>

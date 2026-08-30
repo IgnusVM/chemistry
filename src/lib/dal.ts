@@ -24,8 +24,30 @@ export const getCurrentUser = cache(async () => {
     where: { id: session.userId },
     include: { memberships: { include: { department: true } } },
   });
-  return user;
+  if (!user) return null;
+
+  // A Director has every permission an org admin has. Rather than teach ~200
+  // call sites about a second flag -- and get one of them wrong -- the
+  // EFFECTIVE value is computed once, here, at the only door everything enters
+  // through. `isDirector` remains the stored truth and is what the admin
+  // screens read when they show and change roles.
+  return { ...user, isOrgAdmin: user.isOrgAdmin || user.isDirector };
 });
+
+/**
+ * The root Director, identified by configuration rather than by a row.
+ *
+ * Only this person may grant or revoke Director, and nobody -- including
+ * another Director -- can remove them. Keeping the identity in the environment
+ * rather than the database means it survives a restore onto a fresh instance,
+ * and that handing the application to someone else later is a config change
+ * rather than a data edit. Same reasoning as BOOTSTRAP_ADMIN_EMAIL.
+ */
+export function isRootDirector(user: { email: string } | null | undefined): boolean {
+  const root = process.env.ROOT_DIRECTOR_EMAIL?.trim().toLowerCase();
+  if (!root || !user) return false;
+  return user.email.trim().toLowerCase() === root;
+}
 
 export const requireCurrentUser = cache(async () => {
   const session = await verifySession();
@@ -93,6 +115,18 @@ export async function requireOrgAdmin() {
 export async function requireOrgAdminPage() {
   const user = await requireCurrentUser();
   if (!user.isOrgAdmin) notFound();
+  return user;
+}
+
+/**
+ * For SERVER ACTIONS that only the root Director may perform -- granting and
+ * revoking Director itself. Deliberately not satisfied by being a Director:
+ * that would be an escalation path where anyone promoted could promote others,
+ * and the set could grow without the person who started it.
+ */
+export async function requireRootDirector() {
+  const user = await requireCurrentUser();
+  if (!isRootDirector(user)) throw new Error("Only the root Director can do that");
   return user;
 }
 

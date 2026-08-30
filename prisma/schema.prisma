@@ -158,6 +158,11 @@ model User {
   contactDuringBurnEmail Boolean @default(false)
   contactDuringBurnOther String?
   isOrgAdmin     Boolean   @default(false)
+  /// Director: every permission an org admin has, and then some. Kept as a
+  /// separate flag rather than a rank on isOrgAdmin so that revoking one
+  /// cannot silently revoke the other. Only the root Director (identified by
+  /// ROOT_DIRECTOR_EMAIL) may grant or revoke it.
+  isDirector     Boolean   @default(false)
   avatarS3Key    String?
   badgeIcon      String?
   badgeColor     String?
