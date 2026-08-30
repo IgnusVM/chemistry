@@ -175,7 +175,7 @@ export default async function WorkOrdersPage({
                     </Link>
                   </td>
                   <td className="px-3 py-2 sm:px-4">
-                    {wo.description.length > 70 ? `${wo.description.slice(0, 70)}…` : wo.description}
+                    {(wo.title || wo.description).length > 70 ? `${(wo.title || wo.description).slice(0, 70)}…` : wo.title || wo.description}
                   </td>
                   <td className="hidden px-3 py-2 sm:px-4 text-neutral-500 sm:table-cell">
                     {wo.asset ? (

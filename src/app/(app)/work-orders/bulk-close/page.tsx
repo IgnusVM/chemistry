@@ -33,7 +33,7 @@ export default async function BulkCloseWorkOrdersPage({
     prisma.workOrder.findMany({
       where: { id: { in: ids } },
       orderBy: { code: "asc" },
-      select: { id: true, code: true, description: true, status: true, asset: { select: { assetTag: true } } },
+      select: { id: true, code: true, title: true, description: true, status: true, asset: { select: { assetTag: true } } },
     }),
     prisma.resolutionCode.findMany({ orderBy: { label: "asc" } }),
   ]);
@@ -54,7 +54,7 @@ export default async function BulkCloseWorkOrdersPage({
         <div className="max-h-40 overflow-y-auto text-sm text-neutral-600">
           {workOrders.map((wo) => (
             <div key={wo.id}>
-              <span className="font-medium text-neutral-900">{wo.code}</span> — {wo.description}
+              <span className="font-medium text-neutral-900">{wo.code}</span> — {wo.title || wo.description}
               {wo.asset && <span className="text-neutral-400"> · {wo.asset.assetTag}</span>}
               {wo.status === "CLOSED" && <span className="ml-1 text-xs text-neutral-400">(already closed)</span>}
             </div>

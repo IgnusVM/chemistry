@@ -72,7 +72,7 @@ export default async function ScanLandingPage({
                       {wo.priority.replace("_", " ")}
                     </span>
                   </div>
-                  <p className="mt-0.5 truncate text-sm text-neutral-600">{wo.description}</p>
+                  <p className="mt-0.5 truncate text-sm text-neutral-600">{wo.title || wo.description}</p>
                   <p className="mt-0.5 text-xs text-neutral-400">
                     {wo.assignedTo ? `Assigned to ${wo.assignedTo.displayName}` : "Unassigned"}
                   </p>

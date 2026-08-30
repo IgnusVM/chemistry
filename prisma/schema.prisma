@@ -204,6 +204,7 @@ model User {
   posts               Post[]
   personalBoard       Board?
   postReplies         PostReply[]
+  workOrderRevisions  WorkOrderRevision[]
 }
 
 model InviteCode {
@@ -472,6 +473,11 @@ model WorkOrder {
   type             WorkOrderType     @default(CORRECTIVE)
   priority         WorkOrderPriority @default(NORMAL)
   status           WorkOrderStatus   @default(OPEN)
+  /// Short summary, shown in every list. Backfilled from `description`,
+  /// which used to serve as both.
+  title            String   @default("")
+  /// The long account of the problem. Separate from the title so a list stays
+  /// scannable while the ticket itself can hold as much detail as it needs.
   description      String
   reportedByUserId String?
   assignedToUserId String?
@@ -496,6 +502,7 @@ model WorkOrder {
   card           Card?
   referencedBy   CardWorkOrderRef[]
   codeFileVersions AssetCodeFileVersion[]
+  revisions        WorkOrderRevision[]
 
   @@index([departmentId])
   @@index([status])
@@ -834,4 +841,29 @@ model PostReply {
   author User? @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
 
   @@index([postId, createdAt])
+}
+
+/// One edit to a work order, kept so it can be undone.
+///
+/// Stores the fields that changed and both sides of the change, rather than a
+/// whole snapshot: an undo has to put back exactly what the edit touched and
+/// leave everything else alone, or two people editing different fields would
+/// have one silently reverting the other's work.
+model WorkOrderRevision {
+  id            String   @id @default(cuid())
+  workOrderId   String
+  editedByUserId String?
+  /// Field name -> value before this edit.
+  before        Json
+  /// Field name -> value after it.
+  after         Json
+  /// Undone edits stay in place so they can be redone; they are skipped when
+  /// looking for the next thing to undo.
+  undone        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  editedBy  User?     @relation(fields: [editedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([workOrderId, createdAt])
 }

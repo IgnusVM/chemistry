@@ -12,6 +12,7 @@ import { buildAttachmentKey, uploadAttachment, deleteAttachmentObject } from "@/
 import { generateWorkOrderCode } from "@/lib/work-order-code";
 import { WO_TYPES, WO_PRIORITIES, WO_STATUSES, ALLOWED_ATTACHMENT_TYPES, NOTE_FORMATS } from "@/lib/constants";
 import { sanitizeNoteBody } from "@/lib/notes";
+import { recordRevision } from "@/lib/work-order-revisions";
 
 const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 
@@ -518,4 +519,144 @@ export async function deleteWorkOrderPart(workOrderPartId: string) {
   });
 
   revalidatePath(`/work-orders/${use.workOrder.code}`);
+}
+
+const editSchema = z.object({
+  workOrderId: z.string().min(1),
+  title: z.string().trim().min(1, "Give it a title.").max(140, "Keep the title short — the detail belongs below."),
+  description: z.string().trim().max(10000).optional(),
+  priority: z.enum(WO_PRIORITIES).optional(),
+  type: z.enum(WO_TYPES).optional(),
+  resolutionNotes: z.string().trim().max(10000).optional(),
+  laborMinutes: z.string().optional(),
+});
+
+export type EditWorkOrderState = { error?: string } | undefined;
+
+/**
+ * Edit a work order's own fields, recording what changed so it can be undone.
+ *
+ * Only fields that ACTUALLY changed are written to the revision. An edit that
+ * touches the title alone must undo the title alone — recording the whole form
+ * would mean undoing it also reverted whatever someone else had changed in the
+ * meantime.
+ *
+ * The write and the revision go in one transaction. A revision without its edit
+ * would offer to undo something that never happened; an edit without its
+ * revision would be silently permanent.
+ */
+export async function editWorkOrder(
+  _prev: EditWorkOrderState,
+  formData: FormData,
+): Promise<EditWorkOrderState> {
+  const user = await requireCurrentUser();
+  const parsed = editSchema.safeParse({
+    workOrderId: formData.get("workOrderId"),
+    title: formData.get("title"),
+    description: formData.get("description") ?? undefined,
+    priority: formData.get("priority") || undefined,
+    type: formData.get("type") || undefined,
+    resolutionNotes: formData.get("resolutionNotes") ?? undefined,
+    laborMinutes: formData.get("laborMinutes") ?? undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+
+  const workOrder = await requireWorkOrderAccess(parsed.data.workOrderId);
+
+  const current = await prisma.workOrder.findUniqueOrThrow({
+    where: { id: workOrder.id },
+    select: {
+      title: true, description: true, priority: true, type: true,
+      resolutionNotes: true, laborMinutes: true,
+    },
+  });
+
+  const next: Record<string, unknown> = {
+    title: parsed.data.title,
+    description: parsed.data.description ?? "",
+    resolutionNotes: parsed.data.resolutionNotes || null,
+    laborMinutes: parsed.data.laborMinutes ? Number(parsed.data.laborMinutes) : null,
+  };
+  if (parsed.data.priority) next.priority = parsed.data.priority;
+  if (parsed.data.type) next.type = parsed.data.type;
+
+  const before: Record<string, unknown> = {};
+  const after: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(next)) {
+    const was = (current as Record<string, unknown>)[key] ?? null;
+    const now = value ?? null;
+    if (was !== now) { before[key] = was; after[key] = now; }
+  }
+  if (Object.keys(after).length === 0) return;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.workOrder.update({ where: { id: workOrder.id }, data: after });
+    await recordRevision(tx, workOrder.id, user.id, before, after);
+  });
+
+  await recordAudit({
+    entityType: "WorkOrder",
+    entityId: workOrder.id,
+    action: "edited",
+    userId: user.id,
+    changes: after,
+  });
+  revalidatePath(`/work-orders/${workOrder.code}`);
+}
+
+/**
+ * Step back one edit.
+ *
+ * The revision is kept and flagged rather than deleted, which is the whole
+ * mechanism behind redo.
+ */
+export async function undoWorkOrderEdit(workOrderId: string): Promise<EditWorkOrderState> {
+  const user = await requireCurrentUser();
+  const workOrder = await requireWorkOrderAccess(workOrderId);
+
+  const revision = await prisma.workOrderRevision.findFirst({
+    where: { workOrderId: workOrder.id, undone: false },
+    orderBy: { createdAt: "desc" },
+  });
+  if (!revision) return { error: "There is nothing to undo." };
+
+  await prisma.$transaction(async (tx) => {
+    await tx.workOrder.update({
+      where: { id: workOrder.id },
+      data: revision.before as Record<string, never>,
+    });
+    await tx.workOrderRevision.update({ where: { id: revision.id }, data: { undone: true } });
+  });
+
+  await recordAudit({
+    entityType: "WorkOrder", entityId: workOrder.id, action: "edit undone",
+    userId: user.id, changes: revision.before as Record<string, unknown>,
+  });
+  revalidatePath(`/work-orders/${workOrder.code}`);
+}
+
+/** Step forward again, for an edit that was just undone. */
+export async function redoWorkOrderEdit(workOrderId: string): Promise<EditWorkOrderState> {
+  const user = await requireCurrentUser();
+  const workOrder = await requireWorkOrderAccess(workOrderId);
+
+  const revision = await prisma.workOrderRevision.findFirst({
+    where: { workOrderId: workOrder.id, undone: true },
+    orderBy: { createdAt: "asc" },
+  });
+  if (!revision) return { error: "There is nothing to redo." };
+
+  await prisma.$transaction(async (tx) => {
+    await tx.workOrder.update({
+      where: { id: workOrder.id },
+      data: revision.after as Record<string, never>,
+    });
+    await tx.workOrderRevision.update({ where: { id: revision.id }, data: { undone: false } });
+  });
+
+  await recordAudit({
+    entityType: "WorkOrder", entityId: workOrder.id, action: "edit redone",
+    userId: user.id, changes: revision.after as Record<string, unknown>,
+  });
+  revalidatePath(`/work-orders/${workOrder.code}`);
 }

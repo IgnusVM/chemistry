@@ -42,7 +42,7 @@ export function ClosedWorkOrderView({
           <div className="text-xs uppercase tracking-wide text-neutral-400">
             {workOrder.code} · {workOrder.department.name} · {workOrder.type.replace("_", " ")}
           </div>
-          <h1 className="text-xl font-semibold text-neutral-900">{workOrder.description}</h1>
+          <h1 className="text-xl font-semibold text-neutral-900">{workOrder.title || workOrder.description}</h1>
           <div className="mt-1 flex items-center gap-2">
             <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[workOrder.status] ?? "bg-neutral-200 text-neutral-500"}`}>
               {workOrder.status.replace("_", " ")}

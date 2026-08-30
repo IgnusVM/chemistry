@@ -22,6 +22,8 @@ import { resolveBadge, resolveBadges } from "@/lib/user-badge-data";
 import { UserBadge, UserBadgeLabel } from "@/components/user-badge";
 import { HelpLink } from "@/components/help-link";
 import { CopyButton } from "@/components/copy-button";
+import { EditWorkOrder } from "./edit-work-order";
+import { getRevisionState } from "@/lib/work-order-revisions";
 
 export default async function WorkOrderDetailPage({
   params,
@@ -45,6 +47,9 @@ export default async function WorkOrderDetailPage({
     },
   });
   if (!workOrder) notFound();
+
+  // Whether the undo and redo buttons have anything to offer.
+  const revisions = await getRevisionState(workOrder.id);
 
   if (workOrder.status === "CLOSED") {
     const attachmentUrls = await Promise.all(workOrder.attachments.map((a) => getAttachmentUrl(a.s3Key)));
@@ -263,7 +268,7 @@ export default async function WorkOrderDetailPage({
               <Link href={`/work-orders/${wo.code}`} className="min-w-0 hover:underline">
                 <span className="font-medium text-neutral-900">{wo.code}</span>{" "}
                 <span className="text-neutral-600">
-                  {wo.description.length > 70 ? `${wo.description.slice(0, 70)}…` : wo.description}
+                  {(wo.title || wo.description).length > 70 ? `${(wo.title || wo.description).slice(0, 70)}…` : wo.title || wo.description}
                 </span>
               </Link>
               <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[wo.status]}`}>
@@ -322,13 +327,35 @@ export default async function WorkOrderDetailPage({
           <CopyButton value={workOrder.code} label="work order number" />
           <span>· {workOrder.department.name} · {workOrder.type.replace("_", " ")}</span>
         </div>
-        <h1 className="text-xl font-semibold text-neutral-900">{workOrder.description}</h1>
+        <h1 className="text-xl font-semibold text-neutral-900">{workOrder.title || workOrder.description}</h1>
         <div className="mt-1 flex items-center gap-2">
           <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[workOrder.status]}`}>
             {workOrder.status.replace("_", " ")}
           </span>
           <span className="text-xs text-neutral-500">Priority: {workOrder.priority.replace("_", " ")}</span>
         </div>
+
+        {/* The account of the problem, below the title rather than as it. On a
+            ticket written before titles existed the two are the same text, so
+            it is only shown when it adds something. */}
+        {workOrder.description && workOrder.description !== workOrder.title ? (
+          <p className="mt-3 max-w-3xl text-sm whitespace-pre-wrap text-neutral-700">
+            {workOrder.description}
+          </p>
+        ) : null}
+
+        <EditWorkOrder
+          workOrder={{
+            id: workOrder.id,
+            title: workOrder.title,
+            description: workOrder.description,
+            priority: workOrder.priority,
+            type: workOrder.type,
+            resolutionNotes: workOrder.resolutionNotes,
+            laborMinutes: workOrder.laborMinutes,
+          }}
+          revisions={revisions}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4 rounded-md border border-neutral-200 bg-white p-4 text-sm sm:grid-cols-4">

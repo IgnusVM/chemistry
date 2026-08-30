@@ -17,7 +17,7 @@ export default async function BulkNewWorkOrdersDonePage({
     ? await prisma.workOrder.findMany({
         where: { id: { in: ids } },
         orderBy: { code: "asc" },
-        select: { code: true, description: true, asset: { select: { assetTag: true } } },
+        select: { code: true, title: true, description: true, asset: { select: { assetTag: true } } },
       })
     : [];
 
@@ -42,7 +42,7 @@ export default async function BulkNewWorkOrdersDonePage({
                 {wo.code}
               </Link>
               <span className="text-neutral-500">
-                {wo.asset?.assetTag ?? "—"} · {wo.description.length > 50 ? `${wo.description.slice(0, 50)}…` : wo.description}
+                {wo.asset?.assetTag ?? "—"} · {(wo.title || wo.description).length > 50 ? `${(wo.title || wo.description).slice(0, 50)}…` : wo.title || wo.description}
               </span>
             </li>
           ))}

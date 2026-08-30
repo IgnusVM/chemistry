@@ -567,7 +567,7 @@ It's a separate page rather than printing the ticket screen directly, because th
 
 **I don't see the Admin tab.** It's only shown to org admins. Ask an existing admin (check **Admin → Users**, or ask your department lead who to contact) to grant it if you have a genuine need to manage shared structural data.
 
-**My work order doesn't have a title field — where do I describe the problem?** Work orders were deliberately simplified to use just a **description** field instead of a separate title; whatever you type there is what shows everywhere the ticket is listed. See [Creating a work order](/help/work-orders/creating-a-work-order).
+**What is the difference between the title and the description?** The **title** is the short line every list shows — keep it to something you would say on the radio. The **description** underneath is where the problem actually gets explained: what happened, what you already tried, what the next person needs to know. Tickets written before titles existed have the same text in both; edit either one and they part company. See [Editing a work order](/help/work-orders/editing-a-work-order).
 
 **Still stuck?** Search this guide from the box at the top of the **Help** tab, or ask an org admin directly — their contact info is on their profile the same way yours is (see [Your contact profile](/help/accounts/your-contact-profile)).`,
   },
@@ -722,6 +722,24 @@ These differ because one is about display and the other about intent. Done can *
 **Work orders do not land here.** A ticket belongs to the department that has to do it, and a ticket that quietly moved onto someone's private board would be work the rest of the team could no longer see. You can still attach a ticket to one of your cards as a reminder to follow it up — see [Cards and work orders](/help/board/cards-and-work-orders).
 
 **Tags are shared.** The tag list is the same one every kanban uses, so a tag means what it means everywhere. Which tags you put on your own cards is still only visible to you.`,
+  },
+  {
+    slug: "editing-a-work-order",
+    title: "Editing a work order, and undoing it",
+    category: "work-orders",
+    order: 12,
+    summary: "Every field can be changed, and the last five changes can be taken back.",
+    body: `Open a ticket and press **Edit details**. Everything on it can be changed: the title, the description, priority, type, labour minutes and the resolution notes.
+
+**Title and description are different things.** The title is the one line that shows in every list, so keep it short and recognisable. The description is the room to explain the problem properly — what happened, what you tried, what the next person needs to know. A ticket created before titles existed carries the same text in both until somebody edits it.
+
+**Undo takes back the last change.** It appears next to Edit details as soon as there is something to undo, and it goes back up to five steps. It puts back only the fields that particular edit changed, so undoing your own typo will not quietly revert something a colleague changed in the meantime.
+
+**Redo only appears once you have used undo.** If it is not there, there is nothing to redo — that is the button telling you so rather than sitting greyed out.
+
+**Making a new edit ends the redo trail.** Once you change something else, the steps you had undone are gone for good: they described a version of the ticket that no longer exists.
+
+**Undo is not the history.** Every edit is also written to the audit log, which keeps everything permanently and is what to consult when the question is "who changed this and when". Undo is for the thing you just did by accident.`,
   },
 ];
 

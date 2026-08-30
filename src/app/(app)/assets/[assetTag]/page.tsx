@@ -203,7 +203,7 @@ export default async function AssetDetailPage({
             {workOrders.map((wo) => (
               <li key={wo.id} className="flex items-center justify-between py-2 text-sm">
                 <Link href={`/work-orders/${wo.code}`} className="hover:underline">
-                  {wo.code} · {wo.description}
+                  {wo.code} · {wo.title || wo.description}
                 </Link>
                 <span className={`rounded-full px-2 py-0.5 text-xs ${WORK_ORDER_STATUS_STYLES[wo.status]}`}>
                   {wo.status.replace("_", " ")}
