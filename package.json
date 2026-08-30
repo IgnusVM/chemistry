@@ -1,6 +1,6 @@
 {
   "name": "chemistry",
-  "version": "0.23.0",
+  "version": "0.23.1",
   "private": true,
   "scripts": {
     "dev": "node scripts/copy-zxing-wasm.mjs && next dev",

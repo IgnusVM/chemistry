@@ -106,11 +106,14 @@ async function main() {
   });
 
   // Where a ticket goes for someone with no membership of their own. Org admins
-  // can work any department, so this is a real placement for them, not a fudge.
-  const fallback = await prisma.department.findFirst({
-    where: { active: true },
-    orderBy: { name: "asc" },
-  });
+  // and Directors can work any department, so this is a real placement for them
+  // rather than a fudge. Named explicitly instead of taken alphabetically: the
+  // ticket shows up as a card on that department's kanban for everyone to see,
+  // which is not something to decide by accident.
+  const fallbackSlug =
+    process.argv.find((a) => a.startsWith("--fallback="))?.split("=")[1] ?? "lamplighters";
+  const fallback = await prisma.department.findUnique({ where: { slug: fallbackSlug } });
+  if (!fallback) throw new Error(`No department with slug "${fallbackSlug}".`);
 
   const plan: { user: (typeof users)[number]; departmentId: string; departmentName: string }[] = [];
   const blocked: string[] = [];
@@ -130,7 +133,6 @@ async function main() {
     if (own) {
       plan.push({ user, departmentId: own.departmentId, departmentName: own.department.name });
     } else if (user.isOrgAdmin || user.isDirector) {
-      if (!fallback) throw new Error("No active department exists to file tutorials against.");
       plan.push({ user, departmentId: fallback.id, departmentName: `${fallback.name} (as admin)` });
     } else {
       // Filing this anyway would produce a ticket they can read and not use.
