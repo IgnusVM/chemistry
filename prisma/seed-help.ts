@@ -529,6 +529,8 @@ You'll find it under **Admin → Asset Types → (a type) → Code**. Only org a
     summary: "Nearly everything can be corrected after the fact. Here is where.",
     body: `Typos happen, especially at 3am in a dusty container. Almost every record in Chemistry can be corrected after creation rather than deleted and re-made.
 
+**An asset can be renamed** by anyone who can work on it, from the pencil beside its name. Names drift: gear gets relabelled, a batch turns out to be mis-described, someone types it wrong at 3am. The rename is recorded in the asset History with who did it and what it was called before.
+
 **Org admins can edit** part numbers and descriptions, part links and order history, divisions, departments, resolution codes, locations, and asset group names, each from an inline **Edit** control on the row or card itself. Asset types have always been editable from their own page.
 
 **Validation still applies.** Renaming something to a value that's already taken is refused with a clear message rather than silently creating a duplicate. Part numbers within an asset type, department and division slugs, and resolution codes are all still unique. Re-parenting a location is checked for loops, so you can't accidentally make a location its own ancestor and break the tree.
@@ -537,7 +539,7 @@ You'll find it under **Admin → Asset Types → (a type) → Code**. Only org a
 
 Deleting a user is blocked while they still have anything [checked out](/help/assets/checking-tools-in-and-out). Check the gear back in first, so it doesn't simply vanish from the record.
 
-**What isn't editable.** Work order codes and asset tags are permanent identifiers, and audit log entries and notes are append-only by design. If a note is wrong, add a correcting note rather than rewriting history.`,
+**What isn't editable.** Work order codes and asset tags are permanent identifiers, and audit log entries and notes are append-only by design. An asset tag in particular is printed on the sticker and encoded in that sticker's QR code, so changing it would strand every label already stuck to the thing. If a note is wrong, add a correcting note rather than rewriting history.`,
   },
   {
     slug: "exporting-lists",

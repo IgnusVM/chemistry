@@ -18,6 +18,7 @@ import { AddNoteForm } from "@/components/add-note-form";
 import { LoansPanel } from "./loans/loans-panel";
 import { HelpLink } from "@/components/help-link";
 import { CopyButton } from "@/components/copy-button";
+import { AssetName } from "./asset-name";
 
 export default async function AssetDetailPage({
   params,
@@ -244,7 +245,7 @@ export default async function AssetDetailPage({
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs uppercase tracking-wide text-neutral-400">{asset.assetType.name}</div>
-          <h1 className="text-xl font-semibold text-neutral-900">{asset.name}</h1>
+          <AssetName assetId={asset.id} name={asset.name} />
           <div className="flex items-center gap-1 text-sm text-neutral-500">
             <span className="font-mono">{asset.assetTag}</span>
             <CopyButton value={asset.assetTag} label="asset tag" />

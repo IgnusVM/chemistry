@@ -142,6 +142,55 @@ export async function changeAssetStatus(formData: FormData) {
   revalidatePath(`/assets/${asset.assetTag}`);
 }
 
+const renameSchema = z.object({
+  assetId: z.string().min(1),
+  name: z.string().trim().min(1, "Give the asset a name.").max(200, "Keep the name short."),
+});
+
+export type RenameAssetState = { error?: string } | undefined;
+
+/**
+ * Rename an asset.
+ *
+ * The name is the human label and nothing keys off it, so this is an ordinary
+ * update. The asset tag is a different matter and stays fixed: it is printed on
+ * a physical sticker and encoded in that sticker's QR code, so changing it would
+ * strand every label already stuck to the thing.
+ */
+export async function renameAsset(
+  _prevState: RenameAssetState,
+  formData: FormData,
+): Promise<RenameAssetState> {
+  const user = await requireCurrentUser();
+  const parsed = renameSchema.safeParse({
+    assetId: formData.get("assetId"),
+    name: formData.get("name"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const asset = await prisma.asset.findUniqueOrThrow({ where: { id: parsed.data.assetId } });
+  const allowed = await hasDepartmentAccess(asset.owningDepartmentId, "MEMBER");
+  if (!allowed) return { error: "You can't change assets in that department." };
+
+  if (asset.name === parsed.data.name) return undefined;
+
+  await prisma.asset.update({
+    where: { id: asset.id },
+    data: { name: parsed.data.name },
+  });
+  await recordAudit({
+    entityType: "Asset",
+    entityId: asset.id,
+    action: "renamed",
+    userId: user.id,
+    changes: { from: asset.name, to: parsed.data.name },
+  });
+
+  revalidatePath(`/assets/${asset.assetTag}`);
+  revalidatePath("/assets");
+  return undefined;
+}
+
 const valueSchema = z.object({
   assetId: z.string().min(1),
   acquisitionCost: z.coerce.number().nonnegative().optional(),
