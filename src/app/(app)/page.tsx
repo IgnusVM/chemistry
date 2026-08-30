@@ -9,13 +9,13 @@ import { Noticeboard } from "./noticeboard";
 import { AssignedTiles } from "./assigned-tiles";
 import { getFeedPage } from "@/lib/feed";
 import { NewWorkOrderButton } from "./new-work-order-button";
-import { TERMINAL_WO_STATUSES } from "@/lib/constants";
+import { ACTIVE_WO_STATUSES } from "@/lib/constants";
 
 export default async function DashboardPage() {
   const user = await requireCurrentUser();
 
   const myWorkOrders = await prisma.workOrder.findMany({
-    where: { assignedToUserId: user.id, status: { notIn: [...TERMINAL_WO_STATUSES] } },
+    where: { assignedToUserId: user.id, status: { in: [...ACTIVE_WO_STATUSES] } },
     orderBy: [{ priority: "desc" }, { reportedAt: "desc" }],
     take: 20,
   });

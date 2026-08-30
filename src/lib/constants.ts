@@ -15,6 +15,15 @@ export const NOTE_FORMATS = ["HTML", "MARKDOWN"] as const;
 // filter types want a mutable array and reject a readonly tuple.
 export const TERMINAL_WO_STATUSES = ["CLOSED", "CANCELLED"] as const;
 
+// Work still asking something of the person it is assigned to.
+//
+// Deliberately NOT the inverse of TERMINAL_WO_STATUSES: COMPLETE is not
+// terminal -- the ticket is still open and awaiting closure -- but the work
+// itself is finished, so it does not belong in a list headed "assigned to
+// you". Those tickets remain on the Work Orders list under the default
+// "Open (not closed/cancelled)" filter, which is where closing them happens.
+export const ACTIVE_WO_STATUSES = ["OPEN", "IN_PROGRESS", "WAITING_PARTS"] as const;
+
 // Photos, PDFs, and common office docs — covers repair photos, receipts, and
 // service reports, the three things attachments get used for in practice.
 // Not `as const`: only ever used for `.includes(file.type)` runtime checks
