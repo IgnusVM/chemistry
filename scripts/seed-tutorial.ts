@@ -22,12 +22,13 @@ import { ensurePersonalBoard } from "@/lib/personal-board";
 import { generateWorkOrderCode } from "@/lib/work-order-code";
 
 const APPLY = process.argv.includes("--apply");
+const REFRESH = process.argv.includes("--refresh");
 
 const TUTORIAL_TITLE = "Start here: a tour of Chemistry";
 
-const TUTORIAL_DESCRIPTION = `Welcome to Chemistry. This ticket is your tour of it, and it is also an example of the thing it is teaching you: a work order with a checklist, assigned to a person, which gets closed when the work is done.
+const TUTORIAL_DESCRIPTION = `Welcome to Chemistry. This ticket is your tour of it, and it is also an example of the thing it is teaching you: a work order with a checklist, assigned to a person, which gets completed when the work is done.
 
-Work through the tasks below in any order. Each one has instructions, behind the small Instructions link under the task. Tick them off as you go. When they are all ticked, close this ticket with the Close ticket button and you are done.
+Work through the tasks below in any order. Each one has instructions, behind the small Instructions link under the task. Tick them off as you go. When they are all ticked, press the green Complete button at the top and you are done.
 
 Nothing here can break anything. Every task is either looking at something or changing something that belongs to you.
 
@@ -88,10 +89,10 @@ Give it a short title, the kind of line you would say on the radio. Put the deta
 If you cannot think of anything real, file one against a piece of gear you know is fine and cancel it afterwards. Better to practise now than at 2am.`,
   },
   {
-    text: "Close this ticket",
-    instructions: `Once the rest are ticked, use Close ticket at the top of this page.
+    text: "Complete this ticket",
+    instructions: `First fill in the Resolution box further down: pick a resolution code, which is a short controlled list rather than free text so patterns show up over time. General Repair is fine for this one. Write a line in the resolution notes about anything that confused you, because that is genuinely useful to whoever looks after this system. Press Save in that box.
 
-Closing asks for a resolution code, which is a short controlled list rather than free text so patterns show up over time. For this one, General Repair is fine. Write a line in the resolution notes about anything that confused you, because that is genuinely useful to whoever is looking after this system.
+Then press the green Complete button at the top. There are only two ways a ticket ends: Complete, meaning the work was done, and Cancel, meaning it is not going to happen. Both count as closed.
 
 A closed ticket becomes a read-only record. If you need it back, Reopen work order is at the bottom.`,
   },
@@ -148,6 +149,34 @@ async function main() {
   }
   console.log(`\nwould create ${plan.length} tutorial(s):`);
   for (const p of plan) console.log(`  ${p.user.displayName} -> ${p.departmentName}`);
+
+  // --refresh rewrites the wording of tutorials that already exist. Tick state,
+  // assignment and status are left alone: this updates what the text says, not
+  // how far anyone has got through it.
+  if (REFRESH) {
+    const live = await prisma.workOrder.findMany({
+      where: { title: TUTORIAL_TITLE },
+      include: { tasks: { orderBy: { position: "asc" } } },
+    });
+    console.log(`\nrefreshing wording on ${live.length} existing tutorial(s)`);
+    if (APPLY) {
+      for (const wo of live) {
+        await prisma.workOrder.update({
+          where: { id: wo.id },
+          data: { description: TUTORIAL_DESCRIPTION },
+        });
+        for (const [i, task] of wo.tasks.entries()) {
+          const source = TASKS[i];
+          if (!source) continue;
+          await prisma.workOrderTask.update({
+            where: { id: task.id },
+            data: { text: source.text, instructions: source.instructions },
+          });
+        }
+        console.log(`  ${wo.code}: description and ${Math.min(wo.tasks.length, TASKS.length)} task(s)`);
+      }
+    }
+  }
 
   if (!APPLY) {
     console.log("\nDry run. Pass --apply to write.");
