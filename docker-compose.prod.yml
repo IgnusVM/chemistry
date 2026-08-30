@@ -37,6 +37,9 @@ services:
       # it upserts. Required for the very first boot of a new deployment,
       # otherwise nobody can administer the instance.
       - BOOTSTRAP_ADMIN_EMAIL=${BOOTSTRAP_ADMIN_EMAIL:-}
+      # The single account allowed to grant or revoke Director. Unset means
+      # nobody can, which is a safe default rather than an open one.
+      - ROOT_DIRECTOR_EMAIL=${ROOT_DIRECTOR_EMAIL:-}
       - BOOTSTRAP_ADMIN_NAME=${BOOTSTRAP_ADMIN_NAME:-}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - EMAIL_FROM=${EMAIL_FROM:-}
