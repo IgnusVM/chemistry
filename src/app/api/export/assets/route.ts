@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     status: sp.get("status") ?? undefined,
     type: sp.get("type") ?? undefined,
   };
-  const where = buildAssetWhere(params);
+  const where = await buildAssetWhere(params);
 
   // Custom fields are only meaningful when a single type is selected.
   let available: ExportColumn<AssetExportRow>[] = ASSET_COLUMNS;

@@ -29,7 +29,7 @@ export async function enterBulkSelection(formData: FormData) {
   if (selectAllMatching) {
     const rawParams = filterParamsFromFormData(formData);
     if (entityType === "Asset") {
-      const where = buildAssetWhere(rawParams);
+      const where = await buildAssetWhere(rawParams);
       const rows = await prisma.asset.findMany({ where, select: { id: true }, take: MAX_BULK_ITEMS + 1 });
       ids = rows.map((r) => r.id);
     } else if (entityType === "WorkOrder") {

@@ -28,6 +28,8 @@ export async function GET(req: NextRequest) {
     priority: sp.get("priority") ?? undefined,
     mine: sp.get("mine") ?? undefined,
     assignedToName: sp.get("assignedToName") ?? undefined,
+    location: sp.get("location") ?? undefined,
+    searchBy: sp.get("searchBy") ?? undefined,
   };
 
   // Reuses the list's own where-builder, so an export always matches exactly

@@ -9,7 +9,7 @@ import { SelectAllHeaderCheckbox } from "@/components/selection/select-all-check
 import { RowCheckbox } from "@/components/selection/row-checkbox";
 import { SelectionToolbar } from "@/components/selection/selection-toolbar";
 import { AssignedFilterFields } from "./assigned-filter-fields";
-import { buildWorkOrderWhere, resolveWorkOrderListDefaults, OPEN_STATUS_FILTER, type WorkOrderListParams } from "./where";
+import { buildWorkOrderWhere, resolveWorkOrderListDefaults, OPEN_STATUS_FILTER, WORK_ORDER_SEARCH_FIELDS, type WorkOrderListParams } from "./where";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES, WORK_ORDER_PRIORITY_STYLES as PRIORITY_STYLES } from "@/lib/status-styles";
 import { ExportDialog } from "@/components/export-dialog";
 import { WORK_ORDER_COLUMNS, DEFAULT_WORK_ORDER_COLUMNS } from "@/lib/export/columns";
@@ -22,14 +22,14 @@ export default async function WorkOrdersPage({
 }) {
   const user = await requireCurrentUser();
   const params = await searchParams;
-  const { q, department, priority, assignedToName } = params;
+  const { q, department, priority, assignedToName, location, searchBy } = params;
   const page = parsePage(params.page);
   const pageSize = parsePageSize(params.pageSize);
   const { status, mine } = resolveWorkOrderListDefaults(params);
 
   const where = buildWorkOrderWhere(params, { userId: user.id });
 
-  const [workOrders, total, departments, members] = await Promise.all([
+  const [workOrders, total, departments, members, locations] = await Promise.all([
     prisma.workOrder.findMany({
       where,
       orderBy: [{ priority: "desc" }, { reportedAt: "desc" }],
@@ -43,6 +43,7 @@ export default async function WorkOrdersPage({
       orderBy: { displayName: "asc" },
       select: { displayName: true },
     }),
+    prisma.location.findMany({ orderBy: { name: "asc" } }),
   ]);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -62,7 +63,7 @@ export default async function WorkOrdersPage({
             storageKey="chemistry.export.work-orders"
             columns={WORK_ORDER_COLUMNS.map((c) => ({ key: c.key, label: c.label }))}
             defaultColumns={DEFAULT_WORK_ORDER_COLUMNS}
-            filterParams={{ q, department, status, priority, mine, assignedToName }}
+            filterParams={{ q, searchBy, department, status, priority, mine, assignedToName, location }}
             total={total}
           />
           <Link href="/work-orders/new" className={buttonClass()}>
@@ -78,11 +79,36 @@ export default async function WorkOrdersPage({
           placeholder="Search description or WO#…"
           className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
         />
+        <select
+          name="searchBy"
+          defaultValue={searchBy ?? "any"}
+          aria-label="Which field to search"
+          className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+        >
+          {WORK_ORDER_SEARCH_FIELDS.map((f) => (
+            <option key={f.value} value={f.value}>
+              {f.label}
+            </option>
+          ))}
+        </select>
         <select name="department" defaultValue={department ?? ""} className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
           <option value="">All departments</option>
           {departments.map((d) => (
             <option key={d.id} value={d.id}>
               {d.name}
+            </option>
+          ))}
+        </select>
+        <select
+          name="location"
+          defaultValue={location ?? ""}
+          aria-label="Location"
+          className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+        >
+          <option value="">All locations</option>
+          {locations.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.name}
             </option>
           ))}
         </select>
@@ -117,7 +143,7 @@ export default async function WorkOrdersPage({
       <SelectionProvider pageIds={workOrders.map((w) => w.id)} totalMatching={total}>
         <SelectionToolbar
           entityType="WorkOrder"
-          filterParams={{ q, department, status, priority, mine, assignedToName }}
+          filterParams={{ q, searchBy, department, status, priority, mine, assignedToName, location }}
           actions={[{ label: "Close selected", targetPath: "/work-orders/bulk-close" }]}
         />
 
