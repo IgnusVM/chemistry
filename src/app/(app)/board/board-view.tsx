@@ -144,6 +144,14 @@ export function BoardViewGrid({
     enabled: canWrite,
     canDropInto,
     onDrop: (p, toColumnId) => performMove(p.cardId, toColumnId, p.updatedAt),
+    onRefused: (p, toColumnId) => {
+      const col = columnChoices.find((c) => c.id === toColumnId);
+      setMoveError(
+        p.hasWorkOrder && col && !col.acceptsWorkOrderCards
+          ? `This card is work order work, and "${col.name}" has no work order status behind it. Pick a column that does, or change the columns under Admin.`
+          : "That card can't go there.",
+      );
+    },
     scrollRef,
   });
 
@@ -253,7 +261,9 @@ export function BoardViewGrid({
                       if (cardDrag.didDrag()) return;
                       setSelected({ card, columnId: col.id });
                     }}
-                    className={`rounded-lg text-left focus:ring-2 focus:ring-neutral-400 focus:outline-none ${
+                    draggable={false}
+                    onDragStart={(e) => e.preventDefault()}
+                    className={`touch-manipulation rounded-lg text-left select-none focus:ring-2 focus:ring-neutral-400 focus:outline-none ${
                       canWrite ? "cursor-grab active:cursor-grabbing" : ""
                     } ${cardDrag.active?.cardId === card.id ? "opacity-40" : ""}`}
                   >

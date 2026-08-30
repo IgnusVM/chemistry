@@ -43,11 +43,13 @@ export function useCardDrag({
   enabled,
   canDropInto,
   onDrop,
+  onRefused,
   scrollRef,
 }: {
   enabled: boolean;
   canDropInto: (columnId: string, dragged: DragPayload) => boolean;
   onDrop: (p: DragPayload, toColumnId: string) => void;
+  onRefused: (p: DragPayload, toColumnId: string) => void;
   scrollRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const [active, setActive] = useState<DragPayload | null>(null);
@@ -62,9 +64,11 @@ export function useCardDrag({
   // they were when the drag started.
   const canDropRef = useRef(canDropInto);
   const onDropRef = useRef(onDrop);
+  const onRefusedRef = useRef(onRefused);
   useEffect(() => {
     canDropRef.current = canDropInto;
     onDropRef.current = onDrop;
+    onRefusedRef.current = onRefused;
   });
 
   // Pre-activation: a press that has not yet become a drag.
@@ -87,11 +91,41 @@ export function useCardDrag({
     edge.current = 0;
   }, []);
 
-  /** Which column is under the pointer? The ghost is pointer-events:none. */
+  /**
+   * Which column is the pointer over?
+   *
+   * By geometry, not `elementFromPoint`. Hit-testing the topmost element means
+   * anything that happens to sit over a column — a sheet, a sticky header, a
+   * browser's own drag image, a text selection — silently answers "no column"
+   * and the drop is dropped on the floor.
+   *
+   * Horizontal position is what decides it, with a generous vertical band:
+   * columns are tall and full of gaps, and being a few pixels below the last
+   * card plainly still means "this column".
+   */
   const columnAt = useCallback((x: number, y: number) => {
-    const el = document.elementFromPoint(x, y);
-    const section = el?.closest<HTMLElement>("[data-column-id]");
-    return section?.dataset.columnId ?? null;
+    const cols = document.querySelectorAll<HTMLElement>("[data-column-id]");
+    let lane: string | null = null;
+    let nearest: { id: string; d: number } | null = null;
+
+    for (const el of cols) {
+      const id = el.dataset.columnId;
+      if (!id) continue;
+      const r = el.getBoundingClientRect();
+      if (x >= r.left && x <= r.right) {
+        // Inside the column's own box: unambiguous.
+        if (y >= r.top && y <= r.bottom) return id;
+        // In its lane, just above or below it — still plainly meant for it.
+        if (y >= r.top - 120 && y <= r.bottom + 120) lane = id;
+      } else {
+        // Landing in the gap between two columns should not throw the move
+        // away; take the closer one.
+        const d = x < r.left ? r.left - x : x - r.right;
+        if (y >= r.top - 60 && y <= r.bottom + 60 && (!nearest || d < nearest.d)) nearest = { id, d };
+      }
+    }
+    if (lane) return lane;
+    return nearest && nearest.d <= 40 ? nearest.id : null;
   }, []);
 
   const begin = useCallback((payload: DragPayload, x: number, y: number) => {
@@ -147,8 +181,11 @@ export function useCardDrag({
     const up = () => {
       const payload = activeRef.current;
       const col = overRef.current;
-      if (payload && col && col !== payload.fromColumnId && canDropRef.current(col, payload)) {
-        onDropRef.current(payload, col);
+      if (payload && col && col !== payload.fromColumnId) {
+        if (canDropRef.current(col, payload)) onDropRef.current(payload, col);
+        // A refused drop used to do nothing at all, which is indistinguishable
+        // from the feature being broken. Say why instead.
+        else onRefusedRef.current(payload, col);
       }
       // Outlives the click that follows this pointerup.
       suppressClick.current = true;
@@ -199,7 +236,12 @@ export function useCardDrag({
   const onPointerDown = useCallback(
     (e: React.PointerEvent, payload: Omit<DragPayload, "width">) => {
       if (!enabled || e.button > 0) return;
-      const width = (e.currentTarget as HTMLElement).getBoundingClientRect().width;
+      const el = e.currentTarget as HTMLElement;
+      const width = el.getBoundingClientRect().width;
+      // Keep the gesture ours. Without capture the browser can retarget or
+      // swallow the rest of it — a text selection or its own drag image — and
+      // the pointerup that would have completed the drop never arrives.
+      try { el.setPointerCapture(e.pointerId); } catch { /* not capturable */ }
       const full: DragPayload = { ...payload, width };
       const touch = e.pointerType !== "mouse";
       const x = e.clientX, y = e.clientY;
