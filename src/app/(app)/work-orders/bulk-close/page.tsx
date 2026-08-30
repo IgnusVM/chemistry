@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { parentStatus } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { readBulkSelection } from "@/lib/bulk-selection";
@@ -56,7 +57,7 @@ export default async function BulkCloseWorkOrdersPage({
             <div key={wo.id}>
               <span className="font-medium text-neutral-900">{wo.code}</span> · {wo.title || wo.description}
               {wo.asset && <span className="text-neutral-400"> · {wo.asset.assetTag}</span>}
-              {wo.status === "CLOSED" && <span className="ml-1 text-xs text-neutral-400">(already closed)</span>}
+              {parentStatus(wo.status) === "CLOSED" && <span className="ml-1 text-xs text-neutral-400">(already closed)</span>}
             </div>
           ))}
         </div>

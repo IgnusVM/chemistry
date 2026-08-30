@@ -255,7 +255,7 @@ async function loadBoard(
 }
 
 /** Statuses whose cards age out of the active board (D7). */
-const TERMINAL_LIKE: WorkOrderStatus[] = ["COMPLETE", "CLOSED", "CANCELLED"];
+const TERMINAL_LIKE: WorkOrderStatus[] = ["COMPLETE", "CANCELLED"];
 
 /**
  * A department's board.

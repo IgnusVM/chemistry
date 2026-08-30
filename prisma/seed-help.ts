@@ -31,7 +31,7 @@ const ARTICLES: ArticleSeed[] = [
 
 **Something's wrong with it?** Open the asset and click **Report a problem**. That creates a work order, which is Chemistry's name for a maintenance ticket, already linked to the asset. Describe what's wrong, pick a priority, and submit. See [Creating a work order](/help/work-orders/creating-a-work-order).
 
-**Working a ticket?** Open it from the **Work Orders** tab, assign it to yourself, move its status along as you go (Open, In Progress, Complete), attach photos if useful, and when you're done pick a resolution code and add resolution notes. Closing it locks the ticket down to a summary view until it's reopened. See [Resolution codes explained](/help/work-orders/resolution-codes-explained) and [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order).
+**Working a ticket?** Open it from the **Work Orders** tab, assign it to yourself, move its status along as you go (Pending, In progress, Complete), attach photos if useful, and when you're done pick a resolution code and add resolution notes. Completing it locks the ticket down to a summary view until it's reopened. See [Resolution codes explained](/help/work-orders/resolution-codes-explained) and [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order).
 
 **Adding new gear?** Use **Assets → New asset** for one item, or **Assets → Bulk create** when you're tagging a whole batch (say, forty lanterns) at once with a shared name template and sequential tags. See [Creating an asset](/help/assets/creating-an-asset).
 
@@ -206,7 +206,9 @@ A ticket has a short **title**, which is the line every list shows, and a longer
 
 **Numbering is automatic.** Every work order gets a code like \`CM081926001\`, made of a two-letter type prefix (CM for Corrective, PM for Preventive, IN for Inspection, MO for Modification, DC for Decommission), the date it was opened (MMDDYY), and a sequence number that resets each day per type. You never assign a number yourself, and codes are permanent once issued.
 
-Once created, a work order starts in **Open** status and can be assigned to someone independently of status, since assignment just says who owns it. From Open, status moves through **In Progress**, **Waiting Parts**, **Complete** and **Closed**, or **Cancelled** if it turns out not to be needed. See [Working a ticket end to end](/help/work-orders/working-a-ticket-end-to-end) for the full lifecycle.`,
+Once created, a work order is **Open / Pending**, and can be assigned to someone independently of status, since assignment just says who owns it.
+
+**Status comes in two parts.** A ticket is either **Open** or **Closed**, and within that it has a sub-status saying where exactly it has got to. Open covers **Pending**, **In progress** and **Waiting parts**. Closed covers **Complete**, meaning the work was done, and **Cancelled**, meaning it is not going to happen. Those two are the only ways a ticket ends. See [Working a ticket end to end](/help/work-orders/working-a-ticket-end-to-end) for the full lifecycle.`,
   },
   {
     slug: "working-a-ticket-end-to-end",
@@ -220,7 +222,7 @@ The ticket's code, title, status, priority, and its asset, assignee and reporter
 
 **Assign it** to yourself or someone else using the assignment control in the action bar. Assignment is tracked separately from status: assigning someone doesn't change where the ticket is in its lifecycle, it just says who owns it.
 
-**Move it through status** as work progresses, also from the action bar: Open, then In Progress, then Waiting Parts if you're blocked on something, then Complete. Status changes are logged with a timestamp so there's always a record of how long each stage took.
+**Move it through status** as work progresses, using the status control in the action bar: Pending, then In progress, then Waiting parts if you're blocked on something. Status changes are logged with a timestamp so there's always a record of how long each stage took.
 
 **Tick off the tasks** if the ticket has a checklist. See [Task checklists](/help/work-orders/task-checklists).
 
@@ -230,7 +232,9 @@ The ticket's code, title, status, priority, and its asset, assignee and reporter
 
 **Attach photos, receipts, or reports** from the **Attachments** tab, or the **+ Attachment** shortcut in the action bar. See [Attachments on work orders](/help/photos-documents/photos-on-work-orders).
 
-**Closing out.** When the work is actually done, pick a **resolution code** in the Details tab (see [Resolution codes explained](/help/work-orders/resolution-codes-explained)), write resolution notes summarising what actually happened, and use **Save resolution** in the action bar to save them together. This is the single most useful thing for whoever looks at this asset's history six months from now, so be specific rather than terse. Use **Close ticket** in the action bar, or the status control, to actually close it. See [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order) for what changes once it's closed.
+**Finishing.** First pick a **resolution code** in the Details tab (see [Resolution codes explained](/help/work-orders/resolution-codes-explained)), write resolution notes summarising what actually happened, and press **Save** in that same box. This is the single most useful thing for whoever looks at this asset's history six months from now, so be specific rather than terse.
+
+Then use the green **Complete** button at the top. If the work is not going to happen at all, use the red **Cancel** button instead. There is no separate closing step: completing and cancelling are the two ways a ticket closes. See [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order) for what changes once it has.
 
 The **reported by** field on a ticket links to that person's [account profile](/help/accounts/your-contact-profile), which shows how they'd prefer to be reached during the burn if you need to follow up with them directly.`,
   },
@@ -292,7 +296,7 @@ Resolution codes describe **outcomes**, not root causes, and they are deliberate
     category: "work-orders",
     order: 4,
     summary: "What locks once a ticket is closed, and how to undo it.",
-    body: `Once a work order's status is set to **Closed**, its page switches to a tighter, mostly read-only view. The resolution (code, notes, labour minutes) and the parts used are front and centre, and everything else that's editable on an open ticket disappears: no status dropdown, no reassigning, no changing the linked asset, no adding parts, notes, or photos. What's already there stays visible, just locked, including existing notes, photos, and the full parts list.
+    body: `Once a work order is **Complete** or **Cancelled**, which are the two ways of being closed, its page switches to a tighter, mostly read-only view. The resolution (code, notes, labour minutes) and the parts used are front and centre, and everything else that's editable on an open ticket disappears: no status dropdown, no reassigning, no changing the linked asset, no adding parts, notes, or photos. What's already there stays visible, just locked, including existing notes, photos, and the full parts list.
 
 This is deliberate. A closed ticket is meant to be a finished record, not something that quietly keeps changing after the fact.
 
@@ -312,7 +316,7 @@ The bulk close page only shows fields that make sense applied identically to eve
 
 **Logging a part while bulk-closing.** The form also lets you log one part as used, applied to every selected ticket at once, tied to each ticket's own asset the same way a normal [part-used entry](/help/work-orders/logging-parts-used) would be. Because the selected tickets can be linked to assets of different asset types, logging a new part number this way can end up creating that part under more than one asset type in a single action. Chemistry shows a confirmation before doing this, naming exactly which asset types will get a new part record, so you're not surprised by it after the fact.
 
-Submitting sets every selected ticket to **Closed** with the resolution you entered, the same as closing one manually. See [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order) for what that locks.`,
+Submitting sets every selected ticket to **Complete** with the resolution you entered, the same as completing one manually. See [Closing and reopening a work order](/help/work-orders/closing-and-reopening-a-work-order) for what that locks.`,
   },
   {
     slug: "bulk-creating-work-orders",
@@ -719,7 +723,7 @@ Org admins only, under **Admin → Board columns**.
 
 **Moving here sets** decides what status a ticket gets when someone drags its card into this column. If you leave it blank, the column refuses work order cards altogether, which is right for a column like Ideas where a real ticket has no business.
 
-These differ because one is about display and the other about intent. Done can *show* Complete, Closed, and Cancelled together, while a move into Done has to pick exactly one of them.
+These differ because one is about display and the other about intent. Done can *show* both Complete and Cancelled together, while a move into Done has to pick exactly one of them.
 
 **Every status must appear in exactly one column.** If a status appeared in none, its tickets would vanish from the board. If it appeared in two, the same card would show up twice. Chemistry refuses a configuration that would do either, and tells you which status is the problem. This is the rule most likely to trip you up when adding a column: you have to take a status away from somewhere else to give it to the new one.
 

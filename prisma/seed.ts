@@ -186,10 +186,10 @@ async function main() {
     woStatusesShown: WorkOrderStatus[];
   }[] = [
     { name: "Ideas / Backlog", position: 0, color: "slate", woStatusOnMove: null, woStatusesShown: [] },
-    { name: "Ready / Next Up", position: 1, color: "sky", woStatusOnMove: "OPEN", woStatusesShown: ["OPEN"] },
+    { name: "Ready / Next Up", position: 1, color: "sky", woStatusOnMove: "PENDING", woStatusesShown: ["PENDING"] },
     { name: "In Progress", position: 2, color: "amber", woStatusOnMove: "IN_PROGRESS", woStatusesShown: ["IN_PROGRESS"] },
     { name: "Blocked", position: 3, color: "rose", woStatusOnMove: "WAITING_PARTS", woStatusesShown: ["WAITING_PARTS"] },
-    { name: "Done / Archived", position: 4, color: "emerald", woStatusOnMove: "COMPLETE", woStatusesShown: ["COMPLETE", "CLOSED", "CANCELLED"] },
+    { name: "Done / Archived", position: 4, color: "emerald", woStatusOnMove: "COMPLETE", woStatusesShown: ["COMPLETE", "CANCELLED"] },
   ];
 
   const allDepartments = await prisma.department.findMany({ select: { id: true } });

@@ -13,10 +13,10 @@ import { prisma } from "@/lib/prisma";
  */
 const PERSONAL_BOARD_COLUMNS = [
   { name: "Ideas", position: 0, color: "slate", woStatusOnMove: null, woStatusesShown: [] },
-  { name: "Next up", position: 1, color: "sky", woStatusOnMove: "OPEN" as const, woStatusesShown: ["OPEN" as const] },
+  { name: "Next up", position: 1, color: "sky", woStatusOnMove: "PENDING" as const, woStatusesShown: ["PENDING" as const] },
   { name: "Doing", position: 2, color: "amber", woStatusOnMove: "IN_PROGRESS" as const, woStatusesShown: ["IN_PROGRESS" as const] },
   { name: "Waiting", position: 3, color: "rose", woStatusOnMove: "WAITING_PARTS" as const, woStatusesShown: ["WAITING_PARTS" as const] },
-  { name: "Done", position: 4, color: "emerald", woStatusOnMove: "COMPLETE" as const, woStatusesShown: ["COMPLETE" as const, "CLOSED" as const, "CANCELLED" as const] },
+  { name: "Done", position: 4, color: "emerald", woStatusOnMove: "COMPLETE" as const, woStatusesShown: ["COMPLETE" as const, "CANCELLED" as const] },
 ];
 
 /**

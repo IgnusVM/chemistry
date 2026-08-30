@@ -16,7 +16,7 @@ import { TabbedPageProvider, TabbedPageTabs, JumpToTabButton } from "@/component
 import { AddNoteForm } from "@/components/add-note-form";
 import { Button, buttonClass } from "@/components/button";
 import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
-import { WO_STATUSES, statusLabel } from "@/lib/constants";
+import { WO_STATUSES, statusLabel, parentStatus, fullStatusLabel } from "@/lib/constants";
 import { renderNoteHtml } from "@/lib/notes";
 import { resolveBadge, resolveBadges } from "@/lib/user-badge-data";
 import { UserBadge, UserBadgeLabel } from "@/components/user-badge";
@@ -25,7 +25,7 @@ import { CopyButton } from "@/components/copy-button";
 import { EditWorkOrder } from "./edit-work-order";
 import { getRevisionState } from "@/lib/work-order-revisions";
 import { TaskList } from "./task-list";
-import { CloseTicketButton } from "./close-ticket-button";
+import { FinishButtons } from "./finish-buttons";
 
 export default async function WorkOrderDetailPage({
   params,
@@ -64,7 +64,7 @@ export default async function WorkOrderDetailPage({
   }));
   const openTaskCount = tasks.filter((t) => !t.done).length;
 
-  if (workOrder.status === "CLOSED") {
+  if (parentStatus(workOrder.status) === "CLOSED") {
     const attachmentUrls = await Promise.all(workOrder.attachments.map((a) => getAttachmentUrl(a.s3Key)));
     const [reportedByBadge, assignedToBadge, noteBadges] = await Promise.all([
       resolveBadge(workOrder.reportedBy),
@@ -138,6 +138,12 @@ export default async function WorkOrderDetailPage({
         assetTags={assets.map((a) => a.assetTag)}
       />
 
+      <TaskList
+        workOrderId={workOrder.id}
+        tasks={tasks}
+        help={<HelpLink topic="Task checklists" article="work-orders/task-checklists" />}
+      />
+
       <form id="resolution-form" action={updateResolution} className="space-y-2 rounded-md border border-neutral-200 bg-white p-4">
         <input type="hidden" name="workOrderId" value={workOrder.id} />
         <div className="flex items-center gap-1">
@@ -173,7 +179,9 @@ export default async function WorkOrderDetailPage({
             defaultValue={workOrder.laborMinutes ?? ""}
             className="w-24 rounded-md border border-neutral-300 px-2 py-1 text-sm"
           />
-          <span className="ml-auto text-xs text-neutral-400">Saved with the button up top</span>
+          <Button type="submit" form="resolution-form" variant="secondary" className="ml-auto">
+            Save
+          </Button>
         </div>
       </form>
 
@@ -216,12 +224,6 @@ export default async function WorkOrderDetailPage({
           <p className="mt-3 text-sm text-neutral-400">Link an asset to this work order to log parts used.</p>
         )}
       </div>
-
-      <TaskList
-        workOrderId={workOrder.id}
-        tasks={tasks}
-        help={<HelpLink topic="Task checklists" article="work-orders/task-checklists" />}
-      />
 
       <div id="notes-section" className="rounded-md border border-neutral-200 bg-white p-4">
         <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
@@ -349,7 +351,7 @@ export default async function WorkOrderDetailPage({
         <h1 className="text-xl font-semibold text-neutral-900">{workOrder.title || workOrder.description}</h1>
         <div className="mt-1 flex items-center gap-2">
           <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[workOrder.status]}`}>
-            {workOrder.status.replace("_", " ")}
+            {fullStatusLabel(workOrder.status)}
           </span>
           <span className="text-xs text-neutral-500">Priority: {workOrder.priority.replace("_", " ")}</span>
         </div>
@@ -424,11 +426,20 @@ export default async function WorkOrderDetailPage({
                 defaultValue={workOrder.status}
                 className="mt-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
               >
-                {WO_STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {s.replace("_", " ")}
-                  </option>
-                ))}
+                <optgroup label="Open">
+                  {WO_STATUSES.filter((s) => parentStatus(s) === "OPEN").map((s) => (
+                    <option key={s} value={s}>
+                      {statusLabel(s)}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Closed">
+                  {WO_STATUSES.filter((s) => parentStatus(s) === "CLOSED").map((s) => (
+                    <option key={s} value={s}>
+                      {statusLabel(s)}
+                    </option>
+                  ))}
+                </optgroup>
               </select>
             </div>
             <Button type="submit" variant="secondary">
@@ -460,7 +471,7 @@ export default async function WorkOrderDetailPage({
             </Button>
           </form>
 
-          <CloseTicketButton workOrderId={workOrder.id} openTaskCount={openTaskCount} />
+          <FinishButtons workOrderId={workOrder.id} openTaskCount={openTaskCount} />
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <JumpToTabButton tabId="details" scrollToId="notes-section">+ Note</JumpToTabButton>
@@ -470,9 +481,6 @@ export default async function WorkOrderDetailPage({
               <Printer className="h-4 w-4" />
               Print
             </Link>
-            <Button type="submit" form="resolution-form">
-              Save resolution
-            </Button>
           </div>
         </div>
 

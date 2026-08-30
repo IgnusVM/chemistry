@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import { Plus, Trash2, ListChecks, FileText, ChevronRight } from "lucide-react";
-import { addWorkOrderTask, toggleWorkOrderTask, deleteWorkOrderTask, type TaskState } from "../actions";
+import { Plus, Trash2, ListChecks, FileText, ChevronRight, Pencil, Check } from "lucide-react";
+import { addWorkOrderTask, editWorkOrderTask, toggleWorkOrderTask, deleteWorkOrderTask, type TaskState } from "../actions";
 import { WO_TASK_MAX_LENGTH } from "@/lib/constants";
 
 export type Task = {
@@ -13,14 +13,9 @@ export type Task = {
   completedByName: string | null;
 };
 
-/**
- * The ticket's checklist.
- *
- * Ticking is optimistic — a checkbox that waits for a round trip before moving
- * feels broken, and this is the one control on the page someone uses repeatedly
- * while holding a tool in the other hand. It reverts and says why if the write
- * fails, rather than leaving a tick that never reached the database.
- */
+const fieldClass =
+  "w-full rounded-md border border-neutral-200 bg-white px-2 py-1.5 text-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none";
+
 /**
  * A task's instructions, collapsed by default.
  *
@@ -46,6 +41,77 @@ function TaskInstructions({ text }: { text: string }) {
   );
 }
 
+/** One task while the checklist is in edit mode: rename, rewrite, or remove. */
+function EditableTask({
+  task,
+  busy,
+  onDelete,
+}: {
+  task: Task;
+  busy: boolean;
+  onDelete: () => void;
+}) {
+  const [state, action, pending] = useActionState<TaskState, FormData>(editWorkOrderTask, undefined);
+  return (
+    <li className="rounded-md border border-neutral-200 p-2">
+      <form action={action} className="space-y-1">
+        <input type="hidden" name="taskId" value={task.id} />
+        <div className="flex items-center gap-1.5">
+          <input
+            name="text"
+            required
+            maxLength={WO_TASK_MAX_LENGTH}
+            defaultValue={task.text}
+            aria-label={`Task: ${task.text}`}
+            className={`${fieldClass} min-w-0 flex-1`}
+          />
+          <button
+            type="submit"
+            disabled={pending}
+            aria-label={`Save changes to ${task.text}`}
+            title="Save"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-neutral-200 text-neutral-600 hover:bg-neutral-100 disabled:opacity-50"
+          >
+            <Check className="h-4 w-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onDelete}
+            aria-label={`Remove task: ${task.text}`}
+            title="Remove"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-neutral-200 text-neutral-400 hover:bg-neutral-100 hover:text-red-600 disabled:opacity-50"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+        <textarea
+          name="instructions"
+          rows={3}
+          maxLength={2000}
+          defaultValue={task.instructions ?? ""}
+          placeholder="Instructions, if this task needs them"
+          aria-label={`Instructions for ${task.text}`}
+          className={`${fieldClass} resize-y`}
+        />
+        {state?.error ? <p className="text-xs text-red-600">{state.error}</p> : null}
+      </form>
+    </li>
+  );
+}
+
+/**
+ * The ticket's checklist.
+ *
+ * Ticking is optimistic: a checkbox that waits for a round trip before moving
+ * feels broken, and this is the one control on the page someone uses repeatedly
+ * while holding a tool in the other hand. It reverts and says why if the write
+ * fails, rather than leaving a tick that never reached the database.
+ *
+ * Editing lives behind a mode rather than on every row. Ticking is the common
+ * act by a wide margin, and a delete button beside each task is both clutter and
+ * a thing to hit by accident with dusty hands.
+ */
 export function TaskList({
   workOrderId,
   tasks,
@@ -61,6 +127,7 @@ export function TaskList({
   const [error, setError] = useState<string | null>(null);
   const [ticked, setTicked] = useState<Record<string, boolean>>({});
   const [addingInstructions, setAddingInstructions] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const isDone = (t: Task) => ticked[t.id] ?? t.done;
   const open = tasks.filter((t) => !isDone(t)).length;
@@ -78,6 +145,14 @@ export function TaskList({
     });
   }
 
+  function remove(t: Task) {
+    setError(null);
+    start(async () => {
+      const res = await deleteWorkOrderTask(t.id);
+      if (res?.error) setError(res.error);
+    });
+  }
+
   return (
     <section className="rounded-md border border-neutral-200 bg-white p-4">
       <h2 className="flex items-center gap-1.5 text-sm font-semibold text-neutral-900">
@@ -89,42 +164,48 @@ export function TaskList({
           </span>
         ) : null}
         {help}
+        {tasks.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => setEditing((v) => !v)}
+            aria-pressed={editing}
+            className="-my-3 ml-auto inline-flex h-11 items-center gap-1.5 rounded-md px-2 text-xs font-normal text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+          >
+            <Pencil className="h-3.5 w-3.5" aria-hidden />
+            {editing ? "Done editing" : "Edit tasks"}
+          </button>
+        ) : null}
       </h2>
 
       {tasks.length === 0 ? (
         <p className="mt-2 text-xs text-neutral-500">
           No checklist on this ticket yet. Add the steps that have to happen.
         </p>
+      ) : editing ? (
+        <ul className="mt-2 space-y-2">
+          {tasks.map((t) => (
+            <EditableTask key={t.id} task={t} busy={busy} onDelete={() => remove(t)} />
+          ))}
+        </ul>
       ) : (
         <ul className="mt-2 space-y-1">
           {tasks.map((t) => (
             <li key={t.id}>
-              <div className="flex items-center gap-2">
-                <label className="flex min-w-0 flex-1 items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={isDone(t)}
-                    disabled={busy}
-                    onChange={() => toggle(t)}
-                    className="h-4 w-4 shrink-0"
-                  />
-                  <span className={isDone(t) ? "min-w-0 truncate text-neutral-500 line-through" : "min-w-0 truncate text-neutral-900"}>
-                    {t.text}
-                  </span>
-                  {isDone(t) && t.completedByName ? (
-                    <span className="shrink-0 text-[11px] text-neutral-500">{t.completedByName}</span>
-                  ) : null}
-                </label>
-                <button
-                  type="button"
+              <label className="flex min-w-0 items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={isDone(t)}
                   disabled={busy}
-                  onClick={() => start(async () => { const r = await deleteWorkOrderTask(t.id); if (r?.error) setError(r.error); })}
-                  aria-label={`Remove task: ${t.text}`}
-                  className="-my-3 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-red-600 disabled:opacity-50"
-                >
-                  <Trash2 className="h-3 w-3" aria-hidden />
-                </button>
-              </div>
+                  onChange={() => toggle(t)}
+                  className="h-4 w-4 shrink-0"
+                />
+                <span className={isDone(t) ? "min-w-0 truncate text-neutral-500 line-through" : "min-w-0 truncate text-neutral-900"}>
+                  {t.text}
+                </span>
+                {isDone(t) && t.completedByName ? (
+                  <span className="shrink-0 text-[11px] text-neutral-500">{t.completedByName}</span>
+                ) : null}
+              </label>
               {t.instructions ? <TaskInstructions text={t.instructions} /> : null}
             </li>
           ))}
@@ -140,7 +221,7 @@ export function TaskList({
             maxLength={WO_TASK_MAX_LENGTH}
             placeholder="Add a task…"
             aria-label="New task"
-            className="min-w-0 flex-1 rounded-md border border-neutral-200 bg-white px-2 py-1.5 text-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
+            className={`${fieldClass} min-w-0 flex-1`}
           />
           <button
             type="button"
@@ -168,10 +249,10 @@ export function TaskList({
           hidden={!addingInstructions}
           placeholder="What to do, in as much detail as it needs"
           aria-label="Instructions for the new task"
-          className="w-full resize-y rounded-md border border-neutral-200 bg-white px-2 py-1.5 text-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none"
+          className={`${fieldClass} resize-y`}
         />
       </form>
-      {(state?.error || error) ? (
+      {state?.error || error ? (
         <p className="mt-1 text-xs text-red-600">{state?.error ?? error}</p>
       ) : null}
     </section>

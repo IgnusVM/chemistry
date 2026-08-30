@@ -351,3 +351,34 @@ body {
     animation: none;
   }
 }
+
+/* The two ways a ticket ends.
+ *
+ * Complete pulses slowly, because it is the action a ticket is usually waiting
+ * for and a soft movement draws the eye without shouting. Cancel glows steadily
+ * and does not pulse: it should be findable, not inviting. Both are static under
+ * prefers-reduced-motion, where the glow remains and only the movement stops. */
+.finish-glow {
+  box-shadow: 0 0 10px 1px rgba(34, 197, 94, 0.45);
+  animation: finish-pulse 3.2s ease-in-out infinite;
+}
+
+@keyframes finish-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px 1px rgba(34, 197, 94, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 18px 4px rgba(34, 197, 94, 0.65);
+  }
+}
+
+.cancel-glow {
+  box-shadow: 0 0 8px 1px rgba(239, 68, 68, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .finish-glow {
+    animation: none;
+  }
+}

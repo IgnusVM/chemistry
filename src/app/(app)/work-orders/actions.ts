@@ -164,7 +164,10 @@ export async function updateWorkOrderStatus(formData: FormData) {
       status: parsed.status,
       startedAt: parsed.status === "IN_PROGRESS" && !workOrder.startedAt ? now : undefined,
       completedAt: parsed.status === "COMPLETE" ? now : undefined,
-      closedAt: parsed.status === "CLOSED" ? now : undefined,
+      // Both terminal statuses close the ticket, so both stamp closedAt.
+      // completedAt additionally records that the work actually happened,
+      // which is the distinction between finishing and abandoning.
+      closedAt: parsed.status === "COMPLETE" || parsed.status === "CANCELLED" ? now : undefined,
     },
   });
 
@@ -192,7 +195,7 @@ export async function reopenWorkOrder(formData: FormData) {
 
   await prisma.workOrder.update({
     where: { id: workOrder.id },
-    data: { status: "OPEN", closedAt: null },
+    data: { status: "PENDING", closedAt: null, completedAt: null },
   });
 
   await recordAudit({
@@ -740,6 +743,42 @@ export async function toggleWorkOrderTask(taskId: string, done: boolean): Promis
       completedAt: done ? new Date() : null,
       completedByUserId: done ? user.id : null,
     },
+  });
+  revalidatePath(`/work-orders/${workOrder.code}`);
+}
+
+/**
+ * Edit a task's text and instructions.
+ *
+ * Reached from the checklist's edit mode rather than sitting on every row: a
+ * checklist is read far more often than it is corrected, and controls for
+ * correcting it turn the common case into clutter.
+ */
+export async function editWorkOrderTask(_prev: TaskState, formData: FormData): Promise<TaskState> {
+  await requireCurrentUser();
+  const parsed = z
+    .object({
+      taskId: z.string().min(1),
+      text: z.string().trim().min(1, "Give the task a name.").max(WO_TASK_MAX_LENGTH, "Keep tasks to a few words."),
+      instructions: z.string().trim().max(2000, "Keep instructions under 2000 characters.").optional(),
+    })
+    .safeParse({
+      taskId: formData.get("taskId"),
+      text: formData.get("text"),
+      instructions: formData.get("instructions") || undefined,
+    });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+
+  const task = await prisma.workOrderTask.findUnique({
+    where: { id: parsed.data.taskId },
+    select: { id: true, workOrderId: true },
+  });
+  if (!task) return { error: "That task is already gone." };
+  const workOrder = await requireWorkOrderAccess(task.workOrderId);
+
+  await prisma.workOrderTask.update({
+    where: { id: task.id },
+    data: { text: parsed.data.text, instructions: parsed.data.instructions || null },
   });
   revalidatePath(`/work-orders/${workOrder.code}`);
 }

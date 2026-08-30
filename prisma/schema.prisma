@@ -58,12 +58,15 @@ enum WorkOrderPriority {
   EVENT_CRITICAL
 }
 
+/// The sub-statuses a work order moves through. The parent status (Open or
+/// Closed) is derived from these rather than stored: COMPLETE and CANCELLED are
+/// the two ways a ticket ends, everything else means it is still open. Storing
+/// both would be two records that have to agree, and eventually would not.
 enum WorkOrderStatus {
-  OPEN
+  PENDING
   IN_PROGRESS
   WAITING_PARTS
   COMPLETE
-  CLOSED
   CANCELLED
 }
 
@@ -474,7 +477,7 @@ model WorkOrder {
   departmentId     String
   type             WorkOrderType     @default(CORRECTIVE)
   priority         WorkOrderPriority @default(NORMAL)
-  status           WorkOrderStatus   @default(OPEN)
+  status           WorkOrderStatus   @default(PENDING)
   /// Short summary, shown in every list. Backfilled from `description`,
   /// which used to serve as both.
   title            String   @default("")

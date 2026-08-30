@@ -153,8 +153,9 @@ export async function bulkCloseWorkOrders(
     await tx.workOrder.updateMany({
       where: { id: { in: allIds } },
       data: {
-        status: "CLOSED",
+        status: "COMPLETE",
         closedAt: now,
+        completedAt: now,
         resolutionCodeId: data.resolutionCodeId || null,
         resolutionNotes: data.resolutionNotes,
         laborMinutes: data.laborMinutes ? Number(data.laborMinutes) : null,

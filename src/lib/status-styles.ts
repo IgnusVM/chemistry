@@ -8,18 +8,18 @@ export const ASSET_STATUS_STYLES: Record<string, string> = {
 };
 
 /*
- * Closing is red, completing is green, in-progress is yellow.
+ * Completing is green, in-progress is yellow, cancelling is red.
  *
- * Cancelled stays grey on purpose: it is the one terminal state where the work
- * did not happen, and coluring it like a finish would flatten that distinction.
+ * Cancelled is the one ending where the work did not happen, so it reads as a
+ * stop rather than a finish. The two are the only ways a ticket closes, which is
+ * why they are the only two that carry a strong colour.
  */
 export const WORK_ORDER_STATUS_STYLES: Record<string, string> = {
-  OPEN: "bg-blue-100 text-blue-800",
+  PENDING: "bg-blue-100 text-blue-800",
   IN_PROGRESS: "bg-yellow-100 text-yellow-800",
   WAITING_PARTS: "bg-orange-100 text-orange-800",
   COMPLETE: "bg-green-100 text-green-800",
-  CLOSED: "bg-red-100 text-red-800",
-  CANCELLED: "bg-neutral-200 text-neutral-500",
+  CANCELLED: "bg-red-100 text-red-800",
 };
 
 export const WORK_ORDER_PRIORITY_STYLES: Record<string, string> = {

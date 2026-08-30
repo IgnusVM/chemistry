@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { fullStatusLabel } from "@/lib/constants";
 import { FileText, Printer } from "lucide-react";
 import { reopenWorkOrder } from "../actions";
 import { Button, buttonClass } from "@/components/button";
@@ -45,7 +46,7 @@ export function ClosedWorkOrderView({
           <h1 className="text-xl font-semibold text-neutral-900">{workOrder.title || workOrder.description}</h1>
           <div className="mt-1 flex items-center gap-2">
             <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[workOrder.status] ?? "bg-neutral-200 text-neutral-500"}`}>
-              {workOrder.status.replace("_", " ")}
+              {fullStatusLabel(workOrder.status)}
             </span>
             <span className="text-xs text-neutral-500">Priority: {workOrder.priority.replace("_", " ")}</span>
           </div>
