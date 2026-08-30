@@ -88,7 +88,7 @@ export function ExportDialog({
             type="button"
             aria-label="Dismiss export"
             onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-neutral-900/40"
+            className="absolute inset-0 bg-black/40"
           />
           <div className="relative max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:max-w-lg sm:rounded-2xl">
             <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">

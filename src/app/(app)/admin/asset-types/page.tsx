@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { AssetTypeForm } from "./asset-type-form";
 import type { CustomFieldDef } from "@/lib/custom-fields";
+import { HelpLink } from "@/components/help-link";
 
 export default async function AssetTypesAdminPage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
   const [assetTypes, departments] = await Promise.all([
     prisma.assetType.findMany({
       orderBy: { name: "asc" },
@@ -17,10 +18,10 @@ export default async function AssetTypesAdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Asset Types</h1>
-        <p className="text-sm text-neutral-500">
-          Templates that define what a class of asset is and what custom fields it tracks.
-        </p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Asset Types</h1>
+          <HelpLink topic="Asset types" article="admin-setup/asset-types-and-custom-fields" />
+        </div>
       </div>
 
       <AssetTypeForm departments={departments} />

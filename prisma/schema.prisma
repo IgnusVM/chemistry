@@ -71,11 +71,14 @@ model Division {
   name        String
   slug        String   @unique
   description String?
+  leadUserId  String?
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  lead        User?        @relation("DivisionLead", fields: [leadUserId], references: [id])
   departments Department[]
+  board       Board?
 }
 
 model Department {
@@ -96,6 +99,7 @@ model Department {
   assets      Asset[]
   workOrders  WorkOrder[]
   loanPrivileges AssetLoanPrivilege[]
+  board          Board?
 }
 
 /// Grants one user the right to check assets in and out for one department.
@@ -154,6 +158,11 @@ model User {
   contactDuringBurnEmail Boolean @default(false)
   contactDuringBurnOther String?
   isOrgAdmin     Boolean   @default(false)
+  /// Director: every permission an org admin has, and then some. Kept as a
+  /// separate flag rather than a rank on isOrgAdmin so that revoking one
+  /// cannot silently revoke the other. Only the root Director (identified by
+  /// ROOT_DIRECTOR_EMAIL) may grant or revoke it.
+  isDirector     Boolean   @default(false)
   avatarS3Key    String?
   badgeIcon      String?
   badgeColor     String?
@@ -165,6 +174,9 @@ model User {
 
   memberships       DepartmentMembership[]
   ledDepartments    Department[]            @relation("DepartmentLead")
+  ledDivisions      Division[]              @relation("DivisionLead")
+  ownedCards        Card[]                  @relation("CardOwner")
+  createdCards      Card[]                  @relation("CardCreatedBy")
   createdAssets     Asset[]                 @relation("AssetCreatedBy")
   locationMoves     AssetLocationHistory[]
   magicLinkTokens   MagicLinkToken[]
@@ -189,6 +201,8 @@ model User {
   borrowedLoans       AssetLoan[]            @relation("LoanBorrower")
   loansCheckedOut     AssetLoan[]            @relation("LoanCheckedOutBy")
   loansCheckedIn      AssetLoan[]            @relation("LoanCheckedInBy")
+  posts               Post[]
+  postReplies         PostReply[]
 }
 
 model InviteCode {
@@ -478,6 +492,8 @@ model WorkOrder {
   notes          WorkOrderNote[]
   attachments    WorkOrderAttachment[]
   partsUsed      WorkOrderPart[]
+  card           Card?
+  referencedBy   CardWorkOrderRef[]
   codeFileVersions AssetCodeFileVersion[]
 
   @@index([departmentId])
@@ -601,4 +617,216 @@ model BulkSelection {
   createdBy User @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
 
   @@index([createdByUserId])
+}
+
+// ---------------------------------------------------------------------------
+// Task board
+//
+// One board per department, created implicitly by the seed so nobody ever has
+// to meet the concept of "making a board".
+//
+// The load-bearing decision: a work-order-backed card does NOT store its
+// column. Card.columnId is NULL for those, and the column is derived from
+// workOrder.status at read time via BoardColumn.woStatusesShown. Card position
+// and work order status therefore cannot disagree, because there is only one
+// piece of state rather than two kept in step.
+// See specs/001-kanban-board/research.md D1.
+// ---------------------------------------------------------------------------
+
+// A board belongs to EITHER a department or a division, never both and never
+// neither. Prisma cannot express "exactly one of these two is set", so a CHECK
+// constraint is hand-written into the migration -- see
+// Board_owner_exactly_one in the task-board-division migration.
+//
+// Division boards differ from department boards in two ways that matter:
+//   - they are visible only to the division lead and org admins (the app's
+//     first restricted read -- see constitution Principle II)
+//   - they get no auto-created work order cards; a ticket appears on one only
+//     when a user attaches it to a card deliberately
+model Board {
+  id           String   @id @default(cuid())
+  departmentId String?  @unique
+  divisionId   String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department Department?   @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  division   Division?     @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  columns    BoardColumn[]
+  cards      Card[]
+}
+
+model BoardColumn {
+  id       String  @id @default(cuid())
+  boardId  String
+  name     String
+  position Int
+  color    String?
+
+  // Moving a work-order-backed card here sets this status. NULL means the
+  // column refuses work-order cards at all (Ideas/Backlog, by default).
+  woStatusOnMove  WorkOrderStatus?
+  // Which work order statuses render in this column. Board invariant, enforced
+  // in src/lib/board.ts: every status appears in exactly one column, so a card
+  // can be neither invisible nor duplicated.
+  woStatusesShown WorkOrderStatus[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards Card[]
+
+  @@index([boardId, position])
+}
+
+model Card {
+  id       String  @id @default(cuid())
+  boardId  String
+  // NULL for work-order-backed cards -- their column is derived, not stored.
+  columnId String?
+
+  title       String
+  ownerUserId String?
+  nextAction  String?
+  dueDate     DateTime?
+  statusNotes String?
+  position    Int       @default(0)
+
+  // Nullable unique: Postgres permits many NULLs in a unique index, so this
+  // means "at most one card per work order, unlimited standalone cards".
+  // No partial index required.
+  workOrderId String? @unique
+
+  archivedAt      DateTime?
+  createdByUserId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  board     Board        @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  // Restrict is what makes "deleting a column requires saying where its cards
+  // go" enforceable at the database, rather than by hoping the action did it.
+  column    BoardColumn? @relation(fields: [columnId], references: [id], onDelete: Restrict)
+  owner     User?        @relation("CardOwner", fields: [ownerUserId], references: [id])
+  createdBy User?        @relation("CardCreatedBy", fields: [createdByUserId], references: [id])
+  workOrder WorkOrder?   @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  tags      CardTag[]
+  refs      CardWorkOrderRef[]
+
+  @@index([boardId, columnId, position])
+  @@index([ownerUserId])
+}
+
+// Organization-wide, so a team tag means the same thing on every board.
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String?
+  createdAt DateTime @default(now())
+
+  cards CardTag[]
+}
+
+model CardTag {
+  cardId String
+  tagId  String
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, tagId])
+  @@index([tagId])
+}
+
+// A card REFERENCING a work order, as context. Deliberately separate from
+// Card.workOrderId, which means the card IS that work order.
+//
+//   Card.workOrderId  -> the card is the work order's representation. Auto
+//                        created, column derived from status, cannot be moved
+//                        to an unmapped column, dies with the work order.
+//   CardWorkOrderRef  -> the card is its own thing and merely points at one or
+//                        more tickets. Stays standalone, moves freely, and
+//                        losing the reference does not touch the card.
+//
+// Division boards use this exclusively: they auto-create nothing, so a ticket
+// appears there only when someone attaches it deliberately.
+model CardWorkOrderRef {
+  cardId      String
+  workOrderId String
+  createdAt   DateTime @default(now())
+
+  card      Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, workOrderId])
+  @@index([workOrderId])
+}
+
+/// A noticeboard post. Only org admins write these; everyone reads them.
+/// Rich content (images, link previews) lives in the two child tables rather
+/// than as columns, because a post has zero or many of each.
+model Post {
+  id           String   @id @default(cuid())
+  authorUserId String?
+  body         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  author  User?       @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+  images  PostImage[]
+  links   PostLink[]
+  replies PostReply[]
+
+  /// The feed reads newest-first and pages by this.
+  @@index([createdAt])
+}
+
+/// An uploaded image on a post. Deliberately NOT rendered until asked for:
+/// the feed shows a placeholder and fetches a presigned URL on demand, so
+/// scrolling past a hundred posts costs nothing in object storage.
+model PostImage {
+  id       String @id @default(cuid())
+  postId   String
+  s3Key    String
+  filename String
+  mimeType String
+  position Int    @default(0)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+/// A link with the preview metadata captured when the post was written.
+/// Stored rather than re-fetched so the feed never makes outbound requests
+/// while someone scrolls, and so a preview cannot change under a reader.
+model PostLink {
+  id          String  @id @default(cuid())
+  postId      String
+  url         String
+  title       String?
+  description String?
+  imageUrl    String?
+  siteName    String?
+  position    Int     @default(0)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+/// A reply. Any signed-in member may write one, and it is TEXT ONLY -- no
+/// images, no links expanded -- which keeps both the moderation surface and
+/// the storage cost to what a sentence can carry.
+model PostReply {
+  id           String   @id @default(cuid())
+  postId       String
+  authorUserId String?
+  body         String
+  createdAt    DateTime @default(now())
+
+  post   Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User? @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+
+  @@index([postId, createdAt])
 }

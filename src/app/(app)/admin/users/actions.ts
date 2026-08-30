@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdmin, requireRootDirector, isRootDirector } from "@/lib/dal";
 import { recordAudit } from "@/lib/audit";
 import { issueInviteCode } from "@/lib/invite";
 import { appUrl } from "@/lib/app-url";
@@ -108,6 +108,16 @@ export async function deleteUser(userId: string) {
 
   const target = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
 
+  // Deleting a Director would be the simplest escalation of all: remove the
+  // person above you rather than argue with them. Only the root may, and the
+  // root themselves cannot be deleted at all.
+  if (isRootDirector(target)) {
+    throw new Error("The root Director's account can't be deleted.");
+  }
+  if (target.isDirector && !isRootDirector(admin)) {
+    throw new Error("Only the root Director can delete a Director.");
+  }
+
   // Their past loans survive deletion with an "Unknown" borrower, but anything
   // still in their hands has to be accounted for first or the item is simply lost.
   const outstanding = await prisma.assetLoan.count({
@@ -184,8 +194,50 @@ export async function removeMembership(userId: string, departmentId: string) {
   revalidatePath("/admin/users");
 }
 
+/**
+ * Grant or revoke Director. Only the root Director may call this.
+ *
+ * The root cannot revoke their own Director status. Not a courtesy: it is the
+ * one account that can hand the role out, so letting it drop the role would
+ * leave an installation where nobody can ever grant it again, recoverable only
+ * by editing the database.
+ */
+export async function setDirector(userId: string, isDirector: boolean) {
+  const root = await requireRootDirector();
+
+  const target = await prisma.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: { id: true, email: true, displayName: true },
+  });
+
+  if (isRootDirector(target) && !isDirector) {
+    throw new Error("The root Director can't be removed.");
+  }
+
+  await prisma.user.update({ where: { id: userId }, data: { isDirector } });
+  await recordAudit({
+    entityType: "User",
+    entityId: userId,
+    action: isDirector ? "director-granted" : "director-revoked",
+    userId: root.id,
+    changes: { displayName: target.displayName },
+  });
+  revalidatePath("/admin/users");
+}
+
 export async function toggleOrgAdmin(userId: string, isOrgAdmin: boolean) {
   const admin = await requireOrgAdmin();
+
+  // An org admin removing a Director's admin flag would be reaching upward.
+  // The Director flag is what carries their access, so this is belt and braces
+  // -- but the rule should be stated where the action is, not assumed.
+  const subject = await prisma.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: { isDirector: true, email: true },
+  });
+  if (subject.isDirector && !isRootDirector(admin)) {
+    throw new Error("Only the root Director can change a Director's roles.");
+  }
 
   if (!isOrgAdmin) {
     const otherAdminCount = await prisma.user.count({

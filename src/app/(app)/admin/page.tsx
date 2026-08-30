@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
+import { HelpLink } from "@/components/help-link";
 
 export default async function AdminPage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
 
-  const [divisionCount, departmentCount, userCount, assetTypeCount, resolutionCodeCount, locationCount] =
+  const [divisionCount, departmentCount, userCount, assetTypeCount, resolutionCodeCount, locationCount, tagCount, boardCount] =
     await Promise.all([
       prisma.division.count(),
       prisma.department.count(),
@@ -13,6 +14,8 @@ export default async function AdminPage() {
       prisma.assetType.count(),
       prisma.resolutionCode.count(),
       prisma.location.count(),
+      prisma.tag.count(),
+      prisma.board.count(),
     ]);
 
   const sections = [
@@ -21,14 +24,18 @@ export default async function AdminPage() {
     { href: "/admin/users", label: "Users", description: "Accounts and department roles.", count: userCount },
     { href: "/admin/asset-types", label: "Asset Types", description: "Templates and their custom fields.", count: assetTypeCount },
     { href: "/admin/resolution-codes", label: "Resolution Codes", description: "CMMS-style outcome codes for work orders.", count: resolutionCodeCount },
+    { href: "/admin/tags", label: "Tags", description: "Labels for board cards, usually a team.", count: tagCount },
+    { href: "/admin/board-columns", label: "Board Columns", description: "Column names, colours, and work order status mapping.", count: boardCount },
     { href: "/locations", label: "Locations", description: "Storage facilities, camps, and placements.", count: locationCount },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Admin</h1>
-        <p className="text-sm text-neutral-500">Reference data and org setup — edited rarely, not day-to-day.</p>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold text-neutral-900">Admin</h1>
+          <HelpLink topic="Admin" article="admin-setup/what-lives-under-admin" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

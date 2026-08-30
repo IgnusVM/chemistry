@@ -12,6 +12,7 @@ import {
   X,
   Layers,
   PackageOpen,
+  LayoutGrid,
   MapPin,
   Settings,
   HelpCircle,
@@ -30,6 +31,7 @@ const TABS: Item[] = [
 ];
 
 const MORE_LINKS: Item[] = [
+  { href: "/board", label: "Board", Icon: LayoutGrid },
   { href: "/loans", label: "Checked out", Icon: PackageOpen },
   { href: "/asset-groups", label: "Asset Groups", Icon: Layers },
   { href: "/locations", label: "Locations", Icon: MapPin },
@@ -72,7 +74,7 @@ export function MobileNav({ isOrgAdmin }: { isOrgAdmin: boolean }) {
             type="button"
             aria-label="Close menu"
             onClick={() => setMoreOpen(false)}
-            className="absolute inset-0 bg-neutral-900/40"
+            className="absolute inset-0 bg-black/40"
           />
           <div className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-white pb-[calc(env(safe-area-inset-bottom)+5rem)] shadow-xl">
             <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { getAttachmentUrl } from "@/lib/s3";
 import type { CustomFieldDef } from "@/lib/custom-fields";
 import { EditAssetTypeForm } from "./edit-asset-type-form";
@@ -14,9 +14,10 @@ import { CreateCodeFileForm } from "@/components/code/create-code-file-form";
 import { CodeFileEditorForm } from "@/components/code/code-file-editor-form";
 import { CodeFileVersionHistory } from "@/components/code/code-file-version-history";
 import { DeleteCodeFileButton } from "@/components/code/delete-code-file-button";
+import { HelpLink } from "@/components/help-link";
 
 export default async function AssetTypeDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
   const { id } = await params;
 
   const assetType = await prisma.assetType.findUnique({
@@ -72,7 +73,10 @@ export default async function AssetTypeDetailPage({ params }: { params: Promise<
       />
 
       <div className="rounded-md border border-neutral-200 bg-white p-4">
-        <h2 className="text-sm font-semibold text-neutral-900">Documents</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="text-sm font-semibold text-neutral-900">Documents</h2>
+          <HelpLink topic="Asset type documents" article="photos-documents/asset-type-documents" />
+        </div>
         <p className="text-sm text-neutral-500">Service manuals, schematics, spec sheets — anything worth keeping with this asset type.</p>
         {assetType.documents.length > 0 && (
           <ul className="mt-3 divide-y divide-neutral-200">
@@ -105,46 +109,51 @@ export default async function AssetTypeDetailPage({ params }: { params: Promise<
           logged as used on a work order, or add one directly below.
         </p>
         {assetType.parts.length > 0 && (
-          <table className="mt-3 w-full text-sm">
-            <thead className="text-left text-xs uppercase text-neutral-500">
-              <tr>
-                <th className="py-1 pr-2">Part #</th>
-                <th className="py-1 pr-2">Description</th>
-                <th className="py-1 pr-2">Times ordered</th>
-                <th className="py-1 pr-2">Last price</th>
-                <th className="py-1" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100">
-              {assetType.parts.map((part) => (
-                <tr key={part.id}>
-                  <td className="py-2 pr-2">
-                    <Link
-                      href={`/admin/asset-types/${assetType.id}/parts/${part.id}`}
-                      className="font-medium text-neutral-900 hover:underline"
-                    >
-                      {part.partNumber}
-                    </Link>
-                  </td>
-                  <td className="py-2 pr-2 text-neutral-600">{part.description}</td>
-                  <td className="py-2 pr-2 text-neutral-500">{part.orders.length}</td>
-                  <td className="py-2 pr-2 text-neutral-500">
-                    {part.orders[0]?.price ? `$${part.orders[0].price.toString()}` : "—"}
-                  </td>
-                  <td className="py-2 text-right">
-                    <DeletePartButton partId={part.id} />
-                  </td>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs uppercase text-neutral-500">
+                <tr>
+                  <th className="py-1 pr-2">Part #</th>
+                  <th className="py-1 pr-2">Description</th>
+                  <th className="py-1 pr-2">Times ordered</th>
+                  <th className="py-1 pr-2">Last price</th>
+                  <th className="py-1" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {assetType.parts.map((part) => (
+                  <tr key={part.id}>
+                    <td className="py-2 pr-2">
+                      <Link
+                        href={`/admin/asset-types/${assetType.id}/parts/${part.id}`}
+                        className="font-medium text-neutral-900 hover:underline"
+                      >
+                        {part.partNumber}
+                      </Link>
+                    </td>
+                    <td className="py-2 pr-2 text-neutral-600">{part.description}</td>
+                    <td className="py-2 pr-2 text-neutral-500">{part.orders.length}</td>
+                    <td className="py-2 pr-2 text-neutral-500">
+                      {part.orders[0]?.price ? `$${part.orders[0].price.toString()}` : "—"}
+                    </td>
+                    <td className="py-2 text-right">
+                      <DeletePartButton partId={part.id} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
         <AddPartForm assetTypeId={assetType.id} />
       </div>
 
       <div className="space-y-4 rounded-md border border-neutral-200 bg-white p-4">
         <div>
-          <h2 className="text-sm font-semibold text-neutral-900">Code</h2>
+          <div className="flex items-center gap-1">
+            <h2 className="text-sm font-semibold text-neutral-900">Code</h2>
+            <HelpLink topic="Code files on an asset type" article="admin-setup/code-files-on-asset-types" />
+          </div>
           <p className="text-xs text-neutral-500">
             Source that runs on every {assetType.name}. A change here applies to the whole class, not
             to one unit &mdash; which firmware a specific unit is actually flashed with is tracked as

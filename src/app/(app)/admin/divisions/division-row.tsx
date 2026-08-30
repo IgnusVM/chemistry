@@ -8,8 +8,17 @@ const inputClass = "rounded-md border border-neutral-300 px-2 py-1 text-sm";
 
 export function DivisionRow({
   division,
+  users,
 }: {
-  division: { id: string; name: string; slug: string; description: string | null; departmentCount: number };
+  division: {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    departmentCount: number;
+    lead: { id: string; displayName: string } | null;
+  };
+  users: { id: string; displayName: string }[];
 }) {
   const [editing, setEditing] = useState(false);
   const [state, setState] = useState<DivisionFormState>(undefined);
@@ -18,7 +27,7 @@ export function DivisionRow({
   if (editing) {
     return (
       <tr>
-        <td colSpan={3} className="px-4 py-3">
+        <td colSpan={5} className="px-4 py-3">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -44,6 +53,21 @@ export function DivisionRow({
               <label className="block text-xs font-medium text-neutral-600">Description</label>
               <input name="description" defaultValue={division.description ?? ""} className={`mt-1 w-full ${inputClass}`} />
             </div>
+            <div>
+              <label className="block text-xs font-medium text-neutral-600">Lead</label>
+              <select
+                name="leadUserId"
+                defaultValue={division.lead?.id ?? ""}
+                className={`mt-1 ${inputClass}`}
+              >
+                <option value="">No lead</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.displayName}
+                  </option>
+                ))}
+              </select>
+            </div>
             <Button type="submit" variant="secondary" pending={pending} pendingText="Saving…">
               Save
             </Button>
@@ -62,6 +86,13 @@ export function DivisionRow({
       <td className="px-4 py-2 font-medium text-neutral-900">{division.name}</td>
       <td className="px-4 py-2 text-neutral-500">{division.slug}</td>
       <td className="px-4 py-2">{division.departmentCount}</td>
+      <td className="px-4 py-2">
+        {division.lead ? (
+          <span className="text-neutral-900">{division.lead.displayName}</span>
+        ) : (
+          <span className="text-neutral-400">Nobody</span>
+        )}
+      </td>
       <td className="px-4 py-2 text-right">
         <button type="button" onClick={() => setEditing(true)} className="text-xs text-neutral-400 hover:text-neutral-700">
           Edit

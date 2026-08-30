@@ -19,7 +19,6 @@ export default async function HelpLandingPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-lg font-semibold text-neutral-900">Help &amp; Guide</h1>
-          <p className="text-sm text-neutral-500">Everything you need to know about using Chemistry.</p>
         </div>
         {user.isOrgAdmin && (
           <Link href="/help/admin" className={buttonClass("secondary")}>
@@ -38,11 +37,11 @@ export default async function HelpLandingPage() {
       </form>
 
       {quickGuide ? (
-        <div className="rounded-md border border-neutral-200 bg-white p-6">
+        <div className="max-w-4xl rounded-md border border-neutral-200 bg-white p-6">
           <div className="text-xs uppercase tracking-wide text-neutral-400">Quick guide</div>
           <h2 className="mt-1 text-lg font-semibold text-neutral-900">{quickGuide.title}</h2>
           <div
-            className="prose dark:prose-invert prose-neutral prose-sm mt-3 max-w-none"
+            className="prose dark:prose-invert prose-neutral prose-sm mt-3"
             dangerouslySetInnerHTML={{ __html: renderHelpMarkdown(quickGuide.body) }}
           />
         </div>

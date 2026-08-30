@@ -31,3 +31,16 @@ export const ALLOWED_ATTACHMENT_TYPES: string[] = [
   "application/vnd.ms-excel",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ];
+
+/**
+ * `WAITING_PARTS` -> `Waiting parts`, for prose.
+ *
+ * Status badges keep their own uppercase convention (`status.replace("_", " ")`)
+ * because a badge is a label, not a sentence. This is for the places that read as
+ * prose — the board column editor lists which statuses a column shows, and raw
+ * enum names there read as an unfinished screen.
+ */
+export function statusLabel(status: string) {
+  const s = status.replace(/_/g, " ").toLowerCase();
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}

@@ -2,7 +2,7 @@
 @plugin "@tailwindcss/typography";
 
 /* Class-based dark mode. Tailwind v4 defaults `dark:` to prefers-color-scheme,
-   but the theme is user-selectable (light / dark / follow the system), so it has
+   but the theme is user-selectable (light or dark, no follow-the-system), so it has
    to key off a class we control on <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -13,7 +13,40 @@
      `text-white`, which maps to --color-white and *does* invert (correct for the
      dark pills that become light pills). */
   --color-onaccent: #ffffff;
+
+  /* Tailwind's stock neutral-400 is #a3a3a3 — 2.6:1 on white, which fails WCAG
+     AA for text. This app uses it for 103 things, and not only for quiet labels:
+     "Edit", "Delete", "Remove" and "Forget this device" are all rendered in it.
+     An action nobody can read in the sun is a broken control, not a subtle one.
+     Darkened to the point where it passes AA and still reads as secondary; 500
+     moves down with it so the two steps stay distinguishable. Fixed in the token
+     rather than at 103 call sites, for the same reason the dark palette is. */
+  --color-neutral-400: #6e6e6e;
+  --color-neutral-500: #5f5f5f;
 }
+
+/*
+ * SPACING: how far content sits from the edge that encloses it.
+ *
+ * There was no rule, only values chosen per component, and it showed: one board
+ * column stacked a 12px header, an 8px card list and a 4px capture form down a
+ * single edge. Each was defensible alone; together they looked like a mistake.
+ *
+ *   px-1.5  (6px)   chips and pills only — a badge is sized by its text
+ *   p-3    (12px)   dense rows, compact cards, list rows
+ *   p-4    (16px)   panels, cards, dialogs, anything that reads as a surface
+ *
+ * Two rules that matter more than the numbers:
+ *
+ *   1. One inset per container edge. Everything stacked inside a card shares
+ *      the card's left edge — header, body and footer alike.
+ *   2. A pill's BOX aligns with its siblings; its text is inset by its own
+ *      padding, and that is correct, not a misalignment.
+ *
+ * Avoid px-2.5 / px-3.5 and other in-between steps: an off-scale value is how
+ * the rule erodes. Verified with `rhythm.mjs` / `margins.mjs` (scratchpad),
+ * which measure painted content against the enclosing border box.
+ */
 
 :root {
   --background: #ffffff;
@@ -71,6 +104,17 @@
   --color-emerald-50: #0f2620;
   --color-teal-50: #0d2427;
   --color-violet-50: #1e1533;
+  --color-rose-50: #2c1320;
+  --color-sky-50: #0e2133;
+
+  --color-rose-200: #5c2937;
+  --color-sky-200: #274a63;
+
+  --color-rose-600: #fb7185;
+  --color-rose-700: #fda4af;
+  --color-sky-500: #38bdf8;
+  --color-sky-600: #38bdf8;
+  --color-sky-700: #7dd3fc;
 
   /* Borders that pair with those tinted panels. */
   --color-fuchsia-300: #7d3f79;
@@ -80,6 +124,18 @@
   /* Error text needs a little more lift against a dark ground. */
   --color-red-600: #f87171;
   --color-red-700: #fca5a5;
+  /* Text sitting on those tinted panels. Same problem the -50 steps had: a
+     dark-purple label on what is now a dark-purple panel. Lifted to the light
+     end of each ramp, matching what red-600/700 already do. Verified first that
+     no bright -100 chip pairs with a -700 text colour, which would have turned
+     these into light-on-light. */
+  --color-fuchsia-700: #f0abfc;
+  --color-amber-700: #fcd34d;
+  --color-green-700: #86efac;
+  --color-blue-700: #93c5fd;
+  --color-emerald-700: #6ee7b7;
+  --color-teal-700: #5eead4;
+  --color-violet-700: #c4b5fd;
 }
 
 /*
@@ -100,8 +156,8 @@
     --color-neutral-100: #f5f5f5;
     --color-neutral-200: #e5e5e5;
     --color-neutral-300: #d4d4d4;
-    --color-neutral-400: #a3a3a3;
-    --color-neutral-500: #737373;
+    --color-neutral-400: #6e6e6e;
+    --color-neutral-500: #5f5f5f;
     --color-neutral-600: #525252;
     --color-neutral-700: #404040;
     --color-neutral-800: #262626;
@@ -122,6 +178,22 @@
     --color-red-200: #fecaca;
     --color-red-600: #dc2626;
     --color-red-700: #b91c1c;
+    --color-rose-50: #fff1f2;
+    --color-sky-50: #f0f9ff;
+    --color-rose-200: #fecdd3;
+    --color-sky-200: #bae6fd;
+    --color-rose-600: #e11d48;
+    --color-rose-700: #be123c;
+    --color-sky-500: #0ea5e9;
+    --color-sky-600: #0284c7;
+    --color-sky-700: #0369a1;
+    --color-fuchsia-700: #a21caf;
+    --color-amber-700: #b45309;
+    --color-green-700: #15803d;
+    --color-blue-700: #1d4ed8;
+    --color-emerald-700: #047857;
+    --color-teal-700: #0f766e;
+    --color-violet-700: #6d28d9;
   }
 }
 
@@ -129,6 +201,28 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/*
+ * Native form controls need a real background, not a transparent one.
+ *
+ * Tailwind's preflight resets these to `background-color: transparent`. On the
+ * page that looks right in both themes, because the surface behind shows
+ * through. The drop-down a <select> opens is different: it is drawn by the
+ * browser, and with no background of its own it lands on a light system surface
+ * while the option text keeps the near-white colour inherited from the dark
+ * theme. White on white — the list was there and unreadable.
+ *
+ * Setting it through the palette variables fixes both themes at once, since
+ * --color-white is the raised-surface colour in each.
+ */
+@layer base {
+  select,
+  option,
+  optgroup {
+    background-color: var(--color-white);
+    color: var(--color-neutral-900);
+  }
 }
 
 /* Every interactive element gets a visible focus ring, app-wide — most
@@ -171,3 +265,17 @@ body {
     background-position: 0% 50%;
   }
 }
+
+/*
+ * A note on neutral-900 for surfaces.
+ *
+ * `--color-neutral-900` is *text* in the light theme and inverts to near-white
+ * in the dark one. So `bg-neutral-900` is a dark surface in light mode and a
+ * WHITE one in dark mode. Three modal scrims and the camera viewfinder were
+ * written that way: in dark mode the scrims veiled the page in white instead of
+ * darkening it, and the viewfinder turned white underneath permanently-white
+ * overlay text.
+ *
+ * Use `bg-black` for anything that must stay dark in both themes — `--color-black`
+ * is deliberately not remapped — and `text-onaccent` for what sits on it.
+ */

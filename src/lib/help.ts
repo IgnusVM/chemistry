@@ -6,6 +6,10 @@ export const HELP_CATEGORIES = [
   { slug: "assets", label: "Assets" },
   { slug: "locations", label: "Locations" },
   { slug: "work-orders", label: "Work Orders" },
+  // The board is a peer of Assets and Work Orders, not a sub-topic of either —
+  // a card is not always a ticket, so filing it under Work Orders would
+  // misdescribe it, and under Getting Started would bury it.
+  { slug: "board", label: "Task Board" },
   { slug: "photos-documents", label: "Photos & Documents" },
   { slug: "qr-codes", label: "QR Codes & Scanning" },
   { slug: "accounts", label: "Accounts & Notifications" },

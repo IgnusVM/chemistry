@@ -5,6 +5,7 @@ import { requireCurrentUser, getAccessibleDepartmentIds } from "@/lib/dal";
 import { grantableDepartments } from "@/lib/loans";
 import { resolveBadges } from "@/lib/user-badge-data";
 import { UserBadgeLabel } from "@/components/user-badge";
+import { HelpLink } from "@/components/help-link";
 
 export const metadata = { title: "Checked out — Chemistry" };
 
@@ -32,7 +33,10 @@ export default async function LoansPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">Checked out</h1>
+          <div className="flex items-center gap-1">
+            <h1 className="text-lg font-semibold text-neutral-900">Checked out</h1>
+            <HelpLink topic="Checking tools in and out" article="assets/checking-tools-in-and-out" />
+          </div>
           <p className="text-sm text-neutral-500">
             {open.length === 0
               ? "Nothing is out right now."

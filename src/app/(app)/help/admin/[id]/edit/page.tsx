@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { ArticleForm } from "../../article-form";
 import { DeleteArticleButton } from "./delete-article-button";
 
 export default async function EditHelpArticlePage({ params }: { params: Promise<{ id: string }> }) {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
   const { id } = await params;
 
   const article = await prisma.helpArticle.findUnique({ where: { id } });

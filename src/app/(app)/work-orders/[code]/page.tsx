@@ -20,6 +20,8 @@ import { WO_STATUSES } from "@/lib/constants";
 import { renderNoteHtml } from "@/lib/notes";
 import { resolveBadge, resolveBadges } from "@/lib/user-badge-data";
 import { UserBadge, UserBadgeLabel } from "@/components/user-badge";
+import { HelpLink } from "@/components/help-link";
+import { CopyButton } from "@/components/copy-button";
 
 export default async function WorkOrderDetailPage({
   params,
@@ -120,7 +122,10 @@ export default async function WorkOrderDetailPage({
 
       <form id="resolution-form" action={updateResolution} className="space-y-2 rounded-md border border-neutral-200 bg-white p-4">
         <input type="hidden" name="workOrderId" value={workOrder.id} />
-        <h2 className="text-sm font-semibold text-neutral-900">Resolution</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="text-sm font-semibold text-neutral-900">Resolution</h2>
+          <HelpLink topic="Resolution codes" article="work-orders/resolution-codes-explained" />
+        </div>
         <select
           key={workOrder.resolutionCodeId ?? "none"}
           name="resolutionCodeId"
@@ -155,30 +160,35 @@ export default async function WorkOrderDetailPage({
       </form>
 
       <div id="parts-section" className="rounded-md border border-neutral-200 bg-white p-4">
-        <h2 className="text-sm font-semibold text-neutral-900">Parts used</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="text-sm font-semibold text-neutral-900">Parts used</h2>
+          <HelpLink topic="Logging parts used" article="work-orders/logging-parts-used" />
+        </div>
         {workOrder.partsUsed.length > 0 ? (
-          <table className="mt-2 w-full text-sm">
-            <thead className="text-left text-xs uppercase text-neutral-500">
-              <tr>
-                <th className="py-1 pr-2">Part #</th>
-                <th className="py-1 pr-2">Description</th>
-                <th className="py-1 pr-2">Qty</th>
-                <th className="py-1" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100">
-              {workOrder.partsUsed.map((use) => (
-                <tr key={use.id}>
-                  <td className="py-2 pr-2 font-medium text-neutral-900">{use.part.partNumber}</td>
-                  <td className="py-2 pr-2 text-neutral-600">{use.part.description}</td>
-                  <td className="py-2 pr-2 text-neutral-500">{use.quantity}</td>
-                  <td className="py-2 text-right">
-                    <DeleteWorkOrderPartButton workOrderPartId={use.id} />
-                  </td>
+          <div className="mt-2 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs uppercase text-neutral-500">
+                <tr>
+                  <th className="py-1 pr-2">Part #</th>
+                  <th className="py-1 pr-2">Description</th>
+                  <th className="py-1 pr-2">Qty</th>
+                  <th className="py-1" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {workOrder.partsUsed.map((use) => (
+                  <tr key={use.id}>
+                    <td className="py-2 pr-2 font-medium text-neutral-900">{use.part.partNumber}</td>
+                    <td className="py-2 pr-2 text-neutral-600">{use.part.description}</td>
+                    <td className="py-2 pr-2 text-neutral-500">{use.quantity}</td>
+                    <td className="py-2 text-right">
+                      <DeleteWorkOrderPartButton workOrderPartId={use.id} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <p className="mt-1 text-sm text-neutral-500">No parts logged yet.</p>
         )}
@@ -268,7 +278,10 @@ export default async function WorkOrderDetailPage({
 
   const attachmentsContent = (
     <div id="attachments-section" className="rounded-md border border-neutral-200 bg-white p-4">
-      <h2 className="text-sm font-semibold text-neutral-900">Attachments</h2>
+      <div className="flex items-center gap-1">
+        <h2 className="text-sm font-semibold text-neutral-900">Attachments</h2>
+        <HelpLink topic="Attachments on work orders" article="photos-documents/photos-on-work-orders" />
+      </div>
       <p className="text-xs text-neutral-500">Photos, reports, receipts — anything worth keeping with this ticket.</p>
       {workOrder.attachments.length > 0 && (
         <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -304,8 +317,10 @@ export default async function WorkOrderDetailPage({
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-xs uppercase tracking-wide text-neutral-400">
-          {workOrder.code} · {workOrder.department.name} · {workOrder.type.replace("_", " ")}
+        <div className="flex items-center gap-1 text-xs tracking-wide text-neutral-400 uppercase">
+          <span className="font-mono">{workOrder.code}</span>
+          <CopyButton value={workOrder.code} label="work order number" />
+          <span>· {workOrder.department.name} · {workOrder.type.replace("_", " ")}</span>
         </div>
         <h1 className="text-xl font-semibold text-neutral-900">{workOrder.description}</h1>
         <div className="mt-1 flex items-center gap-2">

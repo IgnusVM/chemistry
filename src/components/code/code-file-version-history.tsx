@@ -57,58 +57,60 @@ export function CodeFileVersionHistory({
 
   return (
     <div className="space-y-3">
-      <table className="w-full text-sm">
-        <thead className="text-left text-xs uppercase text-neutral-500">
-          <tr>
-            <th className="w-8 py-1" />
-            <th className="py-1 pr-2">Message</th>
-            <th className="py-1 pr-2">By</th>
-            <th className="py-1 pr-2">When</th>
-            <th className="py-1 pr-2">Work order</th>
-            <th className="py-1" />
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-neutral-100">
-          {versions.map((v, i) => (
-            <tr key={v.id}>
-              <td className="py-2">
-                <input
-                  type="checkbox"
-                  checked={compareIds.includes(v.id)}
-                  onChange={() => toggleCompare(v.id)}
-                  aria-label={`Select version from ${v.createdAt.toLocaleString()} for comparison`}
-                />
-              </td>
-              <td className="py-2 pr-2 text-neutral-900">
-                {v.message || (i === versions.length - 1 ? "Initial version" : "—")}
-              </td>
-              <td className="py-2 pr-2 text-neutral-500">{v.createdBy?.displayName ?? "Unknown"}</td>
-              <td className="py-2 pr-2 text-neutral-500">{v.createdAt.toLocaleString()}</td>
-              <td className="py-2 pr-2 text-neutral-500">
-                {v.workOrder ? (
-                  <Link href={`/work-orders/${v.workOrder.code}`} className="hover:underline">
-                    {v.workOrder.code}
-                  </Link>
-                ) : (
-                  "—"
-                )}
-              </td>
-              <td className="py-2 text-right">
-                {i !== 0 && (
-                  <button
-                    type="button"
-                    disabled={pending}
-                    onClick={() => rollback(v.id)}
-                    className="text-xs text-neutral-400 transition-colors duration-150 hover:text-red-600 disabled:opacity-50"
-                  >
-                    Rollback to this
-                  </button>
-                )}
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="text-left text-xs uppercase text-neutral-500">
+            <tr>
+              <th className="w-8 py-1" />
+              <th className="py-1 pr-2">Message</th>
+              <th className="py-1 pr-2">By</th>
+              <th className="py-1 pr-2">When</th>
+              <th className="py-1 pr-2">Work order</th>
+              <th className="py-1" />
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-neutral-100">
+            {versions.map((v, i) => (
+              <tr key={v.id}>
+                <td className="py-2">
+                  <input
+                    type="checkbox"
+                    checked={compareIds.includes(v.id)}
+                    onChange={() => toggleCompare(v.id)}
+                    aria-label={`Select version from ${v.createdAt.toLocaleString()} for comparison`}
+                  />
+                </td>
+                <td className="py-2 pr-2 text-neutral-900">
+                  {v.message || (i === versions.length - 1 ? "Initial version" : "—")}
+                </td>
+                <td className="py-2 pr-2 text-neutral-500">{v.createdBy?.displayName ?? "Unknown"}</td>
+                <td className="py-2 pr-2 text-neutral-500">{v.createdAt.toLocaleString()}</td>
+                <td className="py-2 pr-2 text-neutral-500">
+                  {v.workOrder ? (
+                    <Link href={`/work-orders/${v.workOrder.code}`} className="hover:underline">
+                      {v.workOrder.code}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td className="py-2 text-right">
+                  {i !== 0 && (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => rollback(v.id)}
+                      className="text-xs text-neutral-400 transition-colors duration-150 hover:text-red-600 disabled:opacity-50"
+                    >
+                      Rollback to this
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {compareVersions.length === 2 && (
         <div>

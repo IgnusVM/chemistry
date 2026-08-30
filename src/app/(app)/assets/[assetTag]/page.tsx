@@ -16,6 +16,8 @@ import { UserBadgeLabel } from "@/components/user-badge";
 import { TabbedPageProvider, TabbedPageTabs, JumpToTabButton } from "@/components/tabbed-page";
 import { AddNoteForm } from "@/components/add-note-form";
 import { LoansPanel } from "./loans/loans-panel";
+import { HelpLink } from "@/components/help-link";
+import { CopyButton } from "@/components/copy-button";
 
 export default async function AssetDetailPage({
   params,
@@ -92,7 +94,10 @@ export default async function AssetDetailPage({
       <div className="rounded-md border border-neutral-200 bg-white p-4 text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={qrDataUrl} alt={`QR code for ${asset.assetTag}`} width={180} height={180} className="mx-auto" />
-        <div className="mt-2 text-xs text-neutral-500">{assetScanUrl(asset.assetTag)}</div>
+        <div className="mt-2 flex items-center justify-center gap-1 text-xs text-neutral-500">
+          <span className="break-all">{assetScanUrl(asset.assetTag)}</span>
+          <CopyButton value={assetScanUrl(asset.assetTag)} label="scan link" />
+        </div>
       </div>
 
       {fieldDefs.length > 0 && (
@@ -102,7 +107,12 @@ export default async function AssetDetailPage({
             {fieldDefs.map((def) => (
               <div key={def.key}>
                 <dt className="text-xs text-neutral-500">{def.label}</dt>
-                <dd className="text-neutral-900">{String(customFields[def.key] ?? "—")}</dd>
+                <dd className="flex items-center gap-1 text-neutral-900">
+                  <span className="min-w-0 break-all">{String(customFields[def.key] ?? "—")}</span>
+                  {customFields[def.key] ? (
+                    <CopyButton value={String(customFields[def.key])} label={def.label} />
+                  ) : null}
+                </dd>
               </div>
             ))}
           </dl>
@@ -141,7 +151,10 @@ export default async function AssetDetailPage({
         }}
         className="space-y-2 rounded-md border border-neutral-200 bg-white p-4"
       >
-        <h2 className="text-sm font-semibold text-neutral-900">Move</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="text-sm font-semibold text-neutral-900">Move</h2>
+          <HelpLink topic="Locations and moving assets" article="locations/understanding-locations" />
+        </div>
         <LocationField key={asset.updatedAt.toISOString()} name="locationId" locations={locations} />
         <input
           name="notes"
@@ -159,7 +172,10 @@ export default async function AssetDetailPage({
 
   const notesContent = (
     <div id="notes-section" className="rounded-md border border-neutral-200 bg-white p-4">
-      <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
+      <div className="flex items-center gap-1">
+        <h2 className="text-sm font-semibold text-neutral-900">Notes</h2>
+        <HelpLink topic="Writing notes" article="getting-started/notes-and-rich-text" />
+      </div>
       <ul className="mt-2 divide-y divide-neutral-200">
         {asset.notes.length === 0 && <li className="py-2 text-sm text-neutral-500">No notes yet.</li>}
         {asset.notes.map((note, i) => (
@@ -229,8 +245,10 @@ export default async function AssetDetailPage({
         <div>
           <div className="text-xs uppercase tracking-wide text-neutral-400">{asset.assetType.name}</div>
           <h1 className="text-xl font-semibold text-neutral-900">{asset.name}</h1>
-          <div className="text-sm text-neutral-500">
-            {asset.assetTag} · {asset.owningDepartment.name}
+          <div className="flex items-center gap-1 text-sm text-neutral-500">
+            <span className="font-mono">{asset.assetTag}</span>
+            <CopyButton value={asset.assetTag} label="asset tag" />
+            <span>· {asset.owningDepartment.name}</span>
           </div>
           {openLoan && (
             <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-900">

@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { requireOrgAdmin } from "@/lib/dal";
+import { requireOrgAdminPage } from "@/lib/dal";
 import { ArticleForm } from "../article-form";
 
 export default async function NewHelpArticlePage() {
-  await requireOrgAdmin();
+  await requireOrgAdminPage();
 
   return (
     <div className="space-y-6">

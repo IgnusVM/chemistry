@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import type { CustomFieldDef } from "../src/lib/custom-fields";
+import type { WorkOrderStatus } from "../src/generated/prisma/client";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -148,8 +149,81 @@ async function main() {
     });
   }
 
+  // Task board: one per department, created here rather than by any user
+  // action so nobody ever meets the concept of "making a board" — they just
+  // find their department's board already there. Idempotent, because this
+  // seed runs on every container start.
+  //
+  // The status mapping is the load-bearing part. Every WorkOrderStatus must
+  // appear in exactly one column's woStatusesShown, or a work-order card is
+  // either invisible or duplicated. woStatusOnMove is a different question:
+  // what a move INTO this column sets. Done shows three terminal statuses but
+  // a move into it picks one.
+  const DEFAULT_COLUMNS: {
+    name: string;
+    position: number;
+    color: string;
+    woStatusOnMove: WorkOrderStatus | null;
+    woStatusesShown: WorkOrderStatus[];
+  }[] = [
+    { name: "Ideas / Backlog", position: 0, color: "slate", woStatusOnMove: null, woStatusesShown: [] },
+    { name: "Ready / Next Up", position: 1, color: "sky", woStatusOnMove: "OPEN", woStatusesShown: ["OPEN"] },
+    { name: "In Progress", position: 2, color: "amber", woStatusOnMove: "IN_PROGRESS", woStatusesShown: ["IN_PROGRESS"] },
+    { name: "Blocked", position: 3, color: "rose", woStatusOnMove: "WAITING_PARTS", woStatusesShown: ["WAITING_PARTS"] },
+    { name: "Done / Archived", position: 4, color: "emerald", woStatusOnMove: "COMPLETE", woStatusesShown: ["COMPLETE", "CLOSED", "CANCELLED"] },
+  ];
+
+  const allDepartments = await prisma.department.findMany({ select: { id: true } });
+  const allDivisions = await prisma.division.findMany({ select: { id: true } });
+
+  // Divisions get a board too, visible only to the division lead and org
+  // admins. Unlike a department board it gets no auto-created work order
+  // cards -- a ticket shows up there only when someone attaches it to a card
+  // deliberately.
+  const boardOwners: ({ departmentId: string } | { divisionId: string })[] = [
+    ...allDepartments.map((d) => ({ departmentId: d.id })),
+    ...allDivisions.map((v) => ({ divisionId: v.id })),
+  ];
+
+  for (const owner of boardOwners) {
+    const board = await prisma.board.upsert({
+      where: "departmentId" in owner ? { departmentId: owner.departmentId } : { divisionId: owner.divisionId },
+      update: {},
+      create: owner,
+    });
+    // Columns are matched on (boardId, position) rather than deleted and
+    // recreated: recreating would orphan every card on the board every time
+    // the seed ran, which is once per deploy.
+    for (const col of DEFAULT_COLUMNS) {
+      const existing = await prisma.boardColumn.findFirst({
+        where: { boardId: board.id, position: col.position },
+      });
+      if (existing) continue;
+      await prisma.boardColumn.create({ data: { ...col, boardId: board.id } });
+    }
+  }
+
+  // Backfill: any work order without a card gets one. Idempotent, and it also
+  // covers work orders created while a board briefly did not exist.
+  const orphanWorkOrders = await prisma.workOrder.findMany({
+    where: { card: { is: null } },
+    select: { id: true, description: true, departmentId: true },
+  });
+  let backfilled = 0;
+  for (const wo of orphanWorkOrders) {
+    const board = await prisma.board.findUnique({
+      where: { departmentId: wo.departmentId },
+      select: { id: true },
+    });
+    if (!board) continue;
+    await prisma.card.create({
+      data: { boardId: board.id, workOrderId: wo.id, title: wo.description.slice(0, 120) },
+    });
+    backfilled++;
+  }
+
   console.log(
-    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, ${admin ? `org admin ${admin.email}, ` : "no org admin, "}Lamplighter asset type, ${storage.name}, and ${RESOLUTION_CODES.length} resolution codes.`,
+    `Seeded division "Ops" with ${OPS_DEPARTMENTS.length} departments, ${admin ? `org admin ${admin.email}, ` : "no org admin, "}Lamplighter asset type, ${storage.name}, and ${RESOLUTION_CODES.length} resolution codes. Task boards: ${allDepartments.length} department + ${allDivisions.length} division, ${backfilled} work order card(s) backfilled.`,
   );
 }
 

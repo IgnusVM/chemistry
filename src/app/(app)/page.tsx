@@ -4,8 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser } from "@/lib/dal";
 import { getRandomQuote } from "@/lib/quotes";
 import { ChemistryLogo } from "./chemistry-logo";
+import { DashboardQuote } from "./dashboard-quote";
+import { Noticeboard } from "./noticeboard";
+import { AssignedTiles } from "./assigned-tiles";
+import { getFeedPage } from "@/lib/feed";
 import { NewWorkOrderButton } from "./new-work-order-button";
-import { WORK_ORDER_STATUS_STYLES as STATUS_STYLES } from "@/lib/status-styles";
 import { TERMINAL_WO_STATUSES } from "@/lib/constants";
 
 export default async function DashboardPage() {
@@ -17,63 +20,59 @@ export default async function DashboardPage() {
     take: 20,
   });
 
+  const feed = await getFeedPage();
+
   const quote = getRandomQuote();
 
+  // Two columns under the banner: everything you read runs down the left, and
+  // assigned work is its own column on the right rather than a block stacked
+  // below the feed — which on a wide screen put it below the fold entirely.
   return (
     <div className="space-y-8">
       <ChemistryLogo />
 
-      <blockquote className="border-l-2 border-neutral-200 pl-4">
-        <p className="text-sm italic text-neutral-600">&ldquo;{quote.text}&rdquo;</p>
-        <footer className="mt-1 text-xs text-neutral-400">— {quote.author}</footer>
-      </blockquote>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="min-w-0 space-y-6">
 
-      <NewWorkOrderButton />
+          <DashboardQuote quote={quote} />
 
-      {/* Phone-first quick actions — the two things you do standing in front of
-          hardware. Redundant with the bottom tab bar on purpose: this is the
-          large, unambiguous target when you've just opened the app. */}
-      <div className="grid grid-cols-2 gap-3 sm:hidden">
-        <Link
-          href="/scan"
-          className="flex flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white py-5 active:bg-neutral-50"
-        >
-          <ScanLine className="h-7 w-7 text-fuchsia-600" />
-          <span className="text-sm font-medium text-neutral-800">Scan a tag</span>
-        </Link>
-        <Link
-          href="/assets"
-          className="flex flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white py-5 active:bg-neutral-50"
-        >
-          <Boxes className="h-7 w-7 text-teal-600" />
-          <span className="text-sm font-medium text-neutral-800">Browse assets</span>
-        </Link>
-      </div>
+          <NewWorkOrderButton />
 
-      <div>
-        <h2 className="text-sm font-semibold text-neutral-900">Assigned to you</h2>
-        <ul className="mt-3 divide-y divide-neutral-200 rounded-md border border-neutral-200 bg-white">
-          {myWorkOrders.length === 0 && (
-            <li className="px-4 py-6 text-center text-sm text-neutral-500">
-              Nothing assigned to you right now.
-            </li>
-          )}
-          {myWorkOrders.map((wo) => (
-            <li key={wo.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
-              <Link href={`/work-orders/${wo.code}`} className="min-w-0 hover:underline">
-                <span className="font-medium text-neutral-900">{wo.code}</span>{" "}
-                <span className="text-neutral-600">
-                  {wo.description.length > 70 ? `${wo.description.slice(0, 70)}…` : wo.description}
-                </span>
-              </Link>
-              <span
-                className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[wo.status]}`}
-              >
-                {wo.status.replace("_", " ")}
-              </span>
-            </li>
-          ))}
-        </ul>
+          {/* Phone-first quick actions — the two things you do standing in front of
+              hardware. Redundant with the bottom tab bar on purpose: this is the
+              large, unambiguous target when you've just opened the app. */}
+          <div className="grid grid-cols-2 gap-3 sm:hidden">
+            <Link
+              href="/scan"
+              className="flex flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white py-5 active:bg-neutral-50"
+            >
+              <ScanLine className="h-7 w-7 text-fuchsia-600" />
+              <span className="text-sm font-medium text-neutral-800">Scan a tag</span>
+            </Link>
+            <Link
+              href="/assets"
+              className="flex flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white py-5 active:bg-neutral-50"
+            >
+              <Boxes className="h-7 w-7 text-teal-600" />
+              <span className="text-sm font-medium text-neutral-800">Browse assets</span>
+            </Link>
+          </div>
+
+              <Noticeboard
+                initialPosts={feed.posts}
+                initialCursor={feed.nextCursor}
+                isOrgAdmin={user.isOrgAdmin}
+                currentUserId={user.id}
+              />
+
+        </div>
+
+        {/* Assigned work moves to the right, where the dashboard had nothing but
+            empty gradient on a wide screen. Below lg it drops back under the
+            feed, because on a phone there is only one column anyway. */}
+        <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+          <AssignedTiles workOrders={myWorkOrders} />
+        </aside>
       </div>
     </div>
   );
